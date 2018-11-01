@@ -54,6 +54,11 @@ def read_prp(filepath):
 
 
 def get_track_stream_ex(filepath):
+    """Reads a .prp file, and takes TrackStreamEx objects from it
+
+    :param filepath: path to the .prp file to read
+    :return: the list of all TrackStreamEx objects in the .prp file
+    """
     frames = read_prp(filepath)
     track_stream_exs = []
     for frame in frames:
