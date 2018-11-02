@@ -69,4 +69,8 @@ def get_track_stream_ex(filepath):
     return(track_stream_exs)
 
 
-get_track_stream_ex(prp_1)
+tsexs = get_track_stream_ex(prp_1)
+
+
+def function():
+    return 'lol'
