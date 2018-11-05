@@ -7,8 +7,6 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from mpl_toolkits.mplot3d import Axes3D
 
-prp_1 = "prod/s1/TRC6420_ITRProduction_20181026_143235.prp"
-
 
 def read_prp(filepath):
     """Reads a .prp file, frame after frame, and returns an array of frames
@@ -120,6 +118,10 @@ def get_dbscan_prediction(data):
 
 """This part runs if you run 'python utils.py' in the console"""
 if __name__ == '__main__':
+    prp_1 = "prod/s1/TRC6420_ITRProduction_20181026_143235.prp"
+    prp_2 = "prod/s2/TRC6420_ITRProduction_20181026_143231.prp"
+    prp_3 = "prod/s3/TRC6420_ITRProduction_20181026_143233.prp"
+
     tsexs = get_track_stream_exs_from_prp(prp_1)
     raw_tracks = []
 
