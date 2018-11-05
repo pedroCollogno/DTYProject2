@@ -2,6 +2,7 @@ import gen.TrackstreamEx_pb2 as ts
 import os
 from progressbar import ProgressBar
 from sklearn.cluster import DBSCAN
+import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
@@ -122,35 +123,47 @@ if __name__ == '__main__':
     prp_2 = "prod/s2/TRC6420_ITRProduction_20181026_143231.prp"
     prp_3 = "prod/s3/TRC6420_ITRProduction_20181026_143233.prp"
 
-    tsexs = get_track_stream_exs_from_prp(prp_1)
-    raw_tracks = []
+    tsexs_1 = get_track_stream_exs_from_prp(prp_1)
+    tsexs_2 = get_track_stream_exs_from_prp(prp_2)
+    tsexs_3 = get_track_stream_exs_from_prp(prp_3)
 
-    for tsex in tsexs:
-        raw_tracks = get_track_stream_ex_info(tsex, raw_tracks)
+    stations_data = []
+    for tsexs in [tsexs_1, tsexs_2, tsexs_3]:
+        raw_tracks = []
 
-    y_pred, ids = get_dbscan_prediction(raw_tracks)
+        for tsex in tsexs:
+            raw_tracks = get_track_stream_ex_info(tsex, raw_tracks)
 
-    labels = []
-    corresponding_batches = {}
-    i = 0
-    for label in y_pred:
-        if label not in labels:
-            labels.append(label)
-            corresponding_batches[label] = []
-        corresponding_batches[label].append(raw_tracks[i])
-        i += 1
+        y_pred, ids = get_dbscan_prediction(raw_tracks)
+        stations_data.append([y_pred, ids])
+    stations_data = np.array(stations_data)
+    df = pd.concat([pd.DataFrame({'ID': stations_data[i, 1], 'LABEL': stations_data[i, 0]})
+                    for i in range(3)], keys=['Station 1', 'Station 2', 'Station 3'])
 
-    fig = plt.figure()
-    ax = Axes3D(fig)
-    colors = cm.rainbow(np.linspace(0, 1, len(y_pred)))
-    print("\nResult of DBScan clustering on input data. There are %s inputs and %s clusters.\n" %
-          (len(raw_tracks), len(labels)))
-    for key in corresponding_batches.keys():
-        print("Label is %s" % key)
-        for batch in corresponding_batches[key]:
-            print("\tTrack data: % s" % batch)
-        corresponding_batches[key] = np.array(corresponding_batches[key])
-        ax.plot(corresponding_batches[key][:, 2], corresponding_batches[key][:, 1],
-                corresponding_batches[key][:, 4], '-o', color=colors[key])
+    dup_df = df[df.duplicated(['ID'], keep=False)].sort_values(by="ID")
+    print(dup_df)
 
-    plt.show()
+    """labels = []
+        corresponding_batches = {}
+        i = 0
+        for label in y_pred:
+            if label not in labels:
+                labels.append(label)
+                corresponding_batches[label] = []
+            corresponding_batches[label].append(raw_tracks[i])
+            i += 1
+
+        fig = plt.figure()
+        ax = Axes3D(fig)
+        colors = cm.rainbow(np.linspace(0, 1, len(y_pred)))
+        print("\nResult of DBScan clustering on input data. There are %s inputs and %s clusters.\n" %
+              (len(raw_tracks), len(labels)))
+        for key in corresponding_batches.keys():
+            print("Label is %s" % key)
+            for batch in corresponding_batches[key]:
+                print("\tTrack data: % s" % batch)
+            corresponding_batches[key] = np.array(corresponding_batches[key])
+            ax.plot(corresponding_batches[key][:, 2], corresponding_batches[key][:, 1],
+                    corresponding_batches[key][:, 4], '-o', color=colors[key])
+
+        plt.show()"""
