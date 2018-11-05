@@ -122,7 +122,9 @@ if __name__ == '__main__':
     prp_2 = "prod/s2/TRC6420_ITRProduction_20181026_143231.prp"
     prp_3 = "prod/s3/TRC6420_ITRProduction_20181026_143233.prp"
 
-    tsexs = get_track_stream_exs_from_prp(prp_1)
+    prp_test = "prod/test/s1/TRC6420_ITRProduction_20181105_172929.prp"
+
+    tsexs = get_track_stream_exs_from_prp(prp_test)
     raw_tracks = []
 
     for tsex in tsexs:
