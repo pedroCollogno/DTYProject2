@@ -58,7 +58,7 @@ def read_prp(filepath):
     return(frames)
 
 
-def get_track_stream_ex(filepath):
+def get_track_stream_exs_from_prp(filepath):
     """Reads a .prp file, and takes TrackStreamEx objects from it
 
     :param filepath: path to the .prp file to read
@@ -74,52 +74,81 @@ def get_track_stream_ex(filepath):
     return(track_stream_exs)
 
 
-tsexs = get_track_stream_ex(prp_1)
-tsex = tsexs[38]
-raw_data = []
+def get_track_info(track):
+    """ Takes essential information out of a given track
 
-for tsex in tsexs:
-    track_stream_data = tsex.data
-    tracks = track_stream_data.tracks
-    print("Found %s tracks in the file.\n" % len(tracks))
+    :param track: the track from which info should be extracted
+    :return: a list containing the basic info of the track : 
+        [track_id, measurement_type, central_freq_hz, bandwitdh_hz, average_azimut_deg]
+    """
+    info_from_track = []
+    info_from_track.append(track.id.most_significant)
+    info_from_track.append(track.itr_measurement.type)
+    info_from_track.append(track.itr_measurement.central_freq_hz)
+    info_from_track.append(track.itr_measurement.bandwidth_hz)
+    info_from_track.append(track.average_azimut_deg)
+    return info_from_track
 
+
+def get_track_stream_ex_info(track_stream_ex, data=[]):
+    """ Takes essential information out of a given TrackStreamEx object
+
+    :param track_stream_ex: the TrackStreamEx object from which info should be extracted
+    :param data: (optional) the data from other TrackStreamEx objects, that needs to be updated with new info
+    :return: a list containing the basic info of every track contained in the TrackStreamEx object.
+    """
+    tracks = track_stream_ex.data.tracks
     for track in tracks:
-        batch = []
-        batch.append(track.itr_measurement.type)
-        batch.append(track.itr_measurement.central_freq_hz)
-        batch.append(track.itr_measurement.bandwidth_hz)
-        batch.append(track.average_azimut_deg)
+        batch = get_track_info(track)
+        if batch not in data:
+            data.append(batch)
+    return data
 
-        # batch.append(track.begin_date.date_ms)
-        # batch.append(track.end_date.date_ms)
-        if batch not in raw_data:
-            raw_data.append(batch)
-    """for batch in raw_data:
-        print("Track data :", batch)"""
-raw_data = np.array(raw_data)
-y_pred = DBSCAN(min_samples=1).fit_predict(raw_data[:, :3])
 
-labels = []
-corresponding_batches = {}
-i = 0
-for label in y_pred:
-    if label not in labels:
-        labels.append(label)
-        corresponding_batches[label] = []
-    corresponding_batches[label].append(raw_data[i])
-    i += 1
+def get_dbscan_prediction(data):
+    """ Function that clusters data from TrackStreamEx objects
 
-fig = plt.figure()
-ax = Axes3D(fig)
-colors = cm.rainbow(np.linspace(0, 1, len(y_pred)))
-print("\nResult of DBScan clustering on input data. There are %s inputs and %s clusters.\n" %
-      (len(raw_data), len(labels)))
-for key in corresponding_batches.keys():
-    print("Label is %s" % key)
-    for batch in corresponding_batches[key]:
-        print("\tTrack data: % s" % batch)
-    corresponding_batches[key] = np.array(corresponding_batches[key])
-    ax.plot(corresponding_batches[key][:, 1], corresponding_batches[key][:, 0],
-            corresponding_batches[key][:, 3], '-o', color=colors[key])
+    :param data: The data to cluster using the dbscan algorithm
+    :return: a tuple, in which there is :
+        - in first position the array of predictions for all tracks given in entry
+        - in second position an array containing the IDs of the predicted tracks.
+    """
+    np_data = np.array(data)
+    prediction = DBSCAN(min_samples=1).fit_predict(np_data[:, 1:3])
+    return prediction, np_data[:, 0]
 
-plt.show()
+
+"""This part runs if you run 'python utils.py' in the console"""
+if __name__ == '__main__':
+    tsexs = get_track_stream_exs_from_prp(prp_1)
+    raw_tracks = []
+
+    for tsex in tsexs:
+        raw_tracks = get_track_stream_ex_info(tsex, raw_tracks)
+
+    y_pred, ids = get_dbscan_prediction(raw_tracks)
+
+    labels = []
+    corresponding_batches = {}
+    i = 0
+    for label in y_pred:
+        if label not in labels:
+            labels.append(label)
+            corresponding_batches[label] = []
+        corresponding_batches[label].append(raw_tracks[i])
+        i += 1
+
+    fig = plt.figure()
+    ax = Axes3D(fig)
+    colors = cm.rainbow(np.linspace(0, 1, len(y_pred)))
+    print("\nResult of DBScan clustering on input data. There are %s inputs and %s clusters.\n" %
+          (len(raw_tracks), len(labels)))
+    for key in corresponding_batches.keys():
+        print("Label is %s" % key)
+        for batch in corresponding_batches[key]:
+            print("\tTrack data: % s" % batch)
+        corresponding_batches[key] = np.array(corresponding_batches[key])
+        ax.plot(corresponding_batches[key][:, 2], corresponding_batches[key][:, 1],
+                corresponding_batches[key][:, 4], '-o', color=colors[key])
+
+    plt.show()
