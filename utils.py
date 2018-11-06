@@ -68,5 +68,8 @@ def get_track_stream_ex(filepath):
             track_stream_exs.append(TSEX)
     return(track_stream_exs)
 
-
-get_track_stream_ex(prp_1)
+datas = get_track_stream_ex(prp_1)
+with open("./datas.json", "w") as dataF :
+    for data in datas :
+        data = str(data)
+        dataF.write(data)

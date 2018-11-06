@@ -1,0 +1,23 @@
+{
+  "name": "front",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "d3-geo": "^1.10.0",
+    "d3-scale": "^2.1.0",
+    "mapbox-gl": "^0.47.0",
+    "react": "^16.4.1",
+    "react-audio": "0.0.1",
+    "react-dom": "^16.4.1",
+    "react-mapbox-gl": "^3.8.0",
+    "react-scripts": "1.1.4",
+    "socket.io-client": "^2.1.1",
+    "topojson-client": "^3.0.0"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}
