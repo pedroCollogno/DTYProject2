@@ -1,3 +1,6 @@
+""" This module is used to compute the location of emittors that are seen by stations
+"""
+
 import math as m
 
 
