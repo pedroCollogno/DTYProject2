@@ -263,7 +263,7 @@ if __name__ == '__main__':
         scores = []
         for i in range(len(stations_data[2, 2][cycle])):
             comp = same_emittor(
-                stations_data[1, 2][cycle][j], stations_data[2, 2][cycle][i], i, j)
+                stations_data[1, 2][cycle][j], stations_data[2, 2][cycle][i])
             scores.append(comp)
 
         tracks = np.where(scores)
