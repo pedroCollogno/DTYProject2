@@ -122,48 +122,75 @@ def get_dbscan_prediction(data):
 
 
 def same_emittor(track_1, track_2):
-    activity_consistency = False
-    ca_1 = track_1.cumulated_activity_us
-    ca_2 = track_2.cumulated_activity_us
+    """ This function lets you know if two given tracks come from the same emitter.
 
-    if ca_1 > 0.95*ca_2 and ca_1 < 1.05*ca_2:
-        activity_consistency = True
+    :param track_1: The first track
+    :param track_2: The second track
+    :return: A boolean, True if both tracks are from the same emitter, False if not
+    """
+    alternate_consistency = False
 
+    # First of all, check if both tracks use the same frequence to communicate
     freq_consistency = False
-    type_consistency = False
+    f_1 = track_1.itr_measurement.central_freq_hz
+    f_2 = track_2.itr_measurement.central_freq_hz
+    if f_1 > 0.99*f_2 and f_1 < 1.01*f_2:
+        freq_consistency = True
 
-    if activity_consistency:
+    # Then, check if the bandwidth of both tracks is the same
+    bandwidth_consistency = False
+    bw_1 = track_1.itr_measurement.bandwidth_hz
+    bw_2 = track_2.itr_measurement.bandwidth_hz
+    if bw_1 > 0.99*bw_2 and bw_1 < 1.01*bw_2:
+        bandwidth_consistency = True
+
+    # Is the emission type the same for both tracks ?
+    type_consistency = False
+    t_1 = track_1.itr_measurement.type
+    t_2 = track_2.itr_measurement.type
+    if t_1 == t_2:
+        type_consistency = True
+
+    # If all three criteria above have been fulfilled, check if alternates sequences are similar
+    if freq_consistency and type_consistency and bandwidth_consistency:
+        print(
+            "\tFreq and type consistency found : \n\t\t1° Freq - %s - Type - %s \n\t\t2° Freq - %s - Type - %s" % (f_1, t_1, f_2, t_2))
+
         alternate_consistency = True
         alternates_1 = track_1.alternates
         alternates_2 = track_2.alternates
+
         alt_duration_1 = [alt.duration_us for alt in alternates_1]
+        alt_start_1 = [alt.start.date_ms for alt in alternates_1]
         alt_duration_2 = [alt.duration_us for alt in alternates_2]
-        if len(alternates_1) == len(alternates_2):
-            for i in range(len(alt_duration_1)):
-                if alt_duration_1[i] != alt_duration_2[i]:
-                    alternate_consistency = False
-                    break
-            if not alternate_consistency:
-                alternate_consistency = True
-                for i in range(len(alt_duration_1)-1):
-                    if alt_duration_1[i] != alt_duration_2[i+1]:
-                        alternate_consistency = False
-                        break
+        alt_start_2 = [alt.start.date_ms for alt in alternates_2]
 
-            if not alternate_consistency:
-                alternate_consistency = True
-                for i in range(1, len(alt_duration_1)):
-                    if alt_duration_1[i] != alt_duration_2[i-1]:
-                        alternate_consistency = False
-                        break
-        else:
-            alternate_consistency = False
+        # Both tracks may not have been recorded at exactly the same time. Therefore,
+        # we only analyse alternates that have finished. Not ongoing alternates.
+        n = (len(alternates_1) if len(alternates_1) < len(
+            alternates_2) else len(alternates_2)) - 1
 
-    return activity_consistency  # and alternate_consistency
+        for k in range(1, n):
+            # If there is more than a single alternate, we check if the duration of the alternates is consistent
+            if n > 0 and alt_duration_1[k] != alt_duration_2[k]:
+                alternate_consistency = False
+                break
+            # Always check that the start-dates of all alternates are the same.
+            if alt_start_1[k] != alt_start_2[k]:
+                alternate_consistency = False
+                break
+
+        if alternate_consistency:
+            print(
+                "\tBoth tracks are from the same emitter ! \n\t\tAnalysis made on %s alternates." % n)
+
+    return freq_consistency and bandwidth_consistency and type_consistency and alternate_consistency
 
 
 """This part runs if you run 'python utils.py' in the console"""
 if __name__ == '__main__':
+    #prp_1 = "prod/station1.prp"
+    #prp_2 = "prod/station2.prp"
     prp_1 = "prod/s1/TRC6420_ITRProduction_20181026_143235.prp"
     prp_2 = "prod/s2/TRC6420_ITRProduction_20181026_143231.prp"
     prp_3 = "prod/s3/TRC6420_ITRProduction_20181026_143233.prp"
@@ -183,24 +210,26 @@ if __name__ == '__main__':
         y_pred, ids = get_dbscan_prediction(raw_tracks)
         stations_data.append([y_pred, ids, real_tracks])
     stations_data = np.array(stations_data)
-    df = pd.concat([pd.DataFrame({'ID': stations_data[i, 1], 'LABEL': stations_data[i, 0]})
-                    for i in range(3)], keys=['Station 1', 'Station 2', 'Station 3'])
+    """df = pd.concat([pd.DataFrame({'ID': stations_data[i, 1], 'LABEL': stations_data[i, 0]})
+                    for i in range(2)], keys=['Station 1', 'Station 2'])
 
     dup_df = df[df.duplicated(['ID'], keep=False)].sort_values(by="ID")
-    print(dup_df)
+    print(dup_df)"""
 
-    for j in range(len(stations_data[0, 2][40])):
+    cycle = 151
+    for j in range(len(stations_data[1, 2][cycle])):
         scores = []
-        for i in range(len(stations_data[1, 2][40])):
+        for i in range(len(stations_data[2, 2][cycle])):
             comp = same_emittor(
-                stations_data[0, 2][40][j], stations_data[1, 2][40][i])
+                stations_data[1, 2][cycle][j], stations_data[2, 2][cycle][i], i, j)
             scores.append(comp)
 
         tracks = np.where(scores)
         print()
         print(j, tracks)
+        print()
 
-    """labels = []
+        """labels = []
         corresponding_batches = {}
         i = 0
         for label in y_pred:
