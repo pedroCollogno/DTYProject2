@@ -120,6 +120,45 @@ def get_dbscan_prediction(data):
     prediction = DBSCAN(min_samples=1).fit_predict(np_data[:, 1:3])
     return prediction, np_data[:, 0]
 
+def display_alternates(*args):
+    """ Function that displays all the alternates detected by a station
+
+    :args: the prp files from all the stations
+    """
+    prps = [get_track_stream_exs_from_prp(args[i]) for i in range(len(args))]
+    all_alternates = {}
+    for i in range(len(prps)):
+        all_alternates_current_prp = {}
+        for tsex in prps[i]:
+            if tsex.data.tracks:
+                for track in tsex.data.tracks:
+                    key_id = track.id.most_significant
+                    all_alternates_current_prp[key_id] = track.alternates
+                    """ if key_id in all_alternates_current_prp:
+                        all_alternates_current_prp[key_id].append(current_alternate)
+                    else:
+                        all_alternates_current_prp[key_id] = [current_alternate] """
+        all_alternates["prp{}".format(i + 1)] = all_alternates_current_prp
+
+    fig, ax = plt.subplots(len(args),sharex=True)
+    for i in range(len(args)):
+
+        key_indice = 1
+        y_labels = []
+        y_ticks = []
+        for key in all_alternates["prp{}".format(i+1)]:
+            boxes = []
+            for alternate in all_alternates["prp{}".format(i+1)][key]:
+                boxes.append((alternate.start.date_ms/(1000), alternate.duration_us/1000000))
+            ax[i].broken_barh(boxes,(key_indice, 0.9), facecolors='blue')
+            y_ticks.append(key_indice)
+            y_labels.append(str(key))
+            key_indice += 1
+        ax[i].set_yticks(y_ticks)
+        ax[i].set_yticklabels(y_labels)
+        ax[i].set_ylabel("Id")
+        ax[i].set_xlabel("Seconds")
+    plt.show()
 
 def same_emittor(track_1, track_2):
     """ This function lets you know if two given tracks come from the same emitter.
@@ -195,6 +234,7 @@ if __name__ == '__main__':
     prp_2 = "prod/s2/TRC6420_ITRProduction_20181026_143231.prp"
     prp_3 = "prod/s3/TRC6420_ITRProduction_20181026_143233.prp"
 
+<<<<<<< HEAD
     tsexs_1 = get_track_stream_exs_from_prp(prp_1)
     tsexs_2 = get_track_stream_exs_from_prp(prp_2)
     tsexs_3 = get_track_stream_exs_from_prp(prp_3)
@@ -253,3 +293,38 @@ if __name__ == '__main__':
                     corresponding_batches[key][:, 4], '-o', color=colors[key])
 
         plt.show()"""
+=======
+    tsexs = get_track_stream_exs_from_prp(prp_1)
+    raw_tracks = []
+
+    for tsex in tsexs:
+        raw_tracks = get_track_stream_ex_info(tsex, raw_tracks)
+
+    y_pred, ids = get_dbscan_prediction(raw_tracks)
+
+    labels = []
+    corresponding_batches = {}
+    i = 0
+    for label in y_pred:
+        if label not in labels:
+            labels.append(label)
+            corresponding_batches[label] = []
+        corresponding_batches[label].append(raw_tracks[i])
+        i += 1
+
+    fig = plt.figure()
+    ax = Axes3D(fig)
+    colors = cm.rainbow(np.linspace(0, 1, len(y_pred)))
+    print("\nResult of DBScan clustering on input data. There are %s inputs and %s clusters.\n" %
+          (len(raw_tracks), len(labels)))
+    for key in corresponding_batches.keys():
+        print("Label is %s" % key)
+        for batch in corresponding_batches[key]:
+            print("\tTrack data: % s" % batch)
+        corresponding_batches[key] = np.array(corresponding_batches[key])
+        ax.plot(corresponding_batches[key][:, 2], corresponding_batches[key][:, 1],
+                corresponding_batches[key][:, 4], '-o', color=colors[key])
+
+    plt.show() 
+ 
+>>>>>>> de28d9dc1587d489ab4a151f1a108c874c042f6f
