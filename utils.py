@@ -115,6 +115,45 @@ def get_dbscan_prediction(data):
     prediction = DBSCAN(min_samples=1).fit_predict(np_data[:, 1:3])
     return prediction, np_data[:, 0]
 
+def display_alternates(*args):
+    """ Function that displays all the alternates detected by a station
+
+    :args: the prp files from all the stations
+    """
+    prps = [get_track_stream_exs_from_prp(args[i]) for i in range(len(args))]
+    all_alternates = {}
+    for i in range(len(prps)):
+        all_alternates_current_prp = {}
+        for tsex in prps[i]:
+            if tsex.data.tracks:
+                for track in tsex.data.tracks:
+                    key_id = track.id.most_significant
+                    all_alternates_current_prp[key_id] = track.alternates
+                    """ if key_id in all_alternates_current_prp:
+                        all_alternates_current_prp[key_id].append(current_alternate)
+                    else:
+                        all_alternates_current_prp[key_id] = [current_alternate] """
+        all_alternates["prp{}".format(i + 1)] = all_alternates_current_prp
+
+    fig, ax = plt.subplots(len(args),sharex=True)
+    for i in range(len(args)):
+
+        key_indice = 1
+        y_labels = []
+        y_ticks = []
+        for key in all_alternates["prp{}".format(i+1)]:
+            boxes = []
+            for alternate in all_alternates["prp{}".format(i+1)][key]:
+                boxes.append((alternate.start.date_ms/(1000), alternate.duration_us/1000000))
+            ax[i].broken_barh(boxes,(key_indice, 0.9), facecolors='blue')
+            y_ticks.append(key_indice)
+            y_labels.append(str(key))
+            key_indice += 1
+        ax[i].set_yticks(y_ticks)
+        ax[i].set_yticklabels(y_labels)
+        ax[i].set_ylabel("Id")
+        ax[i].set_xlabel("Seconds")
+    plt.show()
 
 """This part runs if you run 'python utils.py' in the console"""
 if __name__ == '__main__':
@@ -122,9 +161,7 @@ if __name__ == '__main__':
     prp_2 = "prod/s2/TRC6420_ITRProduction_20181026_143231.prp"
     prp_3 = "prod/s3/TRC6420_ITRProduction_20181026_143233.prp"
 
-    prp_test = "prod/test/s1/TRC6420_ITRProduction_20181105_172929.prp"
-
-    tsexs = get_track_stream_exs_from_prp(prp_test)
+    tsexs = get_track_stream_exs_from_prp(prp_1)
     raw_tracks = []
 
     for tsex in tsexs:
@@ -155,4 +192,5 @@ if __name__ == '__main__':
         ax.plot(corresponding_batches[key][:, 2], corresponding_batches[key][:, 1],
                 corresponding_batches[key][:, 4], '-o', color=colors[key])
 
-    plt.show()
+    plt.show() 
+ 
