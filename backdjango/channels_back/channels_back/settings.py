@@ -121,6 +121,9 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+
+"""Config for the websocket to work with the redis-server"""
+
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'asgi_redis.RedisChannelLayer',
