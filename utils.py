@@ -1,9 +1,12 @@
 import gen.TrackstreamEx_pb2 as ts
 import os
+
 from progressbar import ProgressBar
 from sklearn.cluster import DBSCAN
+
 import pandas as pd
 import numpy as np
+
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from mpl_toolkits.mplot3d import Axes3D
@@ -77,8 +80,9 @@ def get_track_info(track):
     """ Takes essential information out of a given track
 
     :param track: the track from which info should be extracted
-    :return: a list containing the basic info of the track : 
-        [track_id, measurement_type, central_freq_hz, bandwitdh_hz, average_azimut_deg]
+    :return: a list containing the basic info of the track :
+        [track_id, measurement_type, central_freq_hz,
+            bandwitdh_hz, average_azimut_deg]
     """
     info_from_track = []
     info_from_track.append(track.id.most_significant)
@@ -117,6 +121,47 @@ def get_dbscan_prediction(data):
     return prediction, np_data[:, 0]
 
 
+def same_emittor(track_1, track_2):
+    activity_consistency = False
+    ca_1 = track_1.cumulated_activity_us
+    ca_2 = track_2.cumulated_activity_us
+
+    if ca_1 > 0.95*ca_2 and ca_1 < 1.05*ca_2:
+        activity_consistency = True
+
+    freq_consistency = False
+    type_consistency = False
+
+    if activity_consistency:
+        alternate_consistency = True
+        alternates_1 = track_1.alternates
+        alternates_2 = track_2.alternates
+        alt_duration_1 = [alt.duration_us for alt in alternates_1]
+        alt_duration_2 = [alt.duration_us for alt in alternates_2]
+        if len(alternates_1) == len(alternates_2):
+            for i in range(len(alt_duration_1)):
+                if alt_duration_1[i] != alt_duration_2[i]:
+                    alternate_consistency = False
+                    break
+            if not alternate_consistency:
+                alternate_consistency = True
+                for i in range(len(alt_duration_1)-1):
+                    if alt_duration_1[i] != alt_duration_2[i+1]:
+                        alternate_consistency = False
+                        break
+
+            if not alternate_consistency:
+                alternate_consistency = True
+                for i in range(1, len(alt_duration_1)):
+                    if alt_duration_1[i] != alt_duration_2[i-1]:
+                        alternate_consistency = False
+                        break
+        else:
+            alternate_consistency = False
+
+    return activity_consistency  # and alternate_consistency
+
+
 """This part runs if you run 'python utils.py' in the console"""
 if __name__ == '__main__':
     prp_1 = "prod/s1/TRC6420_ITRProduction_20181026_143235.prp"
@@ -130,18 +175,30 @@ if __name__ == '__main__':
     stations_data = []
     for tsexs in [tsexs_1, tsexs_2, tsexs_3]:
         raw_tracks = []
-
+        real_tracks = []
         for tsex in tsexs:
             raw_tracks = get_track_stream_ex_info(tsex, raw_tracks)
-
+            real_tracks.append(tsex.data.tracks)
+        print(len(real_tracks))
         y_pred, ids = get_dbscan_prediction(raw_tracks)
-        stations_data.append([y_pred, ids])
+        stations_data.append([y_pred, ids, real_tracks])
     stations_data = np.array(stations_data)
     df = pd.concat([pd.DataFrame({'ID': stations_data[i, 1], 'LABEL': stations_data[i, 0]})
                     for i in range(3)], keys=['Station 1', 'Station 2', 'Station 3'])
 
     dup_df = df[df.duplicated(['ID'], keep=False)].sort_values(by="ID")
     print(dup_df)
+
+    for j in range(len(stations_data[0, 2][40])):
+        scores = []
+        for i in range(len(stations_data[1, 2][40])):
+            comp = same_emittor(
+                stations_data[0, 2][40][j], stations_data[1, 2][40][i])
+            scores.append(comp)
+
+        tracks = np.where(scores)
+        print()
+        print(j, tracks)
 
     """labels = []
         corresponding_batches = {}
