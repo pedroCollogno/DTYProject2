@@ -1,4 +1,4 @@
-import config from "../config";
+import config from "./config";
 
 function listenToServer(callback) {
   const path = config.API_PATH;
