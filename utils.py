@@ -222,29 +222,51 @@ def same_emittor(track_1, track_2):
 
         # Both tracks may not have been recorded at exactly the same time. Therefore,
         # we only analyse alternates that have finished. Not ongoing alternates.
-        n = (len(alternates_1) if len(alternates_1) < len(
-            alternates_2) else len(alternates_2)) - 1
+        n = min(len(alternates_1), len(alternates_2)) - 1
 
-        for k in range(1, n):
-            # If there is more than a single alternate, we check if the duration of the alternates is consistent
-            if n > 0 and alt_duration_1[k] != alt_duration_2[k]:
-                alternate_consistency = False
+        start_consistency = False
+        for start_1 in alt_start_1:
+            if start_1 in alt_start_2:
+                start_1_index = alt_start_1.index(start_1)
+                start_2_index = alt_start_2.index(start_1)
+                start_consistency = True
                 break
-            # Always check that the start-dates of all alternates are the same.
-            if alt_start_1[k] != alt_start_2[k]:
-                alternate_consistency = False
-                break
+        if not start_consistency:
+            for start_2 in alt_start_2:
+                if start_2 in alt_start_1:
+                    start_1_index = alt_start_1.index(start_2)
+                    start_2_index = alt_start_2.index(start_2)
+                    start_consistency = True
+                    break
 
-        if alternate_consistency:
+        if start_consistency and track_1.itr_measurement.type != 1:
+            if start_1_index == 0 or start_2_index == 0:
+                start_1_index += 1
+                start_2_index += 1
+            while start_1_index < len(alt_start_1) and start_2_index < len(alt_start_2):
+                # If there is more than a single alternate, we check if the duration of the alternates is consistent
+                if alt_duration_1[start_1_index] != alt_duration_2[start_2_index]:
+                    alternate_consistency = False
+                    break
+
+                # Always check that the start-dates of all alternates are the same.
+                if alt_start_1[start_1_index] != alt_start_2[start_2_index]:
+                    alternate_consistency = False
+                    break
+
+                start_1_index += 1
+                start_2_index += 1
+
+        # if alternate_consistency:
             """print(
                 "\tBoth tracks are from the same emitter ! \n\t\tAnalysis made on %s alternates." % n)"""
 
-    return freq_consistency and bandwidth_consistency and type_consistency and alternate_consistency
+    return freq_consistency and bandwidth_consistency and type_consistency and start_consistency and alternate_consistency
 
 
 def sync_station_streams(station_1_track_stream, station_2_track_stream):
     """ Syncs track_streams between stations, to have them start at the same time.
-
+je gobe des spatz
     :param station_1_track_stream: track stream for first station
     :param station_2_track_stream: track stream for second station
     """
@@ -269,6 +291,7 @@ def sync_station_streams(station_1_track_stream, station_2_track_stream):
     elif s_1_dates[0] - s_2_dates[0] > min_cycle_duration/2:
         s_2_dates.pop(0)
         station_2_track_stream.pop(0)
+    print("Final dates for sync : %s - %s" % (s_1_dates[0], s_2_dates[0]))
 
 
 def sync_stations(*args):
@@ -285,15 +308,22 @@ def sync_stations(*args):
         sync_station_streams(args[i], args[i+1])
 
 
-def get_fused_station_tracks(station_1_track_streams, station_2_track_streams):
+def get_fused_station_tracks(station_1_track_streams, station_2_track_streams, are_lists=[False, False]):
     global_track_streams = []
     n = min(len(station_1_track_streams), len(station_2_track_streams))
     progress = 0
     pbar = ProgressBar(maxval=n)
     pbar.start()
     for i in range(n):
-        track_stream_1 = station_1_track_streams[i].data.tracks
-        track_stream_2 = station_2_track_streams[i].data.tracks
+        if not are_lists[0]:
+            track_stream_1 = station_1_track_streams[i].data.tracks
+        else:
+            track_stream_1 = station_1_track_streams[i]
+
+        if not are_lists[1]:
+            track_stream_2 = station_2_track_streams[i].data.tracks
+        else:
+            track_stream_2 = station_2_track_streams[i]
 
         track_stream = [track for track in track_stream_1]
 
@@ -321,27 +351,44 @@ def fuse_all_station_tracks(*args):
         raise ValueError(
             "Need at least 2 stations to fuse, but was given only %s" % n)
 
-    global_track_streams = args[0]
+    global_track_streams = []
     for i in range(n-1):
-        global_track_streams = get_fused_station_tracks(
-            global_track_streams, args[i+1])
+        if i == 0:
+            global_track_streams = get_fused_station_tracks(
+                args[i], args[i+1])
+        else:
+            global_track_streams = get_fused_station_tracks(
+                global_track_streams, args[i+1], are_lists=[True, False])
+
+    return global_track_streams
 
 
 """This part runs if you run 'python utils.py' in the console"""
 if __name__ == '__main__':
     #prp_1 = "prod/station1.prp"
     #prp_2 = "prod/station2.prp"
-    prp_1 = "prod/s1/TRC6420_ITRProduction_20181026_143235.prp"
+
+    """prp_1 = "prod/evf_sim/s1/TRC6420_ITRProduction_20181105_172929.prp"
+    prp_2 = "prod/evf_sim/s2/TRC6420_ITRProduction_20181105_172931.prp"
+    prp_3 = "prod/evf_sim/s3/TRC6420_ITRProduction_20181105_172932.prp"
+    prp_4 = "prod/evf_sim/s4/TRC6420_ITRProduction_20181105_172936.prp"
+    """
+    """prp_1 = "prod/s1/TRC6420_ITRProduction_20181026_143235.prp"
     prp_2 = "prod/s2/TRC6420_ITRProduction_20181026_143231.prp"
     prp_3 = "prod/s3/TRC6420_ITRProduction_20181026_143233.prp"
+    """
+
+    prp_1 = "prod/new_sim/s1/TRC6420_ITRProduction_20181107_165237.prp"
+    prp_2 = "prod/new_sim/s2/TRC6420_ITRProduction_20181107_165226.prp"
+    prp_3 = "prod/new_sim/s3/TRC6420_ITRProduction_20181107_165213.prp"
 
     tsexs_1 = get_track_stream_exs_from_prp(prp_1)
     tsexs_2 = get_track_stream_exs_from_prp(prp_2)
-    # tsexs_3 = get_track_stream_exs_from_prp(prp_3)
+    tsexs_3 = get_track_stream_exs_from_prp(prp_3)
 
-    sync_stations(tsexs_1, tsexs_2)
-    print("FUSING SHIT")
-    global_track_streams = get_fused_station_tracks(tsexs_1, tsexs_2)
+    sync_stations(tsexs_1, tsexs_2, tsexs_3)
+    print("MERGING SHIT")
+    global_track_streams = fuse_all_station_tracks(tsexs_1, tsexs_2, tsexs_3)
     print("DONE")
     stations_data = []
     raw_tracks = []
