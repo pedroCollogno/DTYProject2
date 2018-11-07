@@ -85,7 +85,6 @@ def get_track_info(track):
             bandwitdh_hz, average_azimut_deg]
     """
     info_from_track = []
-    info_from_track.append(track.id.most_significant)
     info_from_track.append(track.itr_measurement.type)
     info_from_track.append(track.itr_measurement.central_freq_hz)
     info_from_track.append(track.itr_measurement.bandwidth_hz)
@@ -108,6 +107,20 @@ def get_track_stream_ex_info(track_stream_ex, data=[]):
     return data
 
 
+def get_track_list_info(tracks, data=[]):
+    """ Takes essential information out of a given list of tracks
+
+    :param tracks: the list of tracks from which info should be extracted
+    :param data: (optional) the data from other track lists, that needs to be updated with new info
+    :return: a list containing the basic info of every track contained in the input list.
+    """
+    for track in tracks:
+        batch = get_track_info(track)
+        if batch not in data:
+            data.append(batch)
+    return data
+
+
 def get_dbscan_prediction(data):
     """ Function that clusters data from TrackStreamEx objects
 
@@ -117,7 +130,7 @@ def get_dbscan_prediction(data):
         - in second position an array containing the IDs of the predicted tracks.
     """
     np_data = np.array(data)
-    prediction = DBSCAN(min_samples=1).fit_predict(np_data[:, 1:3])
+    prediction = DBSCAN(min_samples=1).fit_predict(np_data[:, :3])
     return prediction, np_data[:, 0]
 
 
@@ -195,8 +208,8 @@ def same_emittor(track_1, track_2):
 
     # If all three criteria above have been fulfilled, check if alternates sequences are similar
     if freq_consistency and type_consistency and bandwidth_consistency:
-        print(
-            "\tFreq and type consistency found : \n\t\t1° Freq - %s - Type - %s \n\t\t2° Freq - %s - Type - %s" % (f_1, t_1, f_2, t_2))
+        """print(
+            "\tFreq and type consistency found : \n\t\t1° Freq - %s - Type - %s \n\t\t2° Freq - %s - Type - %s" % (f_1, t_1, f_2, t_2))"""
 
         alternate_consistency = True
         alternates_1 = track_1.alternates
@@ -223,8 +236,8 @@ def same_emittor(track_1, track_2):
                 break
 
         if alternate_consistency:
-            print(
-                "\tBoth tracks are from the same emitter ! \n\t\tAnalysis made on %s alternates." % n)
+            """print(
+                "\tBoth tracks are from the same emitter ! \n\t\tAnalysis made on %s alternates." % n)"""
 
     return freq_consistency and bandwidth_consistency and type_consistency and alternate_consistency
 
@@ -272,6 +285,48 @@ def sync_stations(*args):
         sync_station_streams(args[i], args[i+1])
 
 
+def get_fused_station_tracks(station_1_track_streams, station_2_track_streams):
+    global_track_streams = []
+    n = min(len(station_1_track_streams), len(station_2_track_streams))
+    progress = 0
+    pbar = ProgressBar(maxval=n)
+    pbar.start()
+    for i in range(n):
+        track_stream_1 = station_1_track_streams[i].data.tracks
+        track_stream_2 = station_2_track_streams[i].data.tracks
+
+        track_stream = [track for track in track_stream_1]
+
+        for track_2 in track_stream_2:
+            is_in_other = False
+            for track_1 in track_stream_1:
+                if same_emittor(track_1, track_2):
+                    is_in_other = True
+            if not is_in_other:
+                track_stream.append(track_2)
+
+        global_track_streams.append(track_stream)
+        progress += 1
+        pbar.update(progress)
+    pbar.finish()
+    return(global_track_streams)
+
+
+def fuse_all_station_tracks(*args):
+    """Fuse all station streams passed as inputs and returns the output.
+    """
+    n = len(args)
+    args = list(args)
+    if n < 2:
+        raise ValueError(
+            "Need at least 2 stations to fuse, but was given only %s" % n)
+
+    global_track_streams = args[0]
+    for i in range(n-1):
+        global_track_streams = get_fused_station_tracks(
+            global_track_streams, args[i+1])
+
+
 """This part runs if you run 'python utils.py' in the console"""
 if __name__ == '__main__':
     #prp_1 = "prod/station1.prp"
@@ -282,12 +337,26 @@ if __name__ == '__main__':
 
     tsexs_1 = get_track_stream_exs_from_prp(prp_1)
     tsexs_2 = get_track_stream_exs_from_prp(prp_2)
-    tsexs_3 = get_track_stream_exs_from_prp(prp_3)
+    # tsexs_3 = get_track_stream_exs_from_prp(prp_3)
 
-    sync_stations(tsexs_1, tsexs_2, tsexs_3)
+    sync_stations(tsexs_1, tsexs_2)
+    print("FUSING SHIT")
+    global_track_streams = get_fused_station_tracks(tsexs_1, tsexs_2)
+    print("DONE")
+    stations_data = []
+    raw_tracks = []
+
+    for tracks in global_track_streams:
+        raw_tracks = get_track_list_info(tracks, raw_tracks)
+
+    print(len(raw_tracks))
+    input()
+
+    y_pred, ids = get_dbscan_prediction(raw_tracks)
+    """
 
     stations_data = []
-    for tsexs in [tsexs_1, tsexs_2, tsexs_3]:
+    for tsexs in [tsexs_1, tsexs_2]:
         raw_tracks = []
         real_tracks = []
         for tsex in tsexs:
@@ -297,46 +366,54 @@ if __name__ == '__main__':
         y_pred, ids = get_dbscan_prediction(raw_tracks)
         stations_data.append([y_pred, ids, real_tracks])
     stations_data = np.array(stations_data)
+
+    y_pred, ids = get_dbscan_prediction(raw_tracks)
+
+    """
     """df = pd.concat([pd.DataFrame({'ID': stations_data[i, 1], 'LABEL': stations_data[i, 0]})
                     for i in range(2)], keys=['Station 1', 'Station 2'])
 
     dup_df = df[df.duplicated(['ID'], keep=False)].sort_values(by="ID")
-    print(dup_df)"""
+    print(dup_df)
 
-    cycle = 151
-    for j in range(len(stations_data[1, 2][cycle])):
-        scores = []
-        for i in range(len(stations_data[2, 2][cycle])):
-            comp = same_emittor(
-                stations_data[1, 2][cycle][j], stations_data[2, 2][cycle][i])
-            scores.append(comp)
+    display_alternates(prp_1, prp_2)
 
-        tracks = np.where(scores)
-        print()
-        print(j, tracks)
-        print()
+    for cycle in range(100):
+        for j in range(len(stations_data[0, 2][cycle])):
+            scores = []
+            for i in range(len(stations_data[1, 2][cycle])):
+                comp = same_emittor(
+                    stations_data[0, 2][cycle][j], stations_data[1, 2][cycle][i])
+                scores.append(comp)
 
-        """labels = []
-        corresponding_batches = {}
-        i = 0
-        for label in y_pred:
-            if label not in labels:
-                labels.append(label)
-                corresponding_batches[label] = []
-            corresponding_batches[label].append(raw_tracks[i])
-            i += 1
+            tracks = np.where(scores)
+            print(scores)
+            print(j, tracks)
+            print()
 
-        fig = plt.figure()
-        ax = Axes3D(fig)
-        colors = cm.rainbow(np.linspace(0, 1, len(y_pred)))
-        print("\nResult of DBScan clustering on input data. There are %s inputs and %s clusters.\n" %
-              (len(raw_tracks), len(labels)))
-        for key in corresponding_batches.keys():
-            print("Label is %s" % key)
-            for batch in corresponding_batches[key]:
-                print("\tTrack data: % s" % batch)
-            corresponding_batches[key] = np.array(corresponding_batches[key])
-            ax.plot(corresponding_batches[key][:, 2], corresponding_batches[key][:, 1],
-                    corresponding_batches[key][:, 4], '-o', color=colors[key])
+    """
 
-        plt.show()"""
+    labels = []
+    corresponding_batches = {}
+    i = 0
+    for label in y_pred:
+        if label not in labels:
+            labels.append(label)
+            corresponding_batches[label] = []
+        corresponding_batches[label].append(raw_tracks[i])
+        i += 1
+
+    fig = plt.figure()
+    ax = Axes3D(fig)
+    colors = cm.rainbow(np.linspace(0, 1, len(y_pred)))
+    print("\nResult of DBScan clustering on input data. There are %s inputs and %s clusters.\n" %
+          (len(raw_tracks), len(labels)))
+    for key in corresponding_batches.keys():
+        print("Label is %s" % key)
+        for batch in corresponding_batches[key]:
+            print("\tTrack data: % s" % batch)
+        corresponding_batches[key] = np.array(corresponding_batches[key])
+        ax.plot(corresponding_batches[key][:, 1], corresponding_batches[key][:, 0],
+                corresponding_batches[key][:, 3], '-o', color=colors[key])
+
+    plt.show()
