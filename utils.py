@@ -229,6 +229,49 @@ def same_emittor(track_1, track_2):
     return freq_consistency and bandwidth_consistency and type_consistency and alternate_consistency
 
 
+def sync_station_streams(station_1_track_stream, station_2_track_stream):
+    """ Syncs track_streams between stations, to have them start at the same time.
+
+    :param station_1_track_stream: track stream for first station
+    :param station_2_track_stream: track stream for second station
+    """
+    s_1_dates = [station_1_track_stream[i].data.debut_cycle.date_ms for i in range(
+        len(station_1_track_stream))]
+    s_2_dates = [station_2_track_stream[i].data.debut_cycle.date_ms for i in range(
+        len(station_2_track_stream))]
+    min_cycle_duration = min(
+        station_1_track_stream[0].data.duree_cycle_ms, station_2_track_stream[0].data.duree_cycle_ms)
+
+    while s_1_dates[0] - s_2_dates[0] > min_cycle_duration:
+        s_2_dates.pop(0)
+        station_2_track_stream.pop(0)
+
+    while s_2_dates[0] - s_1_dates[0] > min_cycle_duration:
+        s_1_dates.pop(0)
+        station_1_track_stream.pop(0)
+
+    if s_2_dates[0] - s_1_dates[0] > min_cycle_duration/2:
+        s_1_dates.pop(0)
+        station_1_track_stream.pop(0)
+    elif s_1_dates[0] - s_2_dates[0] > min_cycle_duration/2:
+        s_2_dates.pop(0)
+        station_2_track_stream.pop(0)
+
+
+def sync_stations(*args):
+    """Syncs all station streams passed as inputs.
+    """
+    n = len(args)
+    args = list(args)
+    if n < 2:
+        raise ValueError(
+            "Need at least 2 stations to sync, but was given only %s" % n)
+    args.sort(key=len)
+
+    for i in range(n-1):
+        sync_station_streams(args[i], args[i+1])
+
+
 """This part runs if you run 'python utils.py' in the console"""
 if __name__ == '__main__':
     #prp_1 = "prod/station1.prp"
@@ -240,6 +283,8 @@ if __name__ == '__main__':
     tsexs_1 = get_track_stream_exs_from_prp(prp_1)
     tsexs_2 = get_track_stream_exs_from_prp(prp_2)
     tsexs_3 = get_track_stream_exs_from_prp(prp_3)
+
+    sync_stations(tsexs_1, tsexs_2, tsexs_3)
 
     stations_data = []
     for tsexs in [tsexs_1, tsexs_2, tsexs_3]:
