@@ -4,18 +4,18 @@ import WorldMap from "./WorldMap";
 import {listenToServer} from "./api"
 
 class App extends Component {
-  stations = [];
+  stations = []; // list of all the detected stations so far
   constructor(props) {
     super(props);
 
-    listenToServer((station) => { //connects to the server websocket
+    listenToServer((station) => { //connects to the server websocket and listens to events
       this.setState({ station });
       this.stations.push(station)
     });
   }
 
   state = {
-    station : {reseau :"",place:"", id :""}
+    station : {reseau :"",place:"", id :""} // reseau : int, place : [lattitude, longitude]
   };
 
 

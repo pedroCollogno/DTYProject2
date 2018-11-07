@@ -17,14 +17,14 @@ class WorldMap extends Component {
   }
 
   afficheStation(station){
-    console.log(station);
+    console.log(station); // debugging
   }
 
 
   componentDidMount() {
     
     this.setState({
-      worldData: feature(world, world.objects.countries).features,
+      worldData: feature(world, world.objects.countries).features, // the background of the map
     })
   }
 
@@ -35,7 +35,8 @@ class WorldMap extends Component {
   render() {
     return (
       <svg width={ 1000 } height={ 600 } viewBox="0 0 1000 600">
-        <g className="countries">
+      {/* only if displaying the countries is relevant... */}
+        <g className="countries"> 
           {
             this.state.worldData.map((d,i) => (
               <path
@@ -50,6 +51,7 @@ class WorldMap extends Component {
           }
         </g>
         <g className="markers">
+        {/* displays every station as a circle on the map at its right position */}
         {this.props.stations.map( (station, index) => (
           <circle id={station.id} onClick={() => this.afficheStation(station)}
             cx={ this.projection()(station.place)[0] }
