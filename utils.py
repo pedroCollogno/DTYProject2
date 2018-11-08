@@ -7,6 +7,7 @@ from sklearn.cluster import DBSCAN
 import pandas as pd
 import numpy as np
 
+import gps
 import json
 
 import matplotlib.pyplot as plt
@@ -187,6 +188,8 @@ def same_emittor(track_1, track_2):
     """
     alternate_consistency = False
     start_consistency = False
+    start_1_index = 0
+    start_2_index = 0
 
     # First of all, check if both tracks use the same frequence to communicate
     freq_consistency = False
@@ -262,8 +265,12 @@ def same_emittor(track_1, track_2):
         # if alternate_consistency:
             """print(
                 "\tBoth tracks are from the same emitter ! \n\t\tAnalysis made on %s alternates." % n)"""
+    bool_response = freq_consistency and bandwidth_consistency and type_consistency and start_consistency and alternate_consistency
 
-    return freq_consistency and bandwidth_consistency and type_consistency and start_consistency and alternate_consistency
+    track_begin_date = track_1.begin_date.date_ms
+    track_id = track_begin_date*1000**5 + f_1*1000**4 + \
+        bw_1**3 + t_1*1000**2 + start_1_index*1000**1
+    return bool_response, track_id
 
 
 def sync_station_streams(station_1_track_stream, station_2_track_stream):
@@ -310,7 +317,7 @@ def sync_stations(*args):
         sync_station_streams(args[i], args[i+1])
 
 
-def get_fused_station_tracks(station_1_track_streams, station_2_track_streams, are_lists=[False, False]):
+def get_fused_station_tracks(station_1_track_streams, station_2_track_streams, are_lists=[False, False], all_track_data={}):
     """Fuses the track stream for two given stations. Returns a track list, without duplicates
 
     :param station_1_track_streams: the track streams from the first station 
@@ -343,8 +350,28 @@ def get_fused_station_tracks(station_1_track_streams, station_2_track_streams, a
         for track_2 in track_stream_2:
             is_in_other = False
             for track_1 in track_stream + previous_track_stream:
-                if same_emittor(track_1, track_2):
+                is_same, track_2_id = same_emittor(track_2, track_1)
+                if is_same:
                     is_in_other = True
+
+                    if track_2_id not in all_track_data.keys():
+                        lat, lng = gps.coords_from_tracks(track_1, track_2)
+                        freq = track_1.itr_measurement.central_freq_hz
+                        bandwidth = track_1.itr_measurement.bandwidth_hz
+                        em_type = track_1.itr_measurement.type
+
+                        track_data = {
+                            'track_id': track_2_id,
+                            'coordinates': {
+                                'lat': lat,
+                                'lng': lng
+                            },
+                            'network_id': None
+                        }
+
+                        all_track_data[track_2_id] = track_data
+                    break
+
             if not is_in_other and len(track_stream) > 0:
                 track_stream.append(track_2)
 
@@ -352,7 +379,7 @@ def get_fused_station_tracks(station_1_track_streams, station_2_track_streams, a
         progress += 1
         pbar.update(progress)
     pbar.finish()
-    return(global_track_streams)
+    return(global_track_streams, all_track_data)
 
 
 def fuse_all_station_tracks(*args):
@@ -365,15 +392,16 @@ def fuse_all_station_tracks(*args):
             "Need at least 2 stations to fuse, but was given only %s" % n)
 
     global_track_streams = []
+    all_tracks_data = {}
     for i in range(n-1):
         if i == 0:
-            global_track_streams = get_fused_station_tracks(
+            global_track_streams, all_tracks_data = get_fused_station_tracks(
                 args[i], args[i+1])
         else:
-            global_track_streams = get_fused_station_tracks(
-                global_track_streams, args[i+1], are_lists=[True, False])
+            global_track_streams, all_tracks_data = get_fused_station_tracks(
+                global_track_streams, args[i+1], are_lists=[True, False], all_track_data=all_tracks_data)
 
-    return global_track_streams
+    return global_track_streams, all_tracks_data
 
 
 """This part runs if you run 'python utils.py' in the console"""
@@ -404,7 +432,8 @@ if __name__ == '__main__':
 
     sync_stations(tsexs_1, tsexs_2, tsexs_3)
     print("Merging info from all stations...")
-    global_track_streams = fuse_all_station_tracks(tsexs_1, tsexs_2, tsexs_3)
+    global_track_streams, all_tracks_data = fuse_all_station_tracks(
+        tsexs_1, tsexs_2, tsexs_3)
     print("Merge done !")
     stations_data = []
     raw_tracks = []
@@ -416,6 +445,13 @@ if __name__ == '__main__':
     print("Done !")
     print("After merge of all station info, found a total of %s emittors." %
           len(raw_tracks))
+
+    filename = 'all_tracks.json'
+    print("Found all of this data from tracks, writing it to %s" % filename)
+    print("Wrote %s tracks to json file" % len(all_tracks_data.keys()))
+    with open(filename, 'w') as fp:
+        json.dump(all_tracks_data, fp)
+
     input("Continue ? (Enter if YES, ctrl+c if NO)")
 
     y_pred, ids = get_dbscan_prediction(raw_tracks)
