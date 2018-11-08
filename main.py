@@ -12,6 +12,8 @@ from utils.track_utils import *
 import json
 import logging
 
+from backdjango.channels_back.back.views import send_emittor_to_front
+
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from mpl_toolkits.mplot3d import Axes3D
@@ -109,14 +111,18 @@ def make_emittor_clusters(global_track_streams, all_tracks_data, debug=False):
             i += 1
         n_clusters = max(y_pred) + 1
         logger.info("Found %s networks on the field.\n" % n_clusters)
+        logger.info("Sending emittors through socket")
+        for key in all_tracks_data.keys():
+            send_emittor_to_front(all_tracks_data[key])
 
-    filename = 'tracks/all_tracks_%s.json' % len(global_track_streams)
-    logger.debug(
-        "Found all of this data from tracks, writing it to %s" % filename)
-    logger.debug("Wrote %s tracks to json file" %
-                 len(all_tracks_data.keys()))
-    with open(filename, 'w') as fp:
-        json.dump(all_tracks_data, fp)
+    if debug:
+        filename = 'tracks/all_tracks_%s.json' % len(global_track_streams)
+        logger.debug(
+            "Found all of this data from tracks, writing it to %s" % filename)
+        logger.debug("Wrote %s tracks to json file" %
+                     len(all_tracks_data.keys()))
+        with open(filename, 'w') as fp:
+            json.dump(all_tracks_data, fp)
 
     if debug and len(raw_tracks) > 1:
         is_shown = False
@@ -131,7 +137,6 @@ def make_emittor_clusters(global_track_streams, all_tracks_data, debug=False):
                 corresponding_batches[label] = []
             corresponding_batches[label].append(raw_tracks[i])
             track_id = get_track_id(raw_tracks[i])
-            all_tracks_data[track_id]['network_id'] = label
             i += 1
 
         fig = plt.figure(1)
