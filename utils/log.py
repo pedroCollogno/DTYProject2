@@ -12,7 +12,8 @@ def set_logger_up():
     fh_formatter = logging.Formatter(
         '%(asctime)s - %(levelname)s - %(message)s')
 
-    fh = logging.FileHandler('logs/logs.txt')
+    fh = logging.FileHandler(
+        '/Users/piaverous/Documents/DTY/Projet_Thales/thales-project/logs/logs.txt')
     fh.setLevel(logging.WARNING)
     fh.setFormatter(fh_formatter)
     logger.addHandler(fh)

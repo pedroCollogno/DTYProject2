@@ -64,8 +64,8 @@ def get_track_id(track):
         bandwidth = track.itr_measurement.bandwidth_hz
         em_type = track.itr_measurement.type
 
-    track_id = track_begin_date*1000**5 + freq * \
-        1000**4 + bandwidth**3 + em_type*1000**2
+    track_id = track_begin_date*100**5 + freq * \
+        100**4 + bandwidth*100**3 + em_type*100**2
 
     return(track_id)
 
