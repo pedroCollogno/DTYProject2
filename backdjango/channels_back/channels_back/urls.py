@@ -16,7 +16,9 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 
-"""Global URLs for the project"""
+"""
+    Global URLs for the project
+"""
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
