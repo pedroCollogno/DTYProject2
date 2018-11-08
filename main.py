@@ -5,17 +5,16 @@ import numpy as np
 
 import utils.gps as gps
 import utils.loading as loading
-import utils.plotting
+from utils.log import logger
 from utils.station_utils import *
 from utils.track_utils import *
 
 import json
+import logging
 
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from mpl_toolkits.mplot3d import Axes3D
-import matplotlib
-matplotlib.interactive(True)
 
 
 def get_dbscan_prediction(data):
@@ -55,6 +54,9 @@ def main(debug=False):
     prp_2 = "prod/new_sim/s2/TRC6420_ITRProduction_20181107_165226.prp"
     prp_3 = "prod/new_sim/s3/TRC6420_ITRProduction_20181107_165213.prp"
 
+    if debug:
+        logger.handlers[1].setLevel(logging.DEBUG)
+
     tsexs_1 = loading.get_track_stream_exs_from_prp(prp_1)
     tsexs_2 = loading.get_track_stream_exs_from_prp(prp_2)
     tsexs_3 = loading.get_track_stream_exs_from_prp(prp_3)
@@ -64,11 +66,12 @@ def main(debug=False):
     n = len(tsexs_1)
     k = 1
     for i in range(k, n):
-        print("Merging info from all stations... Reading %s sensor cycles..." % str(i-k))
+        logger.info(
+            "\nMerging info from all stations... Reading %s sensor cycles..." % str(i-k))
         global_track_streams, all_tracks_data = fuse_all_station_tracks(
             tsexs_1[:i], tsexs_2[:i], tsexs_3[:i])
-        print("Merge done !")
-        make_emittor_clusters(global_track_streams, all_tracks_data)
+        logger.debug("Merge done !")
+        make_emittor_clusters(global_track_streams, all_tracks_data, debug)
         k = max(1, i-100)
 
 
@@ -76,7 +79,7 @@ def make_emittor_clusters(global_track_streams, all_tracks_data, debug=False):
     """ Makes the whole job of clustering emittors together from tracks
 
         Clusters emittors into networks using DBSCAN clustering algorithm. Updates the
-        cluster id info in the all_tracks_data parameter. Sends information for each emittor 
+        cluster id info in the all_tracks_data parameter. Sends information for each emittor
         directly to the Django backend.
 
     :param global_track_streams: All track streams to study
@@ -88,13 +91,13 @@ def make_emittor_clusters(global_track_streams, all_tracks_data, debug=False):
 
     k = max(len(global_track_streams) - 100, 0)
 
-    print("Taking track info out of %s track streams..." %
-          str(len(global_track_streams)-k))
+    logger.debug("Taking track info out of %s track streams..." %
+                 str(len(global_track_streams)-k))
     for tracks in global_track_streams[k:]:
         raw_tracks = get_track_list_info(tracks, raw_tracks)
-    print("Done !")
-    print("After merge of all station info, found a total of %s emittors." %
-          len(raw_tracks))
+    logger.debug("Done !")
+    logger.info("After merge of all station info, found a total of %s emittors." %
+                len(raw_tracks))
 
     if len(raw_tracks) > 1:
         y_pred, ids = get_dbscan_prediction(raw_tracks)
@@ -104,10 +107,14 @@ def make_emittor_clusters(global_track_streams, all_tracks_data, debug=False):
             # Need to convert np.int64 to int for JSON format
             all_tracks_data[track_id]['network_id'] = int(label)
             i += 1
+        n_clusters = max(y_pred) + 1
+        logger.info("Found %s networks on the field.\n" % n_clusters)
 
     filename = 'tracks/all_tracks_%s.json' % len(global_track_streams)
-    print("Found all of this data from tracks, writing it to %s" % filename)
-    print("Wrote %s tracks to json file\n" % len(all_tracks_data.keys()))
+    logger.debug(
+        "Found all of this data from tracks, writing it to %s" % filename)
+    logger.debug("Wrote %s tracks to json file" %
+                 len(all_tracks_data.keys()))
     with open(filename, 'w') as fp:
         json.dump(all_tracks_data, fp)
 
@@ -130,12 +137,12 @@ def make_emittor_clusters(global_track_streams, all_tracks_data, debug=False):
         fig = plt.figure(1)
         ax = Axes3D(fig)
         colors = cm.rainbow(np.linspace(0, 1, len(y_pred)))
-        print("\nResult of DBScan clustering on input data. There are %s inputs and %s clusters.\n" %
-              (len(raw_tracks), len(labels)))
+        logger.debug("\nResult of DBScan clustering on input data. There are %s inputs and %s clusters.\n" %
+                     (len(raw_tracks), len(labels)))
         for key in corresponding_batches.keys():
-            print("Label is %s" % key)
+            logger.debug("Label is %s" % key)
             for batch in corresponding_batches[key]:
-                print("\tTrack data: % s" % batch)
+                logger.debug("\tTrack data: % s" % batch)
             corresponding_batches[key] = np.array(corresponding_batches[key])
             ax.plot(corresponding_batches[key][:, 1], corresponding_batches[key][:, 0],
                     corresponding_batches[key][:, 3], '-o', color=colors[key])
@@ -146,4 +153,4 @@ def make_emittor_clusters(global_track_streams, all_tracks_data, debug=False):
 
 """This part runs if you run 'python main.py' in the console"""
 if __name__ == '__main__':
-    main(True)
+    main(debug=False)

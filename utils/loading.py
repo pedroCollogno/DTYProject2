@@ -2,6 +2,7 @@ import gen.TrackstreamEx_pb2 as ts
 import os
 
 from progressbar import ProgressBar
+from utils.log import logger
 
 
 def read_prp(filepath):
@@ -10,7 +11,7 @@ def read_prp(filepath):
     :param filepath: path to the .prp file to read
     :return: the list of all frames in the .prp file
     """
-    print("\nReading .prp file from path %s" % filepath)
+    logger.info("\nReading .prp file from path %s" % filepath)
     frames = []
     with open(filepath, "rb") as f:
         file_size = os.path.getsize(filepath)
@@ -48,7 +49,7 @@ def read_prp(filepath):
             progress += frame_size
             pbar.update(progress)
         pbar.finish()
-    print("Done ! Found %s frames in the file.\n" % len(frames))
+    logger.debug("Done ! Found %s frames in the file.\n" % len(frames))
     return(frames)
 
 

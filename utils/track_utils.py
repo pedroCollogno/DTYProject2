@@ -1,3 +1,5 @@
+from utils.log import logger
+
 
 def get_track_info(track):
     """ Takes essential information out of a given track
@@ -103,9 +105,8 @@ def same_emittor(track_1, track_2):
 
     # If all three criteria above have been fulfilled, check if alternates sequences are similar
     if freq_consistency and type_consistency and bandwidth_consistency:
-        """print(
-            "\tFreq and type consistency found : \n\t\t1° Freq - %s - Type - %s \n\t\t2° Freq - %s - Type - %s" % (f_1, t_1, f_2, t_2))"""
-
+        # logger.debug(
+        #    "\tFreq and type consistency found : \n\t\t1° Freq - %s - Type - %s \n\t\t2° Freq - %s - Type - %s" % (f_1, t_1, f_2, t_2))
         alternate_consistency = True
         alternates_1 = track_1.alternates
         alternates_2 = track_2.alternates
@@ -152,8 +153,8 @@ def same_emittor(track_1, track_2):
                 start_2_index += 1
 
         # if alternate_consistency:
-            """print(
-                "\tBoth tracks are from the same emitter ! \n\t\tAnalysis made on %s alternates." % n)"""
+            # logger.debug(
+            #   "\tBoth tracks are from the same emitter ! \n\t\tAnalysis made on %s alternates." % n)
     bool_response = freq_consistency and bandwidth_consistency and type_consistency and start_consistency and alternate_consistency
 
     track_id = get_track_id(track_1)
