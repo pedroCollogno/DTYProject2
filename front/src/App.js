@@ -1,32 +1,33 @@
 import React, { Component } from 'react';
 import './App.css';
-import WorldMap from "./WorldMap";
-import {listenToServer} from "./api"
+import MapBox from "./MapBox";
+import SocketHandler from "./SocketHandler";
 
 class App extends Component {
-  stations = []; // list of all the detected stations so far
-  constructor(props) {
-    super(props);
-
-    listenToServer((station) => { //connects to the server websocket and listens to events
-      this.setState({ station });
-      this.stations.push(station)
-    });
+  constructor() {
+    super();
+    this.state = {
+      station : {reseau :0,place:[0, 0], id :0},
+      stations : [{reseau :0,place:[10, 10], id :0}] // list of all the detected stations so far
+    };
+    this.newStation = this.newStation.bind(this);
   }
 
-  state = {
-    station : {reseau :"",place:"", id :""} // reseau : int, place : [lattitude, longitude]
-  };
+
+  newStation(station) {
+    let array = this.state.stations.splice(0);
+    array.push(JSON.parse(station));
+    let stat = JSON.parse(JSON.stringify(station))
+    this.setState({stations : array, station : stat});
+    console.log(this.state.stations);
+  }
 
 
   render() {
     return (
       <div className="App">
-        <p className="App-intro">
-        Derniere station : {this.state.station.id}
-        </p>
-        <p>appartenant au réseau : {this.state.station.reseau}</p>
-        <WorldMap stations={this.stations}/>
+        < SocketHandler handleData={this.newStation}/>
+        < MapBox stations={this.state.stations} lastStation={this.state.station}/>
       </div>
     );
   }
