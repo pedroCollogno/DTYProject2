@@ -7,6 +7,8 @@ from sklearn.cluster import DBSCAN
 import pandas as pd
 import numpy as np
 
+import json
+
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from mpl_toolkits.mplot3d import Axes3D
@@ -184,6 +186,7 @@ def same_emittor(track_1, track_2):
     :return: A boolean, True if both tracks are from the same emitter, False if not
     """
     alternate_consistency = False
+    start_consistency = False
 
     # First of all, check if both tracks use the same frequence to communicate
     freq_consistency = False
@@ -224,7 +227,6 @@ def same_emittor(track_1, track_2):
         # we only analyse alternates that have finished. Not ongoing alternates.
         n = min(len(alternates_1), len(alternates_2)) - 1
 
-        start_consistency = False
         for start_1 in alt_start_1:
             if start_1 in alt_start_2:
                 start_1_index = alt_start_1.index(start_1)
@@ -266,7 +268,7 @@ def same_emittor(track_1, track_2):
 
 def sync_station_streams(station_1_track_stream, station_2_track_stream):
     """ Syncs track_streams between stations, to have them start at the same time.
-je gobe des spatz
+
     :param station_1_track_stream: track stream for first station
     :param station_2_track_stream: track stream for second station
     """
@@ -309,6 +311,14 @@ def sync_stations(*args):
 
 
 def get_fused_station_tracks(station_1_track_streams, station_2_track_streams, are_lists=[False, False]):
+    """Fuses the track stream for two given stations. Returns a track list, without duplicates
+
+    :param station_1_track_streams: the track streams from the first station 
+    :param station_2_track_streams: the track streams from the second station
+    :param are_lists: (optional) list of two booleans, to allow you to replace a trackstreamex object 
+        by a list of tracks in input.
+    """
+
     global_track_streams = []
     n = min(len(station_1_track_streams), len(station_2_track_streams))
     progress = 0
@@ -326,13 +336,16 @@ def get_fused_station_tracks(station_1_track_streams, station_2_track_streams, a
             track_stream_2 = station_2_track_streams[i]
 
         track_stream = [track for track in track_stream_1]
+        previous_track_stream = []
+        if i >= 1:
+            previous_track_stream = global_track_streams[i-1]
 
         for track_2 in track_stream_2:
             is_in_other = False
-            for track_1 in track_stream_1:
+            for track_1 in track_stream + previous_track_stream:
                 if same_emittor(track_1, track_2):
                     is_in_other = True
-            if not is_in_other:
+            if not is_in_other and len(track_stream) > 0:
                 track_stream.append(track_2)
 
         global_track_streams.append(track_stream)
@@ -368,12 +381,15 @@ if __name__ == '__main__':
     #prp_1 = "prod/station1.prp"
     #prp_2 = "prod/station2.prp"
 
-    """prp_1 = "prod/evf_sim/s1/TRC6420_ITRProduction_20181105_172929.prp"
+    """
+    prp_1 = "prod/evf_sim/s1/TRC6420_ITRProduction_20181105_172929.prp"
     prp_2 = "prod/evf_sim/s2/TRC6420_ITRProduction_20181105_172931.prp"
     prp_3 = "prod/evf_sim/s3/TRC6420_ITRProduction_20181105_172932.prp"
     prp_4 = "prod/evf_sim/s4/TRC6420_ITRProduction_20181105_172936.prp"
     """
-    """prp_1 = "prod/s1/TRC6420_ITRProduction_20181026_143235.prp"
+
+    """
+    prp_1 = "prod/s1/TRC6420_ITRProduction_20181026_143235.prp"
     prp_2 = "prod/s2/TRC6420_ITRProduction_20181026_143231.prp"
     prp_3 = "prod/s3/TRC6420_ITRProduction_20181026_143233.prp"
     """
@@ -387,17 +403,20 @@ if __name__ == '__main__':
     tsexs_3 = get_track_stream_exs_from_prp(prp_3)
 
     sync_stations(tsexs_1, tsexs_2, tsexs_3)
-    print("MERGING SHIT")
+    print("Merging info from all stations...")
     global_track_streams = fuse_all_station_tracks(tsexs_1, tsexs_2, tsexs_3)
-    print("DONE")
+    print("Merge done !")
     stations_data = []
     raw_tracks = []
 
+    print("Taking track info out of %s track streams..." %
+          len(global_track_streams))
     for tracks in global_track_streams:
         raw_tracks = get_track_list_info(tracks, raw_tracks)
-
-    print(len(raw_tracks))
-    input()
+    print("Done !")
+    print("After merge of all station info, found a total of %s emittors." %
+          len(raw_tracks))
+    input("Continue ? (Enter if YES, ctrl+c if NO)")
 
     y_pred, ids = get_dbscan_prediction(raw_tracks)
     """
