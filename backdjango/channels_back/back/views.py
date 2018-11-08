@@ -5,10 +5,18 @@ import json
 
 
 def user_list(request):
+    #clustering_bite() by Pierre à verrou
     return render(request, 'back/user_list.html')
 
+
+def send_emittor_to_front(json):
+    print('passed')
+    Group('users').send({
+        'text':json.dumps(json)
+    })
+
 def test(request):
-    print('ok')
+    send_emittor_to_front({'json':'containing data'})
     Group('users').send({
         'text':json.dumps({
             'newelement': 'coucou'
