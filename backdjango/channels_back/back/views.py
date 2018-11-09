@@ -1,4 +1,3 @@
-
 from django.shortcuts import render
 from channels import Group
 import json
@@ -41,6 +40,7 @@ def test(request):
             'newelement': 'coucou'
         })
     })
+    print(path) #path is global so we can call it here
     t = threading.Thread(target=main.main)
     t.start()
     return render(request, 'back/user_list.html')
@@ -57,9 +57,9 @@ def upload(request):
         form = FileForm(request.POST, request.FILES)
         if form.is_valid():
             global_file = request.FILES['File']
-            fs = FileSystemStorage()
+            fs = FileSystemStorage("scenarios/")
             filename = fs.save(global_file.name, global_file)
-            path = fs.location+'/'+filename
+            path = fs.location+'/'+filename 
         return(HttpResponse('<h1>Page was found</h1>'))
     else:
         return(HttpResponse('<h1>Page was not found</h1>'))
