@@ -12,6 +12,12 @@ class MapBox extends Component {
         this.state = props;
     }
 
+    center() {
+        if(this.props.stations.length == 0) {
+            return [2.33, 48.86];
+        }
+        return [this.props.stations[0].coordinates.lng, this.props.stations[0].coordinates.lat];
+    }
       
     render() {
         return(
@@ -21,16 +27,16 @@ class MapBox extends Component {
             height: "500px",
             width: "1000px",
             }}
-            zoom = {[7]}
-            center = {this.props.stations[0].place} >
+            zoom = {[6]}
+            center = {this.center()} >
                 <Layer
                 type="circle"
                 paint = {{
-                    "circle-radius" : 5,
+                    "circle-radius" : 3,
                     "circle-color" : "red"}}
                 id="marker" >
                 {this.props.stations.map((station, key) => (
-                <Feature coordinates={station.place}/>
+                <Feature coordinates={[station.coordinates.lng,station.coordinates.lat] }/>
                 ))}
             </Layer>
 
