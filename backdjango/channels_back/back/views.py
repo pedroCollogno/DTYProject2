@@ -2,7 +2,7 @@
 from django.shortcuts import render
 from channels import Group
 import json
-import main
+#import main
 import threading
 
 
@@ -35,7 +35,7 @@ def test(request):
             'newelement': 'coucou'
         })
     })
-    t = threading.Thread(target=main.main)
-    t.start()
+    #t = threading.Thread(target=main.main)
+    # t.start()
 
     return render(request, 'back/user_list.html')

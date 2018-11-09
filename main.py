@@ -40,43 +40,47 @@ def main(debug=False):
     """
     # prp_1 = "prod/station1.prp"
     # prp_2 = "prod/station2.prp"
+
+    # """
+    prp_1 = "/Users/piaverous/Documents/DTY/Projet_Thales/thales-project/prod/evf_sim/s1/TRC6420_ITRProduction_20181105_172929.prp"
+    prp_2 = "/Users/piaverous/Documents/DTY/Projet_Thales/thales-project/prod/evf_sim/s2/TRC6420_ITRProduction_20181105_172931.prp"
+    prp_3 = "/Users/piaverous/Documents/DTY/Projet_Thales/thales-project/prod/evf_sim/s3/TRC6420_ITRProduction_20181105_172932.prp"
+    prp_4 = "/Users/piaverous/Documents/DTY/Projet_Thales/thales-project/prod/evf_sim/s4/TRC6420_ITRProduction_20181105_172936.prp"
+    # """
+
     """
-    prp_1 = "prod/evf_sim/s1/TRC6420_ITRProduction_20181105_172929.prp"
-    prp_2 = "prod/evf_sim/s2/TRC6420_ITRProduction_20181105_172931.prp"
-    prp_3 = "prod/evf_sim/s3/TRC6420_ITRProduction_20181105_172932.prp"
-    prp_4 = "prod/evf_sim/s4/TRC6420_ITRProduction_20181105_172936.prp"
+    prp_1 = "/Users/piaverous/Documents/DTY/Projet_Thales/thales-project/prod/base_sim/s1/TRC6420_ITRProduction_20181026_143235.prp"
+    prp_2 = "/Users/piaverous/Documents/DTY/Projet_Thales/thales-project/prod/base_sim/s2/TRC6420_ITRProduction_20181026_143231.prp"
+    prp_3 = "/Users/piaverous/Documents/DTY/Projet_Thales/thales-project/prod/base_sim/s3/TRC6420_ITRProduction_20181026_143233.prp"
     """
 
     """
-    prp_1 = "prod/s1/TRC6420_ITRProduction_20181026_143235.prp"
-    prp_2 = "prod/s2/TRC6420_ITRProduction_20181026_143231.prp"
-    prp_3 = "prod/s3/TRC6420_ITRProduction_20181026_143233.prp"
-    """
-
     prp_1 = "/Users/piaverous/Documents/DTY/Projet_Thales/thales-project/prod/new_sim/s1/TRC6420_ITRProduction_20181107_165237.prp"
     prp_2 = "/Users/piaverous/Documents/DTY/Projet_Thales/thales-project/prod/new_sim/s2/TRC6420_ITRProduction_20181107_165226.prp"
     prp_3 = "/Users/piaverous/Documents/DTY/Projet_Thales/thales-project/prod/new_sim/s3/TRC6420_ITRProduction_20181107_165213.prp"
-
+    """
     if debug:
         logger.handlers[1].setLevel(logging.DEBUG)
 
     tsexs_1 = loading.get_track_stream_exs_from_prp(prp_1)
     tsexs_2 = loading.get_track_stream_exs_from_prp(prp_2)
     tsexs_3 = loading.get_track_stream_exs_from_prp(prp_3)
+    tsexs_4 = loading.get_track_stream_exs_from_prp(prp_4)
 
-    sync_stations(tsexs_1, tsexs_2, tsexs_3)
+    sync_stations(tsexs_1, tsexs_2, tsexs_3, tsexs_4)
     all_tracks_data = {}
     n = len(tsexs_1)
     k = 1
-    for i in range(1, n):
+    for i in range(1, n, 600):
         logger.info(
             "\nMerging info from all stations... Reading %s sensor cycles..." % str(i-k))
         prev_tracks_data = copy.deepcopy(all_tracks_data)
         global_track_streams, all_tracks_data = fuse_all_station_tracks(
-            tsexs_1[:i], tsexs_2[:i], tsexs_3[:i])
+            tsexs_1[:i], tsexs_2[:i], tsexs_3[:i], tsexs_4[:i])
         logger.debug("Merge done !")
         make_emittor_clusters(global_track_streams,
                               all_tracks_data, prev_tracks_data, debug)
+        input()
 
 
 def make_emittor_clusters(global_track_streams, all_tracks_data, prev_tracks_data, debug=False):
@@ -101,6 +105,8 @@ def make_emittor_clusters(global_track_streams, all_tracks_data, prev_tracks_dat
     logger.debug("Done !")
     logger.info("After merge of all station info, found a total of %s emittors." %
                 len(raw_tracks))
+    logger.debug("All_data_tracks has a total of %s emittors registered." %
+                 len(all_tracks_data.keys()))
 
     if len(raw_tracks) > 1:
         y_pred, ids = get_dbscan_prediction(raw_tracks)
@@ -108,14 +114,16 @@ def make_emittor_clusters(global_track_streams, all_tracks_data, prev_tracks_dat
         for label in y_pred:
             track_id = get_track_id(raw_tracks[i])
             # Need to convert np.int64 to int for JSON format
-            all_tracks_data[track_id]['network_id'] = int(label)
+            try:
+                all_tracks_data[track_id]['network_id'] = int(label)
+            except KeyError as err:
+                logger.error("Keyerror on track %s : %s" % (i, raw_tracks[i]))
             i += 1
         n_clusters = max(y_pred) + 1
         logger.info("Found %s networks on the field.\n" % n_clusters)
         logger.info("Sending emittors through socket")
         for key in all_tracks_data.keys():
-            if key not in prev_tracks_data.keys():
-                logger.warning("SENT EMITTOR")
+            if key not in prev_tracks_data.keys() and not debug:
                 send_emittor_to_front(all_tracks_data[key])
 
     if debug:
@@ -144,7 +152,9 @@ def make_emittor_clusters(global_track_streams, all_tracks_data, prev_tracks_dat
             i += 1
 
         fig = plt.figure(1)
+
         ax = Axes3D(fig)
+
         colors = cm.rainbow(np.linspace(0, 1, len(y_pred)))
         logger.debug("\nResult of DBScan clustering on input data. There are %s inputs and %s clusters.\n" %
                      (len(raw_tracks), len(labels)))
@@ -162,4 +172,4 @@ def make_emittor_clusters(global_track_streams, all_tracks_data, prev_tracks_dat
 
 """This part runs if you run 'python main.py' in the console"""
 if __name__ == '__main__':
-    main(debug=False)
+    main(debug=True)

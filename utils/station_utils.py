@@ -1,7 +1,8 @@
 import utils.gps as gps
-from utils.track_utils import same_emittor
+from utils.track_utils import same_emittor, get_track_id, add_track_to_dict
 
 from progressbar import ProgressBar
+from utils.log import logger
 
 
 def sync_stations(*args):
@@ -12,7 +13,7 @@ def sync_stations(*args):
     if n < 2:
         raise ValueError(
             "Need at least 2 stations to sync, but was given only %s" % n)
-    args.sort(key=len)
+    args.sort(key=len, reverse=True)
 
     for i in range(n-1):
         sync_station_streams(args[i], args[i+1])
@@ -80,6 +81,7 @@ def get_fused_station_tracks(station_1_track_streams, station_2_track_streams, a
     """
 
     global_track_streams = []
+    met_track_ids = []
     n = min(len(station_1_track_streams), len(station_2_track_streams))
     progress = 0
     pbar = ProgressBar(maxval=n)
@@ -96,9 +98,17 @@ def get_fused_station_tracks(station_1_track_streams, station_2_track_streams, a
             track_stream_2 = station_2_track_streams[i]
 
         track_stream = [track for track in track_stream_1]
+        for track in track_stream:
+            track_id = get_track_id(track)
+            if track_id not in all_track_data.keys():
+                add_track_to_dict(track, all_track_data)
+            if track_id not in met_track_ids:
+                met_track_ids.append(track_id)
+
         previous_track_stream = []
         if i >= 1:
-            previous_track_stream = global_track_streams[i-1]
+            for k in range(i-1, i):
+                previous_track_stream += global_track_streams[k]
 
         for track_2 in track_stream_2:
             is_in_other = False
@@ -106,26 +116,21 @@ def get_fused_station_tracks(station_1_track_streams, station_2_track_streams, a
                 is_same, track_2_id = same_emittor(track_2, track_1)
                 if is_same:
                     is_in_other = True
+                if track_2_id not in all_track_data.keys():
+                    lat, lng = gps.coords_from_tracks(track_1, track_2)
+                    coords = {
+                        'lat': lat,
+                        'lng': lng
+                    }
+                    add_track_to_dict(track_2, all_track_data, coords=coords)
 
-                    if track_2_id not in all_track_data.keys():
-                        lat, lng = gps.coords_from_tracks(track_1, track_2)
-                        freq = track_1.itr_measurement.central_freq_hz
-                        bandwidth = track_1.itr_measurement.bandwidth_hz
-                        em_type = track_1.itr_measurement.type
-
-                        track_data = {
-                            'track_id': track_2_id,
-                            'coordinates': {
-                                'lat': lat,
-                                'lng': lng
-                            },
-                            'network_id': None
-                        }
-
-                        all_track_data[track_2_id] = track_data
-                    break
-
-            if not is_in_other and len(track_stream) > 0:
+                elif all_track_data[track_2_id]['coordinates'] is None:
+                    lat, lng = gps.coords_from_tracks(track_1, track_2)
+                    all_track_data[track_2_id]['coordinates'] = {
+                        'lat': lat,
+                        'lng': lng
+                    }
+            if not is_in_other:
                 track_stream.append(track_2)
 
         global_track_streams.append(track_stream)
