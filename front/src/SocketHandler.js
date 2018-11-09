@@ -8,7 +8,7 @@ class SocketHandler extends Component {
       return (
         <div>
  
-          <Websocket url='ws://localhost:8000'
+          <Websocket url='ws://localhost:8000/test'
               onMessage={this.props.handleData}/>
         </div>
       );
