@@ -92,6 +92,20 @@ def get_track_info(track):
     info_from_track.append(track.average_azimut_deg)
     return info_from_track
 
+def get_track_info_with_alternates(track):
+    """ Takes essential information out of a given track
+
+    :param track: the track from which info should be extracted
+    :return: a list containing the basic info of the track :
+        [track_id, measurement_type, central_freq_hz,
+            bandwitdh_hz, average_azimut_deg, list of alternates : [start_date, end_date]]
+    """
+    new_info_from_track = get_track_info(track)
+    alternates_list = []
+    for alternate in track.alternates:
+        alternates_list.append([alternate.start.date_ms, (alternate.start.date_ms + alternate.duration_us/1000)])
+    new_info_from_track.append(alternates_list)
+    return new_info_from_track
 
 def get_track_stream_ex_info(track_stream_ex, data=[]):
     """ Takes essential information out of a given TrackStreamEx object
@@ -106,7 +120,6 @@ def get_track_stream_ex_info(track_stream_ex, data=[]):
         if batch not in data:
             data.append(batch)
     return data
-
 
 def get_dbscan_prediction(data):
     """ Function that clusters data from TrackStreamEx objects
