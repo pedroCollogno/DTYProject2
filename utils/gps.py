@@ -40,5 +40,5 @@ def coords_from_azimuts(azimuth_1, azimuth_2, station_1_coords, station_2_coords
     x2, y2 = station_2_coords
 
     x = (y1 - y2 + t2*x2 - t1*x1)/(t2 - t1)
-    y = t1*x1 + y1
+    y = t1*(x-x1) + y1
     return(x, y)

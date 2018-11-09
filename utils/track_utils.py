@@ -64,8 +64,11 @@ def get_track_id(track):
         bandwidth = track.itr_measurement.bandwidth_hz
         em_type = track.itr_measurement.type
 
-    track_id = track_begin_date*100**5 + freq * \
-        100**4 + bandwidth*100**3 + em_type*100**2
+    track_begin_date = int(track_begin_date/100)*100
+    freq = int(freq/100000)*100000
+
+    track_id = track_begin_date*100**3 + freq * \
+        100**2 + em_type*100**1
 
     return(track_id)
 
@@ -172,12 +175,14 @@ def add_track_to_dict(track, track_dict, coords=None):
     freq = track.itr_measurement.central_freq_hz
     bandwidth = track.itr_measurement.bandwidth_hz
     em_type = track.itr_measurement.type
+    track_info = get_track_info(track)
 
     track_data = {
         'track_id': track_id,
         'coordinates': coords,
         'frequency': freq,
         'emission_type': em_type,
-        'network_id': None
+        'network_id': None,
+        'track': track_info
     }
     track_dict[track_id] = track_data

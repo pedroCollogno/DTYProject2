@@ -59,19 +59,20 @@ def fuse_all_station_tracks(*args):
             "Need at least 2 stations to fuse, but was given only %s" % n)
 
     global_track_streams = []
+    met_track_ids = []
     all_tracks_data = {}
     for i in range(n-1):
         if i == 0:
-            global_track_streams, all_tracks_data = get_fused_station_tracks(
+            global_track_streams, all_tracks_data, met_track_ids = get_fused_station_tracks(
                 args[i], args[i+1])
         else:
-            global_track_streams, all_tracks_data = get_fused_station_tracks(
-                global_track_streams, args[i+1], are_lists=[True, False], all_track_data=all_tracks_data)
+            global_track_streams, all_tracks_data, met_track_ids = get_fused_station_tracks(
+                global_track_streams, args[i+1], are_lists=[True, False], all_track_data=all_tracks_data, met_track_ids=met_track_ids)
 
     return global_track_streams, all_tracks_data
 
 
-def get_fused_station_tracks(station_1_track_streams, station_2_track_streams, are_lists=[False, False], all_track_data={}):
+def get_fused_station_tracks(station_1_track_streams, station_2_track_streams, are_lists=[False, False], all_track_data={}, met_track_ids=[]):
     """Fuses the track stream for two given stations. Returns a track list, without duplicates
 
     :param station_1_track_streams: the track streams from the first station 
@@ -79,9 +80,7 @@ def get_fused_station_tracks(station_1_track_streams, station_2_track_streams, a
     :param are_lists: (optional) list of two booleans, to allow you to replace a trackstreamex object 
         by a list of tracks in input.
     """
-
     global_track_streams = []
-    met_track_ids = []
     n = min(len(station_1_track_streams), len(station_2_track_streams))
     progress = 0
     pbar = ProgressBar(maxval=n)
@@ -97,25 +96,25 @@ def get_fused_station_tracks(station_1_track_streams, station_2_track_streams, a
         else:
             track_stream_2 = station_2_track_streams[i]
 
-        track_stream = [track for track in track_stream_1]
-        for track in track_stream:
+        track_stream = []
+        for track in track_stream_1:
             track_id = get_track_id(track)
             if track_id not in all_track_data.keys():
                 add_track_to_dict(track, all_track_data)
             if track_id not in met_track_ids:
                 met_track_ids.append(track_id)
-
-        previous_track_stream = []
-        if i >= 1:
-            for k in range(i-1, i):
-                previous_track_stream += global_track_streams[k]
+            track_stream.append(track)
 
         for track_2 in track_stream_2:
             is_in_other = False
-            for track_1 in track_stream + previous_track_stream:
-                is_same, track_2_id = same_emittor(track_2, track_1)
-                if is_same:
-                    is_in_other = True
+            track_2_id = get_track_id(track_2)
+            if track_2_id not in met_track_ids:
+                met_track_ids.append(track_2_id)
+                track_stream.append(track_2)
+
+            for track_1 in track_stream:
+                track_1_id = get_track_id(track_1)
+
                 if track_2_id not in all_track_data.keys():
                     lat, lng = gps.coords_from_tracks(track_1, track_2)
                     coords = {
@@ -124,17 +123,16 @@ def get_fused_station_tracks(station_1_track_streams, station_2_track_streams, a
                     }
                     add_track_to_dict(track_2, all_track_data, coords=coords)
 
-                elif all_track_data[track_2_id]['coordinates'] is None:
+                elif all_track_data[track_2_id]['coordinates'] is None and track_1_id == track_2_id:
                     lat, lng = gps.coords_from_tracks(track_1, track_2)
                     all_track_data[track_2_id]['coordinates'] = {
                         'lat': lat,
                         'lng': lng
                     }
-            if not is_in_other:
-                track_stream.append(track_2)
 
         global_track_streams.append(track_stream)
         progress += 1
         pbar.update(progress)
     pbar.finish()
-    return(global_track_streams, all_track_data)
+
+    return(global_track_streams, all_track_data, met_track_ids)

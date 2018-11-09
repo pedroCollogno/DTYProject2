@@ -20,7 +20,7 @@ import matplotlib.cm as cm
 from mpl_toolkits.mplot3d import Axes3D
 
 
-def get_dbscan_prediction(data):
+def get_dbscan_prediction(data, all_tracks_data):
     """ Function that clusters data from TrackStreamEx objects
 
     :param data: The data to cluster using the dbscan algorithm
@@ -29,8 +29,40 @@ def get_dbscan_prediction(data):
         - in second position an array containing the IDs of the predicted tracks.
     """
     np_data = np.array(data)
-    prediction = DBSCAN(min_samples=1).fit_predict(np_data[:, :3])
-    return prediction, np_data[:, 0]
+    all_tracks = []
+    for key in all_tracks_data.keys():
+        all_tracks.append(all_tracks_data[key]['track'])
+    np_all_tracks = np.array(all_tracks)
+
+    dbscan_model = DBSCAN(min_samples=1).fit(np_all_tracks[:, :3])
+    prediction = dbscan_predict(dbscan_model, np_data[:, :3])
+    n_cluster = len(dbscan_model.labels_)
+
+    return prediction, np_data[:, 0], n_cluster
+
+
+def dbscan_predict(model, X):
+    """ Predicts an input list with a given db_scan model.
+
+    :param model: the fitted dbscan model
+    :param X: the list of samples that you wish to predict
+    :return: a list containing the cluster for each input sample
+    """
+
+    nr_samples = X.shape[0]
+    y_new = np.ones(shape=nr_samples, dtype=int) * -1
+
+    for i in range(nr_samples):
+        diff = model.components_ - X[i, :]  # NumPy broadcasting
+
+        dist = np.linalg.norm(diff, axis=1)  # Euclidean distance
+
+        shortest_dist_idx = np.argmin(dist)
+
+        if dist[shortest_dist_idx] < model.eps:
+            y_new[i] = model.labels_[
+                model.core_sample_indices_[shortest_dist_idx]]
+    return y_new
 
 
 def main(debug=False):
@@ -71,7 +103,7 @@ def main(debug=False):
     all_tracks_data = {}
     n = len(tsexs_1)
     k = 1
-    for i in range(1, n, 600):
+    for i in range(1, n, 50):
         logger.info(
             "\nMerging info from all stations... Reading %s sensor cycles..." % str(i-k))
         prev_tracks_data = copy.deepcopy(all_tracks_data)
@@ -96,11 +128,10 @@ def make_emittor_clusters(global_track_streams, all_tracks_data, prev_tracks_dat
     """
     stations_data = []
     raw_tracks = []
-    k = max(len(global_track_streams) - 100, 0)
 
     logger.debug("Taking track info out of %s track streams..." %
-                 str(len(global_track_streams)-k))
-    for tracks in global_track_streams[k:]:
+                 len(global_track_streams))
+    for tracks in global_track_streams:
         raw_tracks = get_track_list_info(tracks, raw_tracks)
     logger.debug("Done !")
     logger.info("After merge of all station info, found a total of %s emittors." %
@@ -109,7 +140,8 @@ def make_emittor_clusters(global_track_streams, all_tracks_data, prev_tracks_dat
                  len(all_tracks_data.keys()))
 
     if len(raw_tracks) > 1:
-        y_pred, ids = get_dbscan_prediction(raw_tracks)
+        y_pred, ids, n_cluster = get_dbscan_prediction(
+            raw_tracks, all_tracks_data)
         i = 0
         for label in y_pred:
             track_id = get_track_id(raw_tracks[i])
@@ -119,8 +151,7 @@ def make_emittor_clusters(global_track_streams, all_tracks_data, prev_tracks_dat
             except KeyError as err:
                 logger.error("Keyerror on track %s : %s" % (i, raw_tracks[i]))
             i += 1
-        n_clusters = max(y_pred) + 1
-        logger.info("Found %s networks on the field.\n" % n_clusters)
+        logger.info("Found %s networks on the field.\n" % n_cluster)
         logger.info("Sending emittors through socket")
         for key in all_tracks_data.keys():
             if key not in prev_tracks_data.keys() and not debug:
@@ -155,7 +186,7 @@ def make_emittor_clusters(global_track_streams, all_tracks_data, prev_tracks_dat
 
         ax = Axes3D(fig)
 
-        colors = cm.rainbow(np.linspace(0, 1, len(y_pred)))
+        colors = cm.rainbow(np.linspace(0, 1, n_cluster))
         logger.debug("\nResult of DBScan clustering on input data. There are %s inputs and %s clusters.\n" %
                      (len(raw_tracks), len(labels)))
         for key in corresponding_batches.keys():
