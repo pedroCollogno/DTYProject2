@@ -5,10 +5,13 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from .forms import FileForm
 from django.core.files.storage import FileSystemStorage
-
-
-import main
 import threading
+import os
+
+
+import data_process.main as main
+import utils.station_utils as station_utils
+import utils.loading as load
 
 
 def user_list(request):
@@ -40,8 +43,15 @@ def test(request):
             'newelement': 'coucou'
         })
     })
-    print(path)  # path is global so we can call it here
-    t = threading.Thread(target=main.main)
+
+    track_streams = []
+    for path in paths:
+        if path is not None:
+            track_stream = load.get_track_stream_exs_from_prp(path)
+            track_streams.append(track_stream)
+    station_utils.sync_stations(*track_streams)
+
+    t = threading.Thread(target=main.main, args=track_streams)
     t.start()
     return render(request, 'back/user_list.html')
 
@@ -52,14 +62,17 @@ def upload(request):
         Deals with the upload and save of a PRP file so that the user can upload his own scenario
         :return: success if the file is safe and sound
     """
-    global path
+    global paths
     if(request.method == 'POST'):
         form = FileForm(request.POST, request.FILES)
         if form.is_valid():
-            global_file = request.FILES['File']
             fs = FileSystemStorage("scenarios/")
-            filename = fs.save(global_file.name, global_file)
-            path = fs.location+'/'+filename
+            paths = []
+            for key in request.FILES.keys():
+                global_file = request.FILES[key]
+                filename = fs.save(global_file.name, global_file)
+                paths.append(os.path.join(fs.location, filename))
+
         return(HttpResponse('<h1>Page was found</h1>'))
     else:
         return(HttpResponse('<h1>Page was not found</h1>'))
