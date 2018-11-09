@@ -8,7 +8,7 @@ class App extends Component {
     super();
     this.state = {
       station : {reseau :0,place:[0, 0], id :0},
-      stations : [{reseau :0,place:[10, 10], id :0}] // list of all the detected stations so far
+      stations : [{reseau :0,place:[2, 45], id :0}] // list of all the detected stations so far
     };
     this.newStation = this.newStation.bind(this);
   }
@@ -28,6 +28,7 @@ class App extends Component {
       <div className="App">
         < SocketHandler handleData={this.newStation}/>
         < MapBox stations={this.state.stations} lastStation={this.state.station}/>
+        <h1 style = {{fontFamily:"Impact"}}>Thales Project</h1>
       </div>
     );
   }

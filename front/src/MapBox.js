@@ -19,14 +19,14 @@ class MapBox extends Component {
             style="mapbox://styles/mapbox/outdoors-v9"
             containerStyle={{
             height: "500px",
-            width: "800px",
+            width: "1000px",
             }}
             zoom = {[7]}
             center = {this.props.stations[0].place} >
                 <Layer
                 type="circle"
                 paint = {{
-                    "circle-radius" : 10,
+                    "circle-radius" : 5,
                     "circle-color" : "red"}}
                 id="marker" >
                 {this.props.stations.map((station, key) => (
