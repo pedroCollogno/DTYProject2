@@ -190,7 +190,6 @@ def process_data(tsexs, file_name):
     removeFiles('./pkl/{}'.format(file_name))
 
     for couple in itertools.combinations(preds[1],2):
-        print(couple)
         Y_value = int(emitter_infos[couple[0]]["network"]==emitter_infos[couple[1]]["network"])
         steps1 = emitter_infos[couple[0]]["steps"]
         steps2 = emitter_infos[couple[1]]["steps"]
