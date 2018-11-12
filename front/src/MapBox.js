@@ -1,9 +1,9 @@
 import React, { Component } from "react"
-import ReactMapboxGl, { Layer, Feature,} from "react-mapbox-gl";
+import ReactMapboxGl, { Layer, Feature, Popup, } from "react-mapbox-gl";
 
 const Map = ReactMapboxGl({
     accessToken: "pk.eyJ1IjoicGllcnJvdGNvIiwiYSI6ImNqbzc5YjVqODB0Z2Mzd3FxYjVsNHNtYm8ifQ.S_87byMcZ0YDwJzTdloBvw"
-  });
+});
 
 class MapBox extends Component {
 
@@ -13,34 +13,41 @@ class MapBox extends Component {
     }
 
     center() {
-        if(this.props.stations.length == 0) {
+        if (this.props.stations.length === 0) {
             return [2.33, 48.86];
         }
         return [this.props.stations[0].coordinates.lng, this.props.stations[0].coordinates.lat];
     }
-      
-    render() {
-        return(
-        <Map
-            style="mapbox://styles/mapbox/outdoors-v9"
-            containerStyle={{
-            height: "500px",
-            width: "1000px",
-            }}
-            zoom = {[6]}
-            center = {this.center()} >
-                <Layer
-                type="circle"
-                paint = {{
-                    "circle-radius" : 3,
-                    "circle-color" : "red"}}
-                id="marker" >
-                {this.props.stations.map((station, key) => (
-                <Feature coordinates={[station.coordinates.lng,station.coordinates.lat] }/>
-                ))}
-            </Layer>
 
-        </Map>
+    render() {
+        return (
+            <Map
+                style="mapbox://styles/mapbox/outdoors-v9"
+                containerStyle={{
+                    height: "500px",
+                    width: "1000px",
+                }}
+                zoom={[6]}
+                center={this.center()} >
+                <Layer
+                    type="circle"
+                    paint={{
+                        "circle-radius": 3,
+                        "circle-color": "red"
+                    }}
+                    id="marker" >
+                    {this.props.stations.map((station, key) => (
+                        <Feature coordinates={[station.coordinates.lng, station.coordinates.lat]} />
+                    ))}
+                </Layer>
+                <div>
+                    {this.props.stations.map((station, key) => (
+                        <Popup coordinates={station.coordinates}>
+                            <p>{station.coordinates.lat}, {station.coordinates.lng}</p>
+                        </Popup>))}
+                </div>
+
+            </Map>
         )
     }
 }

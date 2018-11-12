@@ -13,7 +13,6 @@ import json
 import copy
 import logging
 
-
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from mpl_toolkits.mplot3d import Axes3D
@@ -90,18 +89,23 @@ def main(*args, debug=False):
     prp_2 = "/Users/piaverous/Documents/DTY/Projet_Thales/thales-project/prod/new_sim/s2/TRC6420_ITRProduction_20181107_165226.prp"
     prp_3 = "/Users/piaverous/Documents/DTY/Projet_Thales/thales-project/prod/new_sim/s3/TRC6420_ITRProduction_20181107_165213.prp"
     """
+    from backdjango.channels_back.back.views import send_emittor_to_front
+
     if debug:
         logger.handlers[1].setLevel(logging.DEBUG)
 
     all_tracks_data = {}
     n = len(args[0])
+
     for i in range(1, n, 50):
         track_streams = []
         for arg in args:
             track_streams.append(arg[:i])
+
         logger.info(
             "\nMerging info from all stations... Reading %s sensor cycles..." % str(i-1))
         prev_tracks_data = copy.deepcopy(all_tracks_data)
+
         global_track_streams, all_tracks_data = fuse_all_station_tracks(
             *track_streams)
         logger.debug("Merge done !")
@@ -132,8 +136,8 @@ def make_emittor_clusters(global_track_streams, all_tracks_data, prev_tracks_dat
     logger.debug("Done !")
     logger.info("After merge of all station info, found a total of %s emittors." %
                 len(raw_tracks))
-    logger.debug("All_data_tracks has a total of %s emittors registered." %
-                 len(all_tracks_data.keys()))
+    logger.info("All_data_tracks has a total of %s emittors registered." %
+                len(all_tracks_data.keys()))
 
     if len(raw_tracks) > 1:
         y_pred, ids, n_cluster = get_dbscan_prediction(
@@ -149,6 +153,7 @@ def make_emittor_clusters(global_track_streams, all_tracks_data, prev_tracks_dat
             i += 1
         logger.info("Found %s networks on the field.\n" % n_cluster)
         logger.info("Sending emittors through socket")
+
         for key in all_tracks_data.keys():
             if key not in prev_tracks_data.keys() and not debug:
                 send_emittor_to_front(all_tracks_data[key])

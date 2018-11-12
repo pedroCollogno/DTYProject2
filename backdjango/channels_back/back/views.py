@@ -9,7 +9,7 @@ import threading
 import os
 
 
-import data_process.main as main
+from data_process.threads import DataProcessThread
 import utils.station_utils as station_utils
 import utils.loading as load
 
@@ -29,6 +29,22 @@ def send_emittor_to_front(json_obj):
     Group('users').send({
         'text': json.dumps(json_obj)
     })
+
+
+def send_stations_positions(request):
+    """
+        To call to send station locations to frontend in the form of a JSON
+    """
+    track_streams = []
+    for path in paths:
+        if path is not None:
+            track_stream = load.get_track_stream_exs_from_prp(path)
+            track_streams.append(track_stream)
+    json_obj = station_utils.get_station_coordinates(*track_streams)
+    Group('users').send({
+        'text': json.dumps(json_obj)
+    })
+    return(HttpResponse(json.dumps(json_obj), content_type="application/json"))
 
 
 def startsimulation(request):
@@ -51,7 +67,7 @@ def startsimulation(request):
             track_streams.append(track_stream)
     station_utils.sync_stations(*track_streams)
 
-    t = threading.Thread(target=main.main, args=track_streams)
+    t = DataProcessThread(*track_streams, debug=False)
     t.start()
     return render(request, 'back/user_list.html')
 

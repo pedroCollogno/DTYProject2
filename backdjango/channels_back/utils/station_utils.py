@@ -64,7 +64,8 @@ def fuse_all_station_tracks(*args):
     for i in range(n-1):
         if i == 0:
             global_track_streams, all_tracks_data, met_track_ids = get_fused_station_tracks(
-                args[i], args[i+1])
+                args[i], args[i+1], all_track_data={})
+
         else:
             global_track_streams, all_tracks_data, met_track_ids = get_fused_station_tracks(
                 global_track_streams, args[i+1], are_lists=[True, False], all_track_data=all_tracks_data, met_track_ids=met_track_ids)
@@ -75,9 +76,9 @@ def fuse_all_station_tracks(*args):
 def get_fused_station_tracks(station_1_track_streams, station_2_track_streams, are_lists=[False, False], all_track_data={}, met_track_ids=[]):
     """Fuses the track stream for two given stations. Returns a track list, without duplicates
 
-    :param station_1_track_streams: the track streams from the first station 
+    :param station_1_track_streams: the track streams from the first station
     :param station_2_track_streams: the track streams from the second station
-    :param are_lists: (optional) list of two booleans, to allow you to replace a trackstreamex object 
+    :param are_lists: (optional) list of two booleans, to allow you to replace a trackstreamex object
         by a list of tracks in input.
     """
     global_track_streams = []
@@ -85,6 +86,7 @@ def get_fused_station_tracks(station_1_track_streams, station_2_track_streams, a
     progress = 0
     pbar = ProgressBar(maxval=n)
     pbar.start()
+
     for i in range(n):
         if not are_lists[0]:
             track_stream_1 = station_1_track_streams[i].data.tracks
@@ -133,6 +135,30 @@ def get_fused_station_tracks(station_1_track_streams, station_2_track_streams, a
         global_track_streams.append(track_stream)
         progress += 1
         pbar.update(progress)
+
     pbar.finish()
 
     return(global_track_streams, all_track_data, met_track_ids)
+
+
+def get_station_coordinates(*args):
+    station_coords = {}
+    i = 1
+    found_station = False
+    for arg in args:
+        for trackstream in arg:
+            for track in trackstream.data.tracks:
+                if len(track.alternates) > 0:
+                    station_name = 'station' + str(i)
+                    station_coords[station_name] = {}
+                    station_coords[station_name]['coordinates'] = {
+                        'lat': track.alternates[0].sensor_position.latitude_deg,
+                        'lng': track.alternates[0].sensor_position.longitude_deg
+                    }
+                    found_station = True
+                    break
+            if found_station:
+                found_station = False
+                break
+        i += 1
+    return(station_coords)
