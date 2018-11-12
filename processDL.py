@@ -4,9 +4,70 @@ import itertools
 from progressbar import ProgressBar
 import pandas as pd
 import sys
+import csv
+import os
+import matplotlib.pyplot as plt
 
 
-time_step_ms = 100
+time_step_ms = 500
+
+def createFolder(directory):
+    try:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+    except OSError:
+        print ('Error: Creating directory. ' + directory)
+
+def removeFiles(directory):
+    filelist = [ f for f in os.listdir(directory)]
+    for f in filelist:
+        os.remove(os.path.join(directory, f))
+
+def checkPkl(file):
+    file_path = './pkl/{}'.format(sys.argv[1])
+    df = pd.read_pickle('./pkl/{}'.format(sys.argv[1]))
+    print(df)
+    df = df.loc[df['Y'] == 1]
+    X = df['X'].values
+    Y = df['Y'].values
+    for k in range (len(X)):
+        comparaisons = X[k]
+        emitter1 = []
+        emitter2 = []
+        for i in range(len(comparaisons)):
+            emitter1.append(comparaisons[i][0])
+            emitter2.append(comparaisons[i][1])
+
+
+        plt.figure(1)
+        plt.plot(emitter1, color='green')
+
+        plt.plot(emitter2, color='blue')
+        print(Y[k])
+        plt.show()
+
+    # for i in range(2):
+
+    #     key_indice = 1
+    #     y_labels = []
+    #     y_ticks = []
+    #     for key in all_alternates["prp{}".format(i+1)]:
+    #         boxes = []
+    #         for alternate in all_alternates["prp{}".format(i+1)][key]:
+    #             boxes.append((alternate.start.date_ms/(1000),
+    #                           alternate.duration_us/1000000))
+    #         ax[i].broken_barh(boxes, (key_indice, 0.9), facecolors='blue')
+    #         y_ticks.append(key_indice)
+    #         y_labels.append(str(key))
+    #         key_indice += 1
+    #     ax[i].set_yticks(y_ticks)
+    #     ax[i].set_yticklabels(y_labels)
+    #     ax[i].set_ylabel("Id")
+    #     ax[i].set_xlabel("Seconds")
+    # plt.show()
+
+
+
 
 def get_track_info_with_alternates(track):
     """ Takes essential information out of a given track
@@ -124,24 +185,42 @@ def process_data(tsexs, file_name):
     progress = 0
     pbar2 = ProgressBar(maxval=(len(preds[0])*len(preds[0]))/2)
     pbar2.start()
+
+    createFolder('./pkl/{}'.format(file_name))
+    removeFiles('./pkl/{}'.format(file_name))
+
     for couple in itertools.combinations(preds[1],2):
+        print(couple)
         Y_value = int(emitter_infos[couple[0]]["network"]==emitter_infos[couple[1]]["network"])
-        steps1 = get_steps_track(tsexs, couple[0], sequence_size, start_date_ms)
-        steps2 = get_steps_track(tsexs, couple[1], sequence_size, start_date_ms)
+        steps1 = emitter_infos[couple[0]]["steps"]
+        steps2 = emitter_infos[couple[1]]["steps"]
         X_value = []
         for i in range (int(sequence_size)):
-            X_value.append([steps1[i], steps2[i]])         
+            X_value.append([steps1[i], steps2[i]]) 
         X.append(X_value)
         Y.append(Y_value)
         progress += 1
+        if progress%2000 == 0:
+            df = pd.DataFrame(
+                {
+                    'X' : X,
+                    'Y' : Y
+                }, columns = ['X', 'Y'])
+            df.to_pickle('./pkl/{0}/{1}_{2}.pkl'.format(file_name, file_name, progress))
+            X=[]
+            Y=[]
+            print("Pickle saved in /pkl/{0}/{1}_{2}.pkl".format(file_name, file_name, progress))
         pbar2.update(progress)
-    pbar2.finish()
     df = pd.DataFrame(
-        {
-            'X' : X,
-            'Y' : Y
-        }, columns = ['X', 'Y'])
-    df.to_pickle('./pkl/{}.pkl'.format(file_name))
+                {
+                    'X' : X,
+                    'Y' : Y
+                }, columns = ['X', 'Y'])
+    df.to_pickle('./pkl/{0}/{1}_{2}.pkl'.format(file_name, file_name, progress))
+    X=[]
+    Y=[]
+    print("Pickle saved in /pkl/{0}/{1}_{2}.pkl".format(file_name, file_name, progress))
+    pbar2.finish()
 
 """This part runs if you run 'python processDL.py prp_name pkl_name' in the console
     :param 1: name of prp file in /prod to load
@@ -150,3 +229,4 @@ def process_data(tsexs, file_name):
 if __name__ == '__main__':
     tsexs = utils.get_track_stream_exs_from_prp("prod/{}.prp".format(sys.argv[1]))
     process_data(tsexs, sys.argv[2])
+    #checkPkl(sys.argv[1])
