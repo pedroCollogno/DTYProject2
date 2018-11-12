@@ -31,7 +31,7 @@ def send_emittor_to_front(json_obj):
     })
 
 
-def test(request):
+def startsimulation(request):
     """
         Triggered whenever a user visits localhost:8000/test
         Will be called when lauching the simulation
