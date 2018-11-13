@@ -53,10 +53,12 @@ class MapBox extends Component {
         console.log(this.state)
         return (
             <Map
-                style="mapbox://styles/mapbox/outdoors-v9"
+                style="mapbox://styles/mapbox/basic-v9"
                 containerStyle={{
                     height: "500px",
-                    width: "1000px",
+                    width: "100%",
+                    marginTop: "2em",
+                    marginBottom: "2em",
                 }}
                 zoom={[6]}
                 center={this.center()} >

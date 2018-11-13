@@ -7,6 +7,9 @@
 // Update blue
 $orange: rgba(255, 123, 0, 0.5);
 $blue: #72d0eb;
+
+$grey: #eeeeee;
+$grey-invert: #363636;
 // Add dark blue and its invert
 $dark-blue: #0B0D29;
 $dark-blue-invert: #fbfbfb;
@@ -50,8 +53,16 @@ $addColors: (
     $github,
     $github-invert,
   ),
+  'grey': (
+    $grey, 
+    $grey-invert,
+  )
 );
 $colors: map-merge($colors, $addColors);
+
+body{
+  background: linear-gradient(to right, #010205, #130E3F);
+}
 
 // 6. Import the rest of Bulma
 @import '../../node_modules/bulma/bulma';

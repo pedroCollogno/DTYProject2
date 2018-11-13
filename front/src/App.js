@@ -4,6 +4,13 @@ import MapBox from "./MapBox";
 import SocketHandler from "./SocketHandler";
 import PostHandler from "./PostHandler";
 
+// Set fontAwesome icons up -> Define all icons that will be used in the app.
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { faUpload, faDownload } from '@fortawesome/free-solid-svg-icons'
+
+library.add(faUpload, faDownload)
+// Setup complete
+
 class App extends Component {
   constructor() {
     super();
@@ -39,16 +46,47 @@ class App extends Component {
   render() {
     return (
       <div className="App">
+        <section class="hero is-primary is-bold" style={{ textAlign: 'left' }}>
+          <div class="hero-body">
+            <div class="container">
+              <h1 class="title">
+                Thales Project
+              </h1>
+              <h2 class="subtitle">
+                AI demonstrator
+              </h2>
+            </div>
+          </div>
+        </section>
         < SocketHandler handleData={this.newEmittor} />
-        < MapBox stations={this.state.stations} />
-        <h1 style={{ fontFamily: "Impact" }}>Thales Project</h1>
-        <p>Last station : {this.state.station.track_id}</p>
-        <p>Coordinates : {this.state.station.coordinates.lat}, {this.state.station.coordinates.lng}</p>
-        <p>Network : {this.state.station.network_id}</p>
-        < PostHandler getStations={this.getStations} />
-      </div>
+
+        <div className="container">
+          <MapBox stations={this.state.stations} />
+          <div className="tile is-fullwidth">
+            <PostHandler getStations={this.getStations} />
+            <table className='container table'>
+              <tr>
+                <th >Last station</th>
+                <th colSpan='2'>Coordinates</th>
+                <th>Network</th>
+              </tr>
+              <tr>
+                <td>{this.state.station.track_id}</td>
+                <td>{this.state.station.coordinates.lat}</td>
+                <td>{this.state.station.coordinates.lng}</td>
+                <td>{this.state.station.network_id}</td>
+              </tr>
+            </table>
+          </div>
+
+
+        </div>
+
+      </div >
     );
   }
 }
+
+
 
 export default App;
