@@ -25,7 +25,7 @@ class MapBox extends Component {
                 style="mapbox://styles/mapbox/outdoors-v9"
                 containerStyle={{
                     height: "500px",
-                    width: "1000px",
+                    width: "100%",
                 }}
                 zoom={[6]}
                 center={this.center()} >

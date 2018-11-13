@@ -31,12 +31,26 @@ class App extends Component {
     return (
       <div className="App">
         < SocketHandler handleData={this.newStation} />
-        < MapBox stations={this.state.stations} lastStation={this.state.station} />
-        <h1 style={{ fontFamily: "Impact" }}>Thales Project</h1>
+        <section class="hero is-primary" style={{ textAlign: 'left' }}>
+          <div class="hero-body">
+            <div class="container">
+              <h1 class="title">
+                Thales project
+              </h1>
+              <h2 class="subtitle">
+                AI demonstrator
+              </h2>
+            </div>
+          </div>
+        </section>
+
+        <div className='container'>
+          < MapBox stations={this.state.stations} lastStation={this.state.station} />
+        </div>
         <p>Last station : {this.state.station.track_id}</p>
         <p>Coordinates : {this.state.station.coordinates.lat}, {this.state.station.coordinates.lng}</p>
         <p>Network : {this.state.station.network_id}</p>
-      </div>
+      </div >
     );
   }
 }
