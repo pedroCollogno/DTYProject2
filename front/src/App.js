@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
-import MapBox from "./MapBox";
+import OfflineMap from "./OfflineMap";
 import SocketHandler from "./SocketHandler";
 
 class App extends Component {
@@ -31,7 +31,7 @@ class App extends Component {
     return (
       <div className="App">
         < SocketHandler handleData={this.newStation} />
-        < MapBox stations={this.state.stations} lastStation={this.state.station} />
+        <OfflineMap></OfflineMap>
         <h1 style={{ fontFamily: "Impact" }}>Thales Project</h1>
         <p>Last station : {this.state.station.track_id}</p>
         <p>Coordinates : {this.state.station.coordinates.lat}, {this.state.station.coordinates.lng}</p>
