@@ -18,7 +18,7 @@ gulp.task("front", function (cb) {
 
 gulp.task("sass", function () {
   gulp
-    .src(["./src/**/*.scss", "!./src/app/mixins/*.scss"], { base: "." })
+    .src(["./src/**/*.scss", "!./src/sass/mixins/*.scss"], { base: "." })
     .pipe(sass().on("error", sass.logError))
     .pipe(gulp.dest("."));
 });

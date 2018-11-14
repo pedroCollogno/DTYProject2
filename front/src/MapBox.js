@@ -1,4 +1,6 @@
 import React, { Component } from "react"
+import './Mapbox.css';
+
 import ReactMapboxGl, { Cluster, Marker } from "react-mapbox-gl";
 import colormap from "colormap";
 
@@ -60,35 +62,33 @@ class MapBox extends Component {
             i += 1;
         }
         return (
-            <Map
-                style="mapbox://styles/mapbox/basic-v9"
-                containerStyle={{
-                    height: "500px",
-                    width: "100%",
-                    marginTop: "2em",
-                    marginBottom: "2em",
-                }}
-                zoom={[6]}
-                center={this.center()} >
-                {
-                    this.state.networksLabels.map((network, k) =>
-                        <Cluster ClusterMarkerFactory={this.clusterMarker}>
-                            {
-                                this.state.stations[network].map((station, key) =>
-                                    <Marker
-                                        key={key}
-                                        coordinates={[station.coordinates.lng, station.coordinates.lat]}>
-                                        <div className="mapMarker" style={{ "backgroundColor": this.state.colors[network] }}></div>
-                                    </Marker>
-                                )
-                            }
-                        </Cluster>
-                    )
-                }
-
-
-
-            </Map>
+            <div className="map-container">
+                <Map
+                    style="mapbox://styles/mapbox/basic-v9"
+                    containerStyle={{
+                        borderRadius: "5px",
+                        height: "500px",
+                        width: "100%",
+                    }}
+                    zoom={[6]}
+                    center={this.center()} >
+                    {
+                        this.state.networksLabels.map((network, k) =>
+                            <Cluster ClusterMarkerFactory={this.clusterMarker}>
+                                {
+                                    this.state.stations[network].map((station, key) =>
+                                        <Marker
+                                            key={key}
+                                            coordinates={[station.coordinates.lng, station.coordinates.lat]}>
+                                            <div className="mapMarker" style={{ "backgroundColor": this.state.colors[network] }}></div>
+                                        </Marker>
+                                    )
+                                }
+                            </Cluster>
+                        )
+                    }
+                </Map>
+            </div>
         )
     }
 }
