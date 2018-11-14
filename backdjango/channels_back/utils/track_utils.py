@@ -1,4 +1,4 @@
-from testutils.log import logger
+from utils.log import logger
 
 
 def get_track_info(track):
@@ -64,8 +64,11 @@ def get_track_id(track):
         bandwidth = track.itr_measurement.bandwidth_hz
         em_type = track.itr_measurement.type
 
-    track_id = track_begin_date*100**5 + freq * \
-        100**4 + bandwidth*100**3 + em_type*100**2
+    track_begin_date = int(track_begin_date/100)*100
+    freq = int(freq/100000)*100000
+
+    track_id = track_begin_date*100**3 + freq * \
+        100**2 + em_type*100**1
 
     return(track_id)
 
@@ -153,9 +156,33 @@ def same_emittor(track_1, track_2):
                 start_2_index += 1
 
         # if alternate_consistency:
-            # logger.debug(
-            #   "\tBoth tracks are from the same emitter ! \n\t\tAnalysis made on %s alternates." % n)
+        #    logger.debug(
+        #        "\tBoth tracks are from the same emitter !")
     bool_response = freq_consistency and bandwidth_consistency and type_consistency and start_consistency and alternate_consistency
 
     track_id = get_track_id(track_1)
     return bool_response, track_id
+
+
+def add_track_to_dict(track, track_dict, coords=None):
+    """ Adds a track to a dictionnary of tracks in the right format
+
+    :param track: the track to add to the dict
+    :param track_dict: the dictionnary of tracks, to which the track data should be added
+    :param coords: (optional) the gps coordinates of the emittor behind the track
+    """
+    track_id = get_track_id(track)
+    freq = track.itr_measurement.central_freq_hz
+    bandwidth = track.itr_measurement.bandwidth_hz
+    em_type = track.itr_measurement.type
+    track_info = get_track_info(track)
+
+    track_data = {
+        'track_id': track_id,
+        'coordinates': coords,
+        'frequency': freq,
+        'emission_type': em_type,
+        'network_id': None,
+        'track': track_info
+    }
+    track_dict[track_id] = track_data

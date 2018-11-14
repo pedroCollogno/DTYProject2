@@ -1,4 +1,5 @@
 import logging
+import os
 
 
 def set_logger_up():
@@ -9,11 +10,11 @@ def set_logger_up():
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
 
+    create_new_folder('logs', '.')
     fh_formatter = logging.Formatter(
         '%(asctime)s - %(levelname)s - %(message)s')
 
-    fh = logging.FileHandler(
-        '/Users/piaverous/Documents/DTY/Projet_Thales/thales-project/logs/logs.txt')
+    fh = logging.FileHandler('./logs/logs.txt')
     fh.setLevel(logging.WARNING)
     fh.setFormatter(fh_formatter)
     logger.addHandler(fh)
@@ -26,6 +27,18 @@ def set_logger_up():
 
     logger.info('Initiated logger.')
     return(logger)
+
+
+def create_new_folder(name, path):
+    """
+        Creates a new folder if it does not exists yet
+
+    :param name: name of the new folder
+    :param path: path of the new folder's parent
+    :return: None
+    """
+    if not os.path.exists(os.path.join(path, name)):
+        os.makedirs(os.path.join(path, name))
 
 
 logger = set_logger_up()
