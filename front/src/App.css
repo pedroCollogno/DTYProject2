@@ -17,12 +17,6 @@
 .App-intro {
   font-size: large; }
 
-.mapboxgl-ctrl-bottom-right {
-  display: none; }
-
-.mapboxgl-ctrl-bottom-left {
-  display: none; }
-
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg); }

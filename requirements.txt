@@ -6,3 +6,4 @@ asgi_redis==1.2.1
 scikit-learn
 progressbar
 django-cors-headers
+PyGeodesy

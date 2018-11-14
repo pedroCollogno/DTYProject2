@@ -2,6 +2,7 @@
 """
 
 import math as m
+from pygeodesy import sphericalNvector
 
 
 def coords_from_tracks(track_1, track_2):
@@ -34,11 +35,8 @@ def coords_from_azimuts(azimuth_1, azimuth_2, station_1_coords, station_2_coords
 
     :return: a tuple containing (lat, lng) coordinates of the emitter
     """
-    t1 = 1 / m.tan(m.radians(azimuth_1))
-    t2 = 1 / m.tan(m.radians(azimuth_2))
-    x1, y1 = station_1_coords
-    x2, y2 = station_2_coords
+    point1 = sphericalNvector.LatLon(*station_1_coords)
+    point2 = sphericalNvector.LatLon(*station_2_coords)
+    point3 = sphericalNvector.triangulate(point1, azimuth_1, point2, azimuth_2)
 
-    x = (y1 - y2 + t2*x2 - t1*x1)/(t2 - t1)
-    y = t1*(x-x1) + y1
-    return(x, y)
+    return (point3.latlon)

@@ -49,7 +49,7 @@ class MapBox extends Component {
 
     clusterMarker = (coordinates) => (
         <Marker coordinates={coordinates}>
-            C
+
         </Marker>
     );
 
