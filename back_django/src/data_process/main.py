@@ -3,8 +3,6 @@ from sklearn.cluster import DBSCAN
 
 import numpy as np
 
-import utils.gps as gps
-import utils.loading as loading
 from utils.log import logger, create_new_folder
 from utils.station_utils import *
 from utils.track_utils import *
@@ -18,13 +16,15 @@ import matplotlib.cm as cm
 from mpl_toolkits.mplot3d import Axes3D
 
 
-def get_dbscan_prediction(data, all_tracks_data):
+def get_dbscan_prediction(data, all_tracks_data={}):
     """ Function that clusters data from TrackStreamEx objects
 
     :param data: The data to cluster using the dbscan algorithm
+    :param all_tracks_data: the dict containing all data on found tracks
     :return: a tuple, in which there is :
         - in first position the array of predictions for all tracks given in entry
         - in second position an array containing the IDs of the predicted tracks.
+        - in third position the number of clusters
     """
     np_data = np.array(data)
     all_tracks = []
@@ -36,7 +36,7 @@ def get_dbscan_prediction(data, all_tracks_data):
     prediction = dbscan_predict(dbscan_model, np_data[:, :3])
     n_cluster = len(dbscan_model.labels_)
 
-    return prediction, np_data[:, 0], n_cluster
+    return prediction, np_data[:, -1], n_cluster
 
 
 def dbscan_predict(model, X):
@@ -68,28 +68,6 @@ def main(*args, debug=False):
 
     :param debug: (optional) default is to False, set to True to enter debug mode (more prints)
     """
-    # prp_1 = "prod/station1.prp"
-    # prp_2 = "prod/station2.prp"
-
-    """
-    prp_1 = "/Users/piaverous/Documents/DTY/Projet_Thales/thales-project/prod/evf_sim/s1/TRC6420_ITRProduction_20181105_172929.prp"
-    prp_2 = "/Users/piaverous/Documents/DTY/Projet_Thales/thales-project/prod/evf_sim/s2/TRC6420_ITRProduction_20181105_172931.prp"
-    prp_3 = "/Users/piaverous/Documents/DTY/Projet_Thales/thales-project/prod/evf_sim/s3/TRC6420_ITRProduction_20181105_172932.prp"
-    prp_4 = "/Users/piaverous/Documents/DTY/Projet_Thales/thales-project/prod/evf_sim/s4/TRC6420_ITRProduction_20181105_172936.prp"
-    """
-
-    """
-    prp_1 = "/Users/piaverous/Documents/DTY/Projet_Thales/thales-project/prod/base_sim/s1/TRC6420_ITRProduction_20181026_143235.prp"
-    prp_2 = "/Users/piaverous/Documents/DTY/Projet_Thales/thales-project/prod/base_sim/s2/TRC6420_ITRProduction_20181026_143231.prp"
-    prp_3 = "/Users/piaverous/Documents/DTY/Projet_Thales/thales-project/prod/base_sim/s3/TRC6420_ITRProduction_20181026_143233.prp"
-    """
-
-    """
-    prp_1 = "/Users/piaverous/Documents/DTY/Projet_Thales/thales-project/prod/new_sim/s1/TRC6420_ITRProduction_20181107_165237.prp"
-    prp_2 = "/Users/piaverous/Documents/DTY/Projet_Thales/thales-project/prod/new_sim/s2/TRC6420_ITRProduction_20181107_165226.prp"
-    prp_3 = "/Users/piaverous/Documents/DTY/Projet_Thales/thales-project/prod/new_sim/s3/TRC6420_ITRProduction_20181107_165213.prp"
-    """
-    from backdjango.channels_back.back.views import send_emittor_to_front
 
     if debug:
         logger.handlers[1].setLevel(logging.DEBUG)
@@ -124,9 +102,8 @@ def make_emittor_clusters(global_track_streams, all_tracks_data, prev_tracks_dat
     :param all_tracks_data: Data on all tracks from global_track_streams, as a dictionnary
     :param debug: (optional) default is to False, set to True to enter debug mode (more prints)
     """
-    from backdjango.channels_back.back.views import send_emittor_to_front
+    from back.views import send_emittor_to_front
 
-    stations_data = []
     raw_tracks = []
 
     logger.debug("Taking track info out of %s track streams..." %
@@ -148,7 +125,7 @@ def make_emittor_clusters(global_track_streams, all_tracks_data, prev_tracks_dat
             # Need to convert np.int64 to int for JSON format
             try:
                 all_tracks_data[track_id]['network_id'] = int(label)
-            except KeyError as err:
+            except KeyError:
                 logger.error("Keyerror on track %s : %s" % (i, raw_tracks[i]))
             i += 1
         logger.info("Found %s networks on the field.\n" % n_cluster)
@@ -170,7 +147,6 @@ def make_emittor_clusters(global_track_streams, all_tracks_data, prev_tracks_dat
             json.dump(all_tracks_data, fp)
 
     if debug and len(raw_tracks) > 1:
-        is_shown = False
         plt.ion()
 
         labels = []
@@ -181,7 +157,6 @@ def make_emittor_clusters(global_track_streams, all_tracks_data, prev_tracks_dat
                 labels.append(label)
                 corresponding_batches[label] = []
             corresponding_batches[label].append(raw_tracks[i])
-            track_id = get_track_id(raw_tracks[i])
             i += 1
 
         fig = plt.figure(1)

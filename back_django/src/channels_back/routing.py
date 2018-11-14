@@ -1,5 +1,5 @@
 from channels.routing import route
-from back.connection import ws_connect, ws_disconnect
+from back import ws_connect, ws_disconnect
 
 """Specific routes for the websocket"""
 channel_routing = [

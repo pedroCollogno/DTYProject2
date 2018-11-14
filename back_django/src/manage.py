@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import os
 import sys
-sys.path.append(os.path.abspath(os.path.join('../..')))
 
 if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "channels_back.settings")
@@ -21,3 +20,4 @@ if __name__ == "__main__":
             )
         raise
     execute_from_command_line(sys.argv)
+

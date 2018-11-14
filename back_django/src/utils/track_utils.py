@@ -1,4 +1,4 @@
-from utils.log import logger
+from .log import logger
 
 
 def get_track_info(track):
@@ -6,8 +6,8 @@ def get_track_info(track):
 
     :param track: the track from which info should be extracted
     :return: a list containing the basic info of the track :
-        [track_id, measurement_type, central_freq_hz,
-            bandwitdh_hz, average_azimut_deg]
+        [measurement_type, central_freq_hz,
+            bandwitdh_hz, average_azimut_deg, begin_date_ms]
     """
     info_from_track = []
     info_from_track.append(track.itr_measurement.type)
@@ -15,6 +15,7 @@ def get_track_info(track):
     info_from_track.append(track.itr_measurement.bandwidth_hz)
     info_from_track.append(track.average_azimut_deg)
     info_from_track.append(track.begin_date.date_ms)
+    info_from_track.append(get_track_id(info_from_track))
     return info_from_track
 
 
@@ -56,12 +57,10 @@ def get_track_id(track):
     if type(track) is list:
         em_type = track[0]
         freq = track[1]
-        bandwidth = track[2]
         track_begin_date = track[4]
     else:
         track_begin_date = track.begin_date.date_ms
         freq = track.itr_measurement.central_freq_hz
-        bandwidth = track.itr_measurement.bandwidth_hz
         em_type = track.itr_measurement.type
 
     track_begin_date = int(track_begin_date/100)*100

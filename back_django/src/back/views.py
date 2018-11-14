@@ -5,14 +5,12 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from .forms import FileForm
 from django.core.files.storage import FileSystemStorage
-import threading
 import os
 
 
 from data_process.threads import DataProcessThread
-import utils.station_utils as station_utils
-import utils.loading as load
-
+from utils import station_utils
+from utils import loading as load
 
 def user_list(request):
     """
