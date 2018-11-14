@@ -1,4 +1,4 @@
-from utils.log import logger
+from testutils.log import logger
 
 
 def get_track_info(track):

@@ -1,4 +1,3 @@
-import utils as utils
 import numpy as np
 import itertools
 from progressbar import ProgressBar
@@ -7,6 +6,9 @@ import sys
 import csv
 import os
 import matplotlib.pyplot as plt
+from testutils.track_utils import *
+from testutils.loading import *
+import main as main
 
 
 time_step_ms = 500
@@ -77,7 +79,7 @@ def get_track_info_with_alternates(track):
         [track_id, measurement_type, central_freq_hz,
             bandwitdh_hz, average_azimut_deg, list of alternates : [start_date, end_date]]
     """
-    new_info_from_track = utils.get_track_info(track)
+    new_info_from_track = get_track_info(track)
     alternates_list = []
     for alternate in track.alternates:
         alternates_list.append([alternate.start.date_ms, (alternate.start.date_ms + alternate.duration_us/1000)])
@@ -93,8 +95,8 @@ def predict_all_ids(tsexs):
     raw_tracks = []
     stations_data = []
     for tsex in tsexs:
-        raw_tracks = utils.get_track_stream_ex_info(tsex, raw_tracks)
-    y_pred, ids = utils.get_dbscan_prediction(raw_tracks)
+        raw_tracks = get_track_stream_ex_info(tsex, raw_tracks)
+    y_pred, ids = main.get_dbscan_prediction(raw_tracks)
     stations_data.append([y_pred, ids])
     return [y_pred, ids]
 
@@ -226,6 +228,6 @@ def process_data(tsexs, file_name):
     :param 2: name of pkl file that will be saved in /pkl
 """
 if __name__ == '__main__':
-    tsexs = utils.get_track_stream_exs_from_prp("prod/{}.prp".format(sys.argv[1]))
+    tsexs = get_track_stream_exs_from_prp("prod/{}.prp".format(sys.argv[1]))
     process_data(tsexs, sys.argv[2])
     #checkPkl(sys.argv[1])
