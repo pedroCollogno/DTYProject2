@@ -1,5 +1,5 @@
 import os
-from gen import TrackstreamEx_pb2 as ts
+from ..gen import TrackstreamEx_pb2 as ts
 
 from progressbar import ProgressBar
 from .log import logger

@@ -8,9 +8,10 @@ from django.core.files.storage import FileSystemStorage
 import os
 
 
-from data_process.threads import DataProcessThread
-from utils import station_utils
-from utils import loading as load
+from ml_tools.data_process.threads import DataProcessThread
+from ml_tools.utils import station_utils
+from ml_tools.utils import loading as load
+
 
 def user_list(request):
     """
@@ -66,6 +67,7 @@ def startsimulation(request):
     station_utils.sync_stations(*track_streams)
 
     t = DataProcessThread(*track_streams, debug=False)
+    t.set_sender_function(send_emittor_to_front)
     t.start()
     return render(request, 'back/user_list.html')
 

@@ -9,8 +9,12 @@ class DataProcessThread(threading.Thread):
         self.debug = debug
         threading.Thread.__init__(self)
 
+    def set_sender_function(self, sender_function):
+        self.sender_function = sender_function
+
     def run(self):
-        main(*self.track_stream_ex_s, debug=self.debug)
+        main(*self.track_stream_ex_s, debug=self.debug,
+             sender_function=self.sender_function)
         self.__dict__.clear()
         print('Finished !')
 
