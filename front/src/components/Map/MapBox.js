@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import ReactMapboxGl, { Cluster, Marker, GeoJSONLayer} from "react-mapbox-gl";
 import colormap from "colormap";
-import Station from "./Station"
+import Stations from "./Stations"
 import "./MapBox.css";
 
 const Map = ReactMapboxGl({ // !! REQUIRES INTERNET CONNECTION !! MapBox API (temporary)
@@ -65,7 +65,6 @@ class MapBox extends Component {
         return [x / count, y / count];
     }
 
-    station(color, coordinates, type) {}
       
     render() {
         //console.log(this.state);
@@ -89,46 +88,12 @@ class MapBox extends Component {
                     let clusterCenter = this.clusterCenter(network);
                     return(
                         <div>
-                    <Marker
-                        key = {"center" + network}
-                        coordinates = {clusterCenter}>
-                        <div className = "centerMarker" style = {{"backgroundColor" : colors[network]}}></div>
-                    </Marker>
-                    {/* <Cluster ClusterMarkerFactory={this.clusterMarker}> */}
-                            {
-                            this.state.stations[network].map((station, key) =>{
-                                // let geojson = {
-                                //     "type": "Featurecollection",
-                                //     "features": [{
-                                //     "type": "Feature",
-                                //     "geometry" : {
-                                //         "type" : "LineString",
-                                //         "coordinates": [
-                                //             [station.coordinates.lng, station.coordinates.lat],
-                                //             clusterCenter
-                                //             ]
-                                //         }
-                                //     }],
-                                // };
-                                // console.log(geojson);
-                                return(
-                                    <div>
-                                        {/* <GeoJSONLayer
-                                            data = {geojson}
-                                            linePaint = {{
-                                                "line-color" : colors[network],
-                                                "line-width" : 2
-                                            }}>
-                                        </GeoJSONLayer> */}
-                                        <Marker
-                                            key = {key}
-                                            coordinates = { [station.coordinates.lng, station.coordinates.lat] }>
-                                            <div className = "mapMarker" style = {{"backgroundColor" : this.state.colors[network]}}></div>
-                                        </Marker>
-                                    </div>
-                                )})
-                            }
-                            {/* </Cluster> */}
+                            <Marker
+                                key = {"center" + network}
+                                coordinates = {clusterCenter}>
+                                <div className = "centerMarker" style = {{"backgroundColor" : colors[network]}}></div>
+                            </Marker>
+                            <Stations stations = {this.state.stations[network]} color = {this.state.colors[network]} />
                         </div>)
                     })
                 }

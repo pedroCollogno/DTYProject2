@@ -8,9 +8,3 @@ button {
 form.container {
   width: 40%;
   margin-bottom: 1.5em; }
-
-#dropZone {
-  border: 5px solid rgb(198, 198, 204);
-  width:  200px;
-  height: 100px;
-}
