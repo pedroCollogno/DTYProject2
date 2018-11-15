@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import './App.css';
-import MapBox from "./MapBox";
-import SocketHandler from "./SocketHandler";
-import PostHandler from "./PostHandler";
+import MapBox from "./components/Map/MapBox";
+import SocketHandler from "./components/Socket/SocketHandler";
+import PostHandler from "./components/Http/PostHandler";
 
 // Set fontAwesome icons up -> Define all icons that will be used in the app.
 import { library } from '@fortawesome/fontawesome-svg-core'

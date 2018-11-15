@@ -25,7 +25,7 @@ def coords_from_tracks(track_1, track_2):
     return coords_from_azimuts(azimuth_1, azimuth_2, station_1_coords, station_2_coords)
 
 
-def coords_from_azimuts(azimuth_1, azimuth_2, station_1_coords, station_2_coords):
+def coords_from_azimuts(azimuth_1, azimuth_2, station_1_coords, station_2_coords, north_hem=True):
     """ Gives you the coordinates of the point you get by tracing azimuth_1 from station 1 and azimuth_2 from station 2
 
     :param azimuth_1: The angle from which you percieve an incoming signal in station 1
@@ -38,5 +38,8 @@ def coords_from_azimuts(azimuth_1, azimuth_2, station_1_coords, station_2_coords
     point1 = sphericalNvector.LatLon(*station_1_coords)
     point2 = sphericalNvector.LatLon(*station_2_coords)
     point3 = sphericalNvector.triangulate(point1, azimuth_1, point2, azimuth_2)
+    if point3.latlon[0] < 0 and north_hem :
+        return (-point3.latlon[0],point3.latlon[1] - 180 )
+    return (point3.latlon[0],point3.latlon[1] )
 
-    return (point3.latlon)
+    
