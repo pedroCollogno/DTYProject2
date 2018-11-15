@@ -1,3 +1,6 @@
+import sys
+sys.path.append("..")
+
 import gen.TrackstreamEx_pb2 as ts
 import os
 

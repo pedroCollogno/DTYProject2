@@ -19,7 +19,7 @@ import matplotlib.cm as cm
 from mpl_toolkits.mplot3d import Axes3D
 
 
-def get_dbscan_prediction(data, all_tracks_data):
+def get_dbscan_prediction(data, all_tracks_data={}):
     """ Function that clusters data from TrackStreamEx objects
 
     :param data: The data to cluster using the dbscan algorithm

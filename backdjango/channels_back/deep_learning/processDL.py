@@ -3,15 +3,30 @@ import itertools
 from progressbar import ProgressBar
 import pandas as pd
 import sys
+print(sys.path)
 import csv
 import os
 import matplotlib.pyplot as plt
-from testutils.track_utils import *
-from testutils.loading import *
-import main as main
+from sklearn.cluster import DBSCAN
+
+sys.path.append("../")
+from utils.loading import *
+from utils.track_utils import *
 
 
 time_step_ms = 500
+
+def get_dbscan_prediction(data):
+    """ Function that clusters data from TrackStreamEx objects
+
+    :param data: The data to cluster using the dbscan algorithm
+    :return: a tuple, in which there is :
+        - in first position the array of predictions for all tracks given in entry
+        - in second position an array containing the IDs of the predicted tracks.
+    """
+    np_data = np.array(data)
+    prediction = DBSCAN(min_samples=1).fit_predict(np_data[:, 1:3])
+    return prediction, np_data[:, 0]
 
 def createFolder(directory):
     try:
@@ -48,29 +63,6 @@ def checkPkl(file):
         print(Y[k])
         plt.show()
 
-    # for i in range(2):
-
-    #     key_indice = 1
-    #     y_labels = []
-    #     y_ticks = []
-    #     for key in all_alternates["prp{}".format(i+1)]:
-    #         boxes = []
-    #         for alternate in all_alternates["prp{}".format(i+1)][key]:
-    #             boxes.append((alternate.start.date_ms/(1000),
-    #                           alternate.duration_us/1000000))
-    #         ax[i].broken_barh(boxes, (key_indice, 0.9), facecolors='blue')
-    #         y_ticks.append(key_indice)
-    #         y_labels.append(str(key))
-    #         key_indice += 1
-    #     ax[i].set_yticks(y_ticks)
-    #     ax[i].set_yticklabels(y_labels)
-    #     ax[i].set_ylabel("Id")
-    #     ax[i].set_xlabel("Seconds")
-    # plt.show()
-
-
-
-
 def get_track_info_with_alternates(track):
     """ Takes essential information out of a given track
 
@@ -79,7 +71,7 @@ def get_track_info_with_alternates(track):
         [track_id, measurement_type, central_freq_hz,
             bandwitdh_hz, average_azimut_deg, list of alternates : [start_date, end_date]]
     """
-    new_info_from_track = get_track_info(track)
+    new_info_from_track = get_track_info_with_id(track)
     alternates_list = []
     for alternate in track.alternates:
         alternates_list.append([alternate.start.date_ms, (alternate.start.date_ms + alternate.duration_us/1000)])
@@ -96,7 +88,7 @@ def predict_all_ids(tsexs):
     stations_data = []
     for tsex in tsexs:
         raw_tracks = get_track_stream_ex_info(tsex, raw_tracks)
-    y_pred, ids = main.get_dbscan_prediction(raw_tracks)
+    y_pred, ids = get_dbscan_prediction(raw_tracks)
     stations_data.append([y_pred, ids])
     return [y_pred, ids]
 
@@ -107,6 +99,7 @@ def get_last_track_by_id(tsexs, id):
     :param id: id of the emitter to process
     :return: last track of an emitter
     """
+    print("id",id)
     raw_tracks = []
     for tsex in tsexs:
         tracks = tsex.data.tracks
@@ -161,6 +154,7 @@ def process_data(tsexs, file_name):
     :param file_name: file name of the pkl file in /pkl where data will be saved
     """
     preds = predict_all_ids(tsexs)
+    print(preds)
 
     temporal_data = get_start_and_end(tsexs)
     start_date_ms = temporal_data[0]
