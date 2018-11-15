@@ -73,6 +73,6 @@ def upload(request):
                 filename = fs.save(global_file.name, global_file)
                 paths.append(os.path.join(fs.location, filename))
 
-        return(HttpResponse('<h1>Page was found</h1>'))
+        return(HttpResponse('POST ok !'))
     else:
-        return(HttpResponse('<h1>Page was not found</h1>'))
+        return(HttpResponse('POST failed'))
