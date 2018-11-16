@@ -10,8 +10,8 @@ class DropZone extends Component {
   render() {
     return (
       <FileDrop onDrop={this.props.handleDrop}>
-        Drop some .PRP files here!
-        </FileDrop>
+        {this.props.text}
+      </FileDrop>
     )
 
   }
