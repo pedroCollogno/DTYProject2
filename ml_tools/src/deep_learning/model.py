@@ -2,6 +2,7 @@ from keras.models import Sequential, load_model
 from keras.layers import LSTM, Dense, Dropout, Embedding
 from keras.callbacks import TensorBoard, Callback, EarlyStopping
 from keras.optimizers import Adam
+from keras.layers import Bidirectional
 
 from progressbar import ProgressBar
 from time import time
@@ -14,6 +15,8 @@ import metrics
 import itertools
 import numpy as np
 import pandas as pd
+from sklearn.metrics import recall_score
+from sklearn.metrics import precision_score
 
 if __name__ == "__main__":
     # If launching this file as a file, enlarge the scope to see all of the src folder of ml_tools package
@@ -83,13 +86,13 @@ def train():
     """ 
         Trains a model on data produced with fake_data function. Saves weights to './weights' folder
     """
-    data = fake_data(50, all=False, equalize=False)
+    data = fake_data(100, all=False, equalize=False)
 
     X = np.array(data[0])
     Y = np.array(data[1])
 
     model = Sequential()
-    model.add(LSTM(units=128, input_shape=(None, 2)))
+    model.add(Bidirectional(LSTM(units=128), input_shape=(None,2)))
     #model.add(LSTM(units = 128, input_shape=(None , 2)))
     model.add(Dense(1, activation="sigmoid"))
 
@@ -99,7 +102,7 @@ def train():
     model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=[
                   'accuracy', metrics.auc_roc, metrics.f1_score_threshold(), metrics.precision_threshold(), metrics.recall_threshold()])
 
-    model.summary()
+    #model.summary()
 
     model.fit(
         X,
@@ -142,7 +145,7 @@ def test():
     Y = np.array(list(df['Y'].values))
 
     model = Sequential()
-    model.add(LSTM(units=128, input_shape=(None, 2)))
+    model.add(Bidirectional(LSTM(units=128), input_shape=(None,2)))
     model.add(Dense(1, activation="sigmoid"))
     model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=[
                   'accuracy', metrics.f1_score_threshold(), metrics.precision_threshold(), metrics.recall_threshold()])
@@ -198,38 +201,46 @@ def train2():
         TODO: COMPLETE DOCS 
     """
     df = pd.read_pickle('./pkl2/{}.pkl'.format(sys.argv[1]))
-    print(df.head())
-    print(df['X_new'][0])
+    #print(df.head())
+    #print(df['X_new'][0])
 
     model2 = Sequential()
-    model2.add(LSTM(units=128, input_shape=(None, 1)))
+    model2.add(Bidirectional(LSTM(units=128), input_shape=(None,1)))
     model2.add(Dense(1, activation="sigmoid"))
 
     X = np.array(list(df['X_new'].values))
     Y = np.array(list(df['Y_new'].values))
-
     nb_ones = np.count_nonzero(Y == 1)
+    print(np.where(Y==0)[0])
     zeros_index = np.where(Y == 0)[0]
     df = df.drop(df.index[zeros_index[nb_ones:]])
 
     df = df.sample(frac=1)
 
-    X_new = np.array(list(df['X_new'].values))
-    Y_new = np.array(list(df['Y_new'].values))
-
     print(df)
-    print("How many 0s :", np.count_nonzero(Y_new == 0))
-    print("How many 1s :", np.count_nonzero(Y_new == 1))
+    X2 = np.array(list(df['X_new'].values))
+    Y2 = np.array(list(df['Y_new'].values))
+
+    print("How many 0s :", np.count_nonzero(Y2 == 0))
+    print("How many 1s :", np.count_nonzero(Y2 == 1))
 
     test = []
+    prediction=[]
     for i in range(len(X)):
         predict = 1
         #product = np.prod(X_new[i])
         mean = np.divide(1, np.square(X[i])).mean()
-        if mean > 10e05:
+        if mean > 10e5:
             predict = 0
+        else:
+            predict = 1
+        prediction.append(predict)
         test.append(abs(predict - Y[i]))
     print(test.count(0)/len(test))
+    print(recall_score(Y,prediction))
+    print(recall_score(Y,prediction, pos_label=0))
+    print(precision_score(Y,prediction))
+    print(precision_score(Y,prediction, pos_label=0))
 
     # model2.compile(loss='binary_crossentropy', optimizer=Adam(lr=0.001), metrics=['accuracy', metrics.auc_roc, metrics.f1_score_threshold(), metrics.precision_threshold(), metrics.recall_threshold()])
 
