@@ -1,29 +1,31 @@
-import numpy as np
-import itertools
+import matplotlib
+matplotlib.use("TkAgg")
+
 from progressbar import ProgressBar
-import pandas as pd
-import os
-import matplotlib.pyplot as plt
 from sklearn.cluster import DBSCAN
+from tkinter import filedialog
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import tkinter as tk
+
+import os
+import sys
+import itertools
+
+
+if __name__ == "__main__":
+    # If launching this file as a file, enlarge the scope to see all of the src folder of ml_tools package
+    sys.path.append(os.path.abspath(
+        os.path.dirname(os.path.dirname(__file__))))
 
 from utils.loading import *
 from utils.track_utils import *
+from clustering.dbscan import get_dbscan_prediction_min
 
 
 time_step_ms = 500
-
-
-def get_dbscan_prediction(data):
-    """ Function that clusters data from TrackStreamEx objects
-
-    :param data: The data to cluster using the dbscan algorithm
-    :return: a tuple, in which there is :
-        - in first position the array of predictions for all tracks given in entry
-        - in second position an array containing the IDs of the predicted tracks.
-    """
-    np_data = np.array(data)
-    prediction = DBSCAN(min_samples=1).fit_predict(np_data[:, 1:3])
-    return prediction, np_data[:, 0]
 
 
 def createFolder(directory):
@@ -71,7 +73,7 @@ def get_track_info_with_alternates(track):
         [track_id, measurement_type, central_freq_hz,
             bandwitdh_hz, average_azimut_deg, list of alternates : [start_date, end_date]]
     """
-    new_info_from_track = get_track_info_with_id(track)
+    new_info_from_track = get_track_info(track)
     alternates_list = []
     for alternate in track.alternates:
         alternates_list.append(
@@ -90,7 +92,7 @@ def predict_all_ids(tsexs):
     stations_data = []
     for tsex in tsexs:
         raw_tracks = get_track_stream_ex_info(tsex, raw_tracks)
-    y_pred, ids = get_dbscan_prediction(raw_tracks)
+    y_pred, ids = get_dbscan_prediction_min(raw_tracks)
     stations_data.append([y_pred, ids])
     return [y_pred, ids]
 
@@ -107,7 +109,7 @@ def get_last_track_by_id(tsexs, id):
     for tsex in tsexs:
         tracks = tsex.data.tracks
         for track in tracks:
-            if track.id.most_significant == id:
+            if get_track_id(track) == id:
                 raw_tracks = get_track_info_with_alternates(track)
     return raw_tracks
 
@@ -126,8 +128,9 @@ def get_start_and_end(tsexs):
         for track in tracks:
             raw_tracks.append(get_track_info_with_alternates(track))
     # raw_tracks : all the tracks with alternates info from a prp
-    start_date = raw_tracks[0][5][0][0]
-    end_date = raw_tracks[-1][5][0][1]
+    print(raw_tracks)
+    start_date = raw_tracks[0][6][0][0]
+    end_date = raw_tracks[-1][6][0][1]
     sequence_size = (end_date-start_date)/time_step_ms
     return(start_date, end_date, sequence_size)
 
@@ -145,7 +148,7 @@ def get_steps_track(tsexs, id, sequence_size, start_date_ms):
     data = []
     for i in range(int(sequence_size)):
         found = 0
-        for alternate in last_track_id[5]:
+        for alternate in last_track_id[6]:
             if alternate[0] <= start_date_ms + i*time_step_ms <= alternate[1]:
                 found = 1
                 break
@@ -234,6 +237,10 @@ def process_data(tsexs, file_name):
     :param 2: name of pkl file that will be saved in /pkl
 """
 if __name__ == '__main__':
-    tsexs = get_track_stream_exs_from_prp("prod/{}.prp".format(sys.argv[1]))
-    process_data(tsexs, sys.argv[2])
+    root = tk.Tk()
+    root.withdraw()
+    file_path = filedialog.askopenfilename()
+
+    tsexs = get_track_stream_exs_from_prp(file_path)
+    process_data(tsexs, sys.argv[1])
     # checkPkl(sys.argv[1])

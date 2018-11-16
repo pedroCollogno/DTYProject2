@@ -7,13 +7,13 @@ setup(
     author='Paris Digital Lab',
     packages=[
         'ml_tools',
-        'ml_tools.data_process',
+        'ml_tools.clustering',
         'ml_tools.utils',
         'ml_tools.gen'
     ],
     package_dir={
         'ml_tools': 'src',
-        'ml_tools.data_process': 'src/data_process',
+        'ml_tools.clustering': 'src/clustering',
         'ml_tools.utils': 'src/utils',
         'ml_tools.gen': 'src/gen'
     },

@@ -15,6 +15,13 @@ import itertools
 import numpy as np
 import pandas as pd
 
+if __name__ == "__main__":
+    # If launching this file as a file, enlarge the scope to see all of the src folder of ml_tools package
+    sys.path.append(os.path.abspath(
+        os.path.dirname(os.path.dirname(__file__))))
+
+from utils.log import create_new_folder
+
 
 def random_product(*args, repeat=1):
     "Random selection from itertools.product(*args, **kwds)"
@@ -92,7 +99,8 @@ def train():
     )
 
     # Use this to save the weights to be able to reload them while testing
-    # model.save_weights('./weights/my_model_weights.h5')
+    create_new_folder('weights', '.')
+    model.save_weights('./weights/my_model_weights.h5')
 
 
 def test():
@@ -221,4 +229,4 @@ def train2():
     :param 1: name of file in /pkl folder
 """
 if __name__ == '__main__':
-    train2()
+    train()
