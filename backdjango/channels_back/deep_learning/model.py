@@ -8,6 +8,8 @@ from keras.optimizers import Adam
 from keras import losses
 from keras import backend
 from keras.models import load_model
+import sklearn.metrics as skmetrics 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from time import time
@@ -193,15 +195,53 @@ def train2():
     print("How many 0s :", np.count_nonzero(Y_new==0))
     print("How many 1s :", np.count_nonzero(Y_new==1))
 
-    test = []
-    for i in range(len(X)):
-        predict = 1
-        #product = np.prod(X_new[i])
-        mean = np.divide(1, np.square(X[i])).mean()
-        if mean > 10e05:
-            predict = 0
-        test.append(abs(predict - Y[i]))
-    print(test.count(0)/len(test))
+    thresholds = [10e3, 10e4, 5*10e4, 10e5, 5*10e5, 10e6,2*10e6, 5*10e6, 6*10e6, 7*10e6, 8*10e6, 9*10e6, 10e7, 2*10e7, 5*10e7, 10e8, 10e9, 10e10, 10e30]
+    precision0 = []
+    precision1 = []
+    recall0 = []
+    recall1 = []
+    fscore0 = []
+    fscore1 = []
+    for threshold in thresholds:
+        test = []
+        Y_predicted = []
+        for i in range(len(X)):
+            predict = 1
+            #product = np.prod(X_new[i])
+            mean = np.divide(1, np.square(X[i])).mean()
+            if mean > threshold:
+                predict = 0
+            Y_predicted.append(predict)
+            test.append(abs(predict - Y[i]))
+        score = skmetrics.precision_recall_fscore_support(Y, Y_predicted)
+        print ("Precision '1' :", score[0][1]," Recall '1' :", score[1][1], " Fscore '1' :", score[2][1], " Number of samples '1' :", score[3][1])
+        print ("Precision '0' :", score[0][0]," Recall '0' :", score[1][0], " Fscore '0' :", score[2][0], " Number of samples '0' :", score[3][0])
+        precision0.append(score[0][0])
+        precision1.append(score[0][1])
+        recall0.append(score[1][0])
+        recall1.append(score[1][1])
+        fscore0.append(score[2][0])
+        fscore1.append(score[2][1])
+    ax1 = plt.subplot(311)
+    ax1.set_xscale('log')
+    plt.plot(thresholds, precision0, 'r')
+    plt.plot(thresholds, precision1, 'b')
+    plt.ylabel('Threshold')
+    plt.xlabel('Precision')
+    ax2 = plt.subplot(312, sharex=ax1, sharey=ax1)
+    plt.plot(thresholds, recall0, 'r')
+    plt.plot(thresholds, recall1, 'b')
+    plt.ylabel('Threshold')
+    plt.xlabel('Recall')
+    ax3 = plt.subplot(313, sharex=ax1, sharey=ax1)
+    plt.plot(thresholds, fscore0, 'r')
+    plt.plot(thresholds, fscore1, 'b')
+    plt.ylabel('Threshold')
+    plt.xlabel('Fscore')
+    #plt.plot(<X AXIS VALUES HERE>, <Y AXIS VALUES HERE>, 'line type', label='label here')
+    plt.legend()
+    plt.show()
+
 
 
     # model2.compile(loss='binary_crossentropy', optimizer=Adam(lr=0.001), metrics=['accuracy', metrics.auc_roc, metrics.f1_score_threshold(), metrics.precision_threshold(), metrics.recall_threshold()])

@@ -3,7 +3,6 @@ import itertools
 from progressbar import ProgressBar
 import pandas as pd
 import sys
-print(sys.path)
 import csv
 import os
 import matplotlib.pyplot as plt
@@ -14,7 +13,7 @@ from utils.loading import *
 from utils.track_utils import *
 
 
-time_step_ms = 500
+time_step_ms = 250
 
 def get_dbscan_prediction(data):
     """ Function that clusters data from TrackStreamEx objects
@@ -99,7 +98,6 @@ def get_last_track_by_id(tsexs, id):
     :param id: id of the emitter to process
     :return: last track of an emitter
     """
-    print("id",id)
     raw_tracks = []
     for tsex in tsexs:
         tracks = tsex.data.tracks

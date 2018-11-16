@@ -44,7 +44,7 @@ def get_track_stream_ex_info(track_stream_ex, data=[]):
     """
     tracks = track_stream_ex.data.tracks
     for track in tracks:
-        batch = get_track_info(track)
+        batch = get_track_info_with_id(track)
         if batch not in data:
             data.append(batch)
     return data
