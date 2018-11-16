@@ -11,7 +11,7 @@ class HttpRequestHandler extends Component {
         super(props);
         this.state = {
             files: {},
-            loaded : false // Contains all the uploaded files
+            loaded: false // Contains all the uploaded files
         };
         this.onFormSubmit = this.onFormSubmit.bind(this);
         this.onChange = this.onChange.bind(this);
@@ -26,17 +26,17 @@ class HttpRequestHandler extends Component {
                 axios.get("http://localhost:8000/getstations")
                     .then((response) => {
                         this.props.getStations(response);
-                        this.setState({loaded : true});
+                        this.setState({ loaded: true });
                     })
             }
         })
     }
     onChange(e) { // When entering files with input ()
-        for(let f of e.target.files) {
-            if(!this.state.files[f.name]) {
+        for (let f of e.target.files) {
+            if (!this.state.files[f.name]) {
                 let dic = JSON.parse(JSON.stringify(this.state.files));
                 dic[f.name] = f;
-                this.setState({files : dic});
+                this.setState({ files: dic });
             }
         }
         this.setState({ files: e.target.files });
@@ -64,12 +64,12 @@ class HttpRequestHandler extends Component {
     }
 
     onDrop(file, e) {
-        if(file) {
-            for(let f of file) {
-                if(!this.state.files[f.name]) {
+        if (file) {
+            for (let f of file) {
+                if (!this.state.files[f.name]) {
                     let dic = JSON.parse(JSON.stringify(this.state.files));
                     dic[f.name] = f;
-                    this.setState({files : dic});
+                    this.setState({ files: dic });
                 }
             }
         }
@@ -78,40 +78,58 @@ class HttpRequestHandler extends Component {
     render() {
         return (
             <div>
-            <form onSubmit={this.onFormSubmit} className="container">
                 <p>
                     <strong className="has-text-white-ter">Upload your .PRP files</strong>
                 </p>
-                <div class="file has-name is-boxed is-centered is-fullwidth" >
+                <form onSubmit={this.onFormSubmit}>
+
+                    <div className="tile is-ancestor is-vertical">
+                        <div className="tile">
+
+                            <div className="tile is-parent" >
+                                <article className="tile is-child notification is-warning">
+                                    <div className="file has-name is-boxed is-centered is-fullwidth" >
+
+                                        <label className="file-label" >
+                                            <input type="file" className="file-input" multiple onChange={this.onChange} />
+                                            <span className="file-cta">
+                                                <span className="file-icon">
+                                                    <FontAwesomeIcon icon='download' />
+                                                </span>
+                                                <span className="file-label">Choose a .PRP file…</span>
+                                            </span>
+                                            <span className="file-name has-text-white-ter" >
+                                                {this.state.files.toString()}
+                                            </span>
+                                        </label>
+                                    </div>
+
+                                </article>
+                            </div>
+                            <div className="tile is-parent">
+                                <article className="tile is-child notification is-warning">
+                                    <DropZone handleDrop={this.onDrop} />
+                                </article>
+                            </div>
+
+                        </div>
+                        <div className="tile is-child">
+                            <div className="field has-addons">
+                                <button type="submit" className="button is-grey" >
+                                    <span className="file-icon">
+                                        <FontAwesomeIcon icon='upload' />
+                                    </span>
+                                    <span>Upload</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
                 {/* CSS !! */}
-                    <DropZone handleDrop = {this.onDrop}/> 
-                    {/* CSS !! */}
-                    <label class="file-label" >
-                        <input type="file" className="file-input" multiple onChange={this.onChange} />
-                        <span class="file-cta">
-                            <span class="file-icon">
-                                <FontAwesomeIcon icon='download' />
-                            </span>
-                            <span class="file-label">Choose a .PRP file…</span>
-                        </span>
-                        <span class="file-name has-text-white-ter" >
-                            {this.state.files.toString()}
-                        </span>
-                    </label>
-                </div>
-                <div class="field has-addons">
-                    <button type="submit" className="button is-grey" >
-                        <span class="file-icon">
-                            <FontAwesomeIcon icon='upload' />
-                        </span>
-                        <span>Upload</span>
-                    </button>
-                </div>
-            </form>
-            {/* CSS !! */}
-            <button class="button" disabled={!this.state.loaded} onClick = {this.onStart}>
-            Start simulation</button>
-            {/* CSS !! */}
+                <button className="button" disabled={!this.state.loaded} onClick={this.onStart}>
+                    Start simulation</button>
+                {/* CSS !! */}
             </div>
 
         )

@@ -80,56 +80,53 @@ class MapBox extends Component {
             i += 1;
         }
         return (
-            <Map
-                style="mapbox://styles/mapbox/outdoors-v9"
-                containerStyle={{
-                    height: "500px",
-                    width: "1000px",
-                }}
-                zoom={[6]}
-                center={this.center()} >
-                <Layer
-                    id="stations"
-                    type="symbol"
-                    layout={{
-                        "icon-image": "stationImage",
-                        "icon-size": 0.05
+            <div className="map-container">
+                <Map
+                    style="mapbox://styles/mapbox/basic-v9"
+                    containerStyle={{
+                        height: "500px",
+                        width: "100%",
                     }}
-                    images={images} >
+                    zoom={[6]}
+                    center={this.center()} >
+                    <Layer
+                        id="stations"
+                        type="symbol"
+                        layout={{
+                            "icon-image": "stationImage",
+                            "icon-size": 0.05
+                        }}
+                        images={images} >
+                        {
+                            Object.keys(this.props.recStations).map((station, k) =>
+                                <Feature coordinates={[this.props.recStations[station].coordinates.lng, this.props.recStations[station].coordinates.lat]}></Feature>
+                            )
+                        }
+                    </Layer>
                     {
-                        Object.keys(this.props.recStations).map((station, k) =>
-                            <Feature coordinates={[this.props.recStations[station].coordinates.lng, this.props.recStations[station].coordinates.lat]}></Feature>
-                        )
+                        this.state.networksLabels.map((network, k) => {
+                            let clusterCenter = this.clusterCenter(network);
+                            return (
+                                <div id={"cluster" + k}>
+                                    <Lines
+                                        clusterCenter={clusterCenter} color={colors[network]}
+                                        network={network} stations={this.state.stations[network]} />
+                                    <Layer
+                                        id={"center" + network}
+                                        type="circle"
+                                        paint={{
+                                            "circle-color": colors[network],
+                                            "circle-radius": 3
+                                        }}>
+                                        <Feature coordinates={clusterCenter} ></Feature>
+                                    </Layer>
+                                    <Stations
+                                        stations={this.state.stations[network]} network={network} color={this.state.colors[network]} />
+                                </div>)
+                        })
                     }
-                </Layer>
-                {
-                    this.state.networksLabels.map((network, k) => {
-                        let clusterCenter = this.clusterCenter(network);
-                        return (
-                            <div id={"cluster" + k}>
-                                <Lines
-                                    clusterCenter={clusterCenter} color={colors[network]}
-                                    network={network} stations={this.state.stations[network]} />
-                                <Layer
-                                    id={"center" + network}
-                                    type="circle"
-                                    paint={{
-                                        "circle-color": colors[network],
-                                        "circle-radius": 3
-                                    }}>
-                                    <Feature coordinates={clusterCenter} ></Feature>
-                                </Layer>
-                                <Stations
-                                    stations={this.state.stations[network]} network={network} color={this.state.colors[network]} />
-                            </div>)
-                    })
-                }
-                )
-            }
-
-
-
-        </Map>
+                </Map>
+            </div>
         )
     }
 }
