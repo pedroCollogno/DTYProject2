@@ -13,13 +13,15 @@ class HttpRequestHandler extends Component {
             files: [],
             fileNames: {},
             loaded: false, // Contains all the uploaded files
-            dropText: "Drop your files here !"
+            dropText: "Or drop your .PRP files here !"
         };
         this.onFormSubmit = this.onFormSubmit.bind(this);
         this.onChange = this.onChange.bind(this);
         this.fileUpload = this.fileUpload.bind(this);
         this.onDrop = this.onDrop.bind(this);
     }
+
+
     onFormSubmit(e) {
         e.preventDefault() // Stop form submit
         this.fileUpload(this.state.files).then((response) => {
@@ -85,16 +87,13 @@ class HttpRequestHandler extends Component {
     render() {
         return (
             <div>
-                <p>
-                    <strong className="has-text-white-ter">Upload your .PRP files</strong>
-                </p>
                 <form onSubmit={this.onFormSubmit}>
 
                     <div className="tile is-ancestor is-vertical">
                         <div className="tile">
 
                             <div className="tile is-parent" >
-                                <article className="tile is-child notification is-warning">
+                                <article className="tile is-child notification">
                                     <div className="file has-name is-boxed is-centered is-fullwidth" >
 
                                         <label className="file-label" >
@@ -103,7 +102,7 @@ class HttpRequestHandler extends Component {
                                                 <span className="file-icon">
                                                     <FontAwesomeIcon icon='download' />
                                                 </span>
-                                                <span className="file-label">Choose a .PRP file…</span>
+                                                <span className="file-label">Upload your .PRP files…</span>
                                             </span>
                                             <span className="file-name has-text-white-ter" >
                                                 {this.state.files.toString()}
@@ -114,27 +113,29 @@ class HttpRequestHandler extends Component {
                                 </article>
                             </div>
                             <div className="tile is-parent">
-                                <article className="tile is-child notification is-warning">
+                                <article className="tile is-child notification">
                                     <DropZone handleDrop={this.onDrop} text={this.state.dropText} />
                                 </article>
                             </div>
 
                         </div>
-                        <div className="tile is-child">
-                            <div className="field has-addons">
-                                <button type="submit" className="button is-grey" >
-                                    <span className="file-icon">
-                                        <FontAwesomeIcon icon='upload' />
-                                    </span>
-                                    <span>Upload</span>
-                                </button>
+                        <div className="tile is-parent">
+                            <div className="tile is-child">
+                                <div className="field has-addons">
+                                    <button type="submit" className="button is-grey" >
+                                        <span className="file-icon">
+                                            <FontAwesomeIcon icon='upload' />
+                                        </span>
+                                        <span>Upload</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </form>
 
                 {/* CSS !! */}
-                <button className="button" disabled={!this.state.loaded} onClick={this.onStart}>
+                <button className="button" id="start-sim-button" disabled={!this.state.loaded} onClick={this.onStart}>
                     Start simulation</button>
                 {/* CSS !! */}
             </div>

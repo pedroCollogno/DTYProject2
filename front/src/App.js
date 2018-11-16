@@ -66,8 +66,11 @@ class App extends Component {
 
         <div className="container">
           <MapBox stations={this.state.emittors} recStations={this.state.stations} />
-          <div className="tile is-fullwidth">
-            <table className='container table'>
+
+          <PostHandler getStations={this.getStations} />
+
+          <div className="tile is-fullwidth" id="tabletile">
+            <table className='table'>
               <tr>
                 <th>Last station</th>
                 <th colSpan='2'>Coordinates</th>
@@ -81,9 +84,6 @@ class App extends Component {
               </tr>
             </table>
           </div>
-
-          <PostHandler getStations={this.getStations} />
-
         </div>
 
       </div >

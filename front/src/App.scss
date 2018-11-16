@@ -1,3 +1,5 @@
+@import './sass/mixins/variables';
+
 .App {
     text-align: center;
   }
@@ -28,9 +30,24 @@
   to { transform: rotate(360deg); }
 }
 
-table.container {
-  margin-top: 1.8em;
-  margin-left: 1.8em;
+table {
+  width: 100%;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.table {
+  background-color: $grey;
+  border-radius: 5px 5px 0px 0px;
+}
+
+#tabletile {
+  padding-left: 2%;
+  padding-right: 2%;
+}
+
+body {
+  padding-bottom: 2em;
 }
 
 
