@@ -25,12 +25,21 @@ from utils.log import create_new_folder
 
 
 def random_product(*args, repeat=1):
-    "Random selection from itertools.product(*args, **kwds)"
+    """
+        Random selection from itertools.product(*args, **kwds)
+    """
     pools = [tuple(pool) for pool in args] * repeat
     return tuple(random.choice(pool) for pool in pools)
 
 
-def fakeData(sequence_size, all=True, n_samples=1000, equalize=False):
+def fake_data(sequence_size, all=True, n_samples=1000, equalize=False):
+    """ Generates fake data
+
+    :param sequence_size: the size of the sequence to generate
+    :param all: (optional) TODO: COMPLETE DOCS 
+    :param n_samples: (optional) TODO: COMPLETE DOCS 
+    :param equalize: (optional) TODO: COMPLETE DOCS 
+    """
     # If we want all the possible combinations of size sequence_size (be careful this goes in 2**sequence_size)
     if all:
         fakeX = [np.reshape(list(i), (2, sequence_size)).T.tolist()
@@ -71,7 +80,10 @@ def fakeData(sequence_size, all=True, n_samples=1000, equalize=False):
 
 
 def train():
-    data = fakeData(50, all=False, equalize=False)
+    """ 
+        Trains a model on data produced with fake_data function. Saves weights to './weights' folder
+    """
+    data = fake_data(50, all=False, equalize=False)
 
     X = np.array(data[0])
     Y = np.array(data[1])
@@ -105,6 +117,10 @@ def train():
 
 
 def test():
+    """
+        Tests stuff
+        TODO: COMPLETE DOCS 
+    """
     file_path = './pkl/{}'.format(sys.argv[1])
     filelist = [f for f in os.listdir(file_path)]
     df = pd.DataFrame(columns=['X', 'Y'])
@@ -177,6 +193,10 @@ def test():
 
 
 def train2():
+    """ 
+        Trains a model on data from '.pkl2' folder
+        TODO: COMPLETE DOCS 
+    """
     df = pd.read_pickle('./pkl2/{}.pkl'.format(sys.argv[1]))
     print(df.head())
     print(df['X_new'][0])

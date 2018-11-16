@@ -28,21 +28,21 @@ from clustering.dbscan import get_dbscan_prediction_min
 time_step_ms = 500
 
 
-def createFolder(directory):
-    try:
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-    except OSError:
-        print('Error: Creating directory. ' + directory)
-
-
 def removeFiles(directory):
+    """ Removes all files from a directory
+
+    :param directory: the directory from which files should be removed
+    """
     filelist = [f for f in os.listdir(directory)]
     for f in filelist:
         os.remove(os.path.join(directory, f))
 
 
 def checkPkl(file):
+    """ TODO: COMPLETE DOCS
+
+    :param file: TODO: COMPLETE DOCS
+    """
     file_path = './pkl/{}'.format(sys.argv[1])
     df = pd.read_pickle('./pkl/{}'.format(sys.argv[1]))
     print(df)
@@ -191,7 +191,7 @@ def process_data(tsexs, file_name):
     pbar2 = ProgressBar(maxval=(len(preds[0])*len(preds[0]))/2)
     pbar2.start()
 
-    createFolder('./pkl/{}'.format(file_name))
+    create_new_folder(file_name, './pkl')
     removeFiles('./pkl/{}'.format(file_name))
 
     for couple in itertools.combinations(preds[1], 2):

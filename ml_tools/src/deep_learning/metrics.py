@@ -75,6 +75,9 @@ def recall_threshold(threshold=0.5):
 
 
 def auc_roc(y_true, y_pred):
+    """ AUC metric from ROC curve
+    Only computes a batch-wise average of auc.
+    """
     # any tensorflow metric
     value, update_op = tf.contrib.metrics.streaming_auc(y_pred, y_true)
 
@@ -94,8 +97,13 @@ def auc_roc(y_true, y_pred):
 
 
 def get_metrics(threshold):
+    """ Used to get all metrics with a custom threshold
+
+    :param threshold: the threshold for which metrics should be evaluated
+    """
     return {
         'precision': precision_threshold(threshold=threshold),
         'recall': recall_threshold(threshold=threshold),
-        'f1_score': f1_score_threshold(threshold=threshold)
+        'f1_score': f1_score_threshold(threshold=threshold),
+        'auc_roc': auc_roc
     }
