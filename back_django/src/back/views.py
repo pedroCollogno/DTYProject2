@@ -5,13 +5,11 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from .forms import FileForm
 from django.core.files.storage import FileSystemStorage
-import threading
 import os
 
-
-from data_process.threads import DataProcessThread
-import utils.station_utils as station_utils
-import utils.loading as load
+from ml_tools.threads import DataProcessThread
+from ml_tools.utils import station_utils
+from ml_tools.utils import loading as load
 
 
 def user_list(request):
@@ -68,6 +66,7 @@ def startsimulation(request):
     station_utils.sync_stations(*track_streams)
 
     t = DataProcessThread(*track_streams, debug=False)
+    t.set_sender_function(send_emittor_to_front)
     t.start()
     return render(request, 'back/user_list.html')
 

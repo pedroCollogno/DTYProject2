@@ -1,7 +1,6 @@
 """ This module is used to compute the location of emittors that are seen by stations
 """
 
-import math as m
 from pygeodesy import sphericalNvector
 
 
@@ -38,8 +37,10 @@ def coords_from_azimuts(azimuth_1, azimuth_2, station_1_coords, station_2_coords
     point1 = sphericalNvector.LatLon(*station_1_coords)
     point2 = sphericalNvector.LatLon(*station_2_coords)
     point3 = sphericalNvector.triangulate(point1, azimuth_1, point2, azimuth_2)
-    if point3.latlon[0] < 0 and north_hem :
-        return (-point3.latlon[0],point3.latlon[1] - 180 )
-    return (point3.latlon[0],point3.latlon[1] )
 
-    
+    if point3.latlon[0] < 0 and north_hem:
+        return(-point3.latlon[0], point3.latlon[1]-180)
+    if point3.latlon[0] > 0 and not north_hem:
+        return(-point3.latlon[0], 180-point3.latlon[1])
+
+    return (point3.latlon[0], point3.latlon[1])

@@ -1,0 +1,12 @@
+# Test files
+.idea
+.pytest_cache
+
+# Logs
+logs/
+src/logs
+
+# Other files
+src/db.sqlite3
+src/tracks_json
+scenarios

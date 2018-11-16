@@ -1,5 +1,6 @@
 from django.conf.urls import url
-from back.views import user_list, startsimulation, upload, send_stations_positions
+from .views import user_list, startsimulation, upload, send_stations_positions
+
 
 """Routes for the websocket:
 user_list is called whenever a user connects to localhost:8000/

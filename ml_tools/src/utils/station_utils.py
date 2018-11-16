@@ -1,8 +1,7 @@
-import utils.gps as gps
-from utils.track_utils import same_emittor, get_track_id, add_track_to_dict
-
+from .track_utils import get_track_id, add_track_to_dict
+from .gps import coords_from_tracks
 from progressbar import ProgressBar
-from utils.log import logger
+from .log import logger
 
 
 def sync_stations(*args):
@@ -13,8 +12,7 @@ def sync_stations(*args):
     if n < 2:
         raise ValueError(
             "Need at least 2 stations to sync, but was given only %s" % n)
-    args.sort(key=len, reverse=True)
-
+    args.sort(key=len, reverse=False)
     for i in range(n-1):
         sync_station_streams(args[i], args[i+1])
 
@@ -118,7 +116,7 @@ def get_fused_station_tracks(station_1_track_streams, station_2_track_streams, a
                 track_1_id = get_track_id(track_1)
 
                 if track_2_id not in all_track_data.keys():
-                    lat, lng = gps.coords_from_tracks(track_1, track_2)
+                    lat, lng = coords_from_tracks(track_1, track_2)
                     coords = {
                         'lat': lat,
                         'lng': lng
@@ -126,7 +124,7 @@ def get_fused_station_tracks(station_1_track_streams, station_2_track_streams, a
                     add_track_to_dict(track_2, all_track_data, coords=coords)
 
                 elif all_track_data[track_2_id]['coordinates'] is None and track_1_id == track_2_id:
-                    lat, lng = gps.coords_from_tracks(track_1, track_2)
+                    lat, lng = coords_from_tracks(track_1, track_2)
                     all_track_data[track_2_id]['coordinates'] = {
                         'lat': lat,
                         'lng': lng
@@ -142,6 +140,10 @@ def get_fused_station_tracks(station_1_track_streams, station_2_track_streams, a
 
 
 def get_station_coordinates(*args):
+    """ Returns the coordinates of all stations from which the .prp files come from
+
+    :return: a dict containing all stations from a simulation
+    """
     station_coords = {}
     i = 1
     found_station = False
