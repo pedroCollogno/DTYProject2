@@ -3,9 +3,9 @@ from sklearn.cluster import DBSCAN
 
 import numpy as np
 
-from utils.log import logger, create_new_folder
-from utils.station_utils import *
-from utils.track_utils import *
+from ..utils.log import logger, create_new_folder
+from ..utils.station_utils import *
+from ..utils.track_utils import *
 
 import json
 import copy
@@ -63,7 +63,7 @@ def dbscan_predict(model, X):
     return y_new
 
 
-def main(*args, debug=False):
+def main(*args, debug=False, sender_function=None):
     """Main function, executes when the script is executed.
 
     :param debug: (optional) default is to False, set to True to enter debug mode (more prints)
@@ -71,6 +71,8 @@ def main(*args, debug=False):
 
     if debug:
         logger.handlers[1].setLevel(logging.DEBUG)
+    if sender_function is None:
+        raise ValueError("No sender function, cannot interact with backend.")
 
     all_tracks_data = {}
     n = len(args[0])
@@ -88,10 +90,10 @@ def main(*args, debug=False):
             *track_streams)
         logger.debug("Merge done !")
         make_emittor_clusters(global_track_streams,
-                              all_tracks_data, prev_tracks_data, debug)
+                              all_tracks_data, prev_tracks_data, debug=debug, sender_function=sender_function)
 
 
-def make_emittor_clusters(global_track_streams, all_tracks_data, prev_tracks_data, debug=False):
+def make_emittor_clusters(global_track_streams, all_tracks_data, prev_tracks_data, debug=False, sender_function=None):
     """ Makes the whole job of clustering emittors together from tracks
 
         Clusters emittors into networks using DBSCAN clustering algorithm. Updates the
@@ -102,9 +104,10 @@ def make_emittor_clusters(global_track_streams, all_tracks_data, prev_tracks_dat
     :param all_tracks_data: Data on all tracks from global_track_streams, as a dictionnary
     :param debug: (optional) default is to False, set to True to enter debug mode (more prints)
     """
-    from back.views import send_emittor_to_front
-
     raw_tracks = []
+
+    if sender_function is None:
+        raise ValueError("No sender function, cannot interact with backend.")
 
     logger.debug("Taking track info out of %s track streams..." %
                  len(global_track_streams))
@@ -133,7 +136,7 @@ def make_emittor_clusters(global_track_streams, all_tracks_data, prev_tracks_dat
 
         for key in all_tracks_data.keys():
             if key not in prev_tracks_data.keys() and not debug:
-                send_emittor_to_front(all_tracks_data[key])
+                sender_function(all_tracks_data[key])
 
     if debug:
         create_new_folder('tracks_json', '.')

@@ -1,0 +1,8 @@
+django==1.10.5
+channels==1.1.8
+np
+asgi_redis==1.2.1
+progressbar
+django-cors-headers
+daphne==1.4.1
+redis==2.10.6
