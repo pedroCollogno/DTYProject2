@@ -7,7 +7,6 @@ def ws_connect(message):
         Creates the websocket with parameters to be accepted by the browser
     """
     print('connected')
-    print(message.reply_channel)
     Group('users').add(message.reply_channel)
     Group('users').send({
         'text': json.dumps({
