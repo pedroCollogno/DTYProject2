@@ -14,11 +14,11 @@ import os
 import sys
 import itertools
 
-
 if __name__ == "__main__":
     # If launching this file as a file, enlarge the scope to see all of the src folder of ml_tools package
+    file_dir = os.path.abspath(os.path.dirname(__file__))
     sys.path.append(os.path.abspath(
-        os.path.dirname(os.path.dirname(__file__))))
+        os.path.dirname(file_dir)))
 
 from utils.loading import *
 from utils.track_utils import *
