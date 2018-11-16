@@ -1,0 +1,54 @@
+// 1. Import the initial variables
+@import '../../node_modules/bulma/sass/utilities/initial-variables';
+@import '../../node_modules/bulma/sass/utilities/functions';
+@import './mixins/variables.scss';
+
+// Add a serif family
+$family-serif: 'Verdana', 'Merriweather', 'Georgia', serif;
+$gap: 70px;
+
+// 3. Set the derived variables
+// Use the new dark blue as the primary color
+$primary: $dark-blue;
+$primary-invert: $dark-blue-invert;
+// Use the existing orange as the danger color
+$danger: $orange;
+// Use the new serif family
+$family-primary: $family-serif;
+
+// 4. Setup your Custom Colors
+$linkedin: #0077b5;
+$linkedin-invert: findColorInvert($linkedin);
+$twitter: #55acee;
+$twitter-invert: findColorInvert($twitter);
+$github: #333;
+$github-invert: findColorInvert($github);
+
+// 5. Add new color variables to the color map.
+@import '../../node_modules/bulma/sass/utilities/derived-variables';
+$addColors: (
+  'twitter': (
+    $twitter,
+    $twitter-invert,
+  ),
+  'linkedin': (
+    $linkedin,
+    $linkedin-invert,
+  ),
+  'github': (
+    $github,
+    $github-invert,
+  ),
+  'grey': (
+    $grey, 
+    $grey-invert,
+  )
+);
+$colors: map-merge($colors, $addColors);
+
+body{
+  background: linear-gradient(to right, #010205, #130E3F);
+}
+
+// 6. Import the rest of Bulma
+@import '../../node_modules/bulma/bulma';
