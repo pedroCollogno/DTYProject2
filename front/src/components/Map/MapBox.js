@@ -83,29 +83,6 @@ class MapBox extends Component {
             colors[network] = this.state.colors[i];
             i += 1;
         }
-<<<<<<< HEAD
-        return (
-            <Map
-                style="mapbox://styles/mapbox/outdoors-v9"
-                containerStyle={{
-                    height: "500px",
-                    width: "1000px",
-                }}
-                zoom={[6]}
-                center={this.center()} >
-                {
-                    this.state.networksLabels.map((network, k) => {
-                        let clusterCenter = this.clusterCenter(network);
-                        return (
-                            <div>
-                                <Marker
-                                    key={"center" + network}
-                                    coordinates={clusterCenter}>
-                                    <div className="centerMarker" style={{ "backgroundColor": colors[network] }}></div>
-                                </Marker>
-                                <Stations stations={this.state.stations[network]} color={this.state.colors[network]} />
-                            </div>)
-=======
         return(
         <Map
             style="mapbox://styles/mapbox/outdoors-v9"
@@ -149,7 +126,6 @@ class MapBox extends Component {
                             <Stations 
                                 stations = {this.state.stations[network]} network = {network} color = {this.state.colors[network]} />
                         </div>)
->>>>>>> 022a3989ea0d96c6639b74fe8f4637a7c54741a0
                     })
                 }
                 )
