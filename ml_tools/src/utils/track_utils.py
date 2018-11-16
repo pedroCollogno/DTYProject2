@@ -7,7 +7,7 @@ def get_track_info(track):
     :param track: the track from which info should be extracted
     :return: a list containing the basic info of the track :
         [measurement_type, central_freq_hz,
-            bandwitdh_hz, average_azimut_deg, begin_date_ms]
+            bandwitdh_hz, average_azimut_deg, begin_date_ms, track_id]
     """
     info_from_track = []
     info_from_track.append(track.itr_measurement.type)
@@ -16,6 +16,23 @@ def get_track_info(track):
     info_from_track.append(track.average_azimut_deg)
     info_from_track.append(track.begin_date.date_ms)
     info_from_track.append(get_track_id(info_from_track))
+    return info_from_track
+
+
+def get_track_info_with_id(track):
+    """ Takes essential information out of a given track
+
+    :param track: the track from which info should be extracted
+    :return: a list containing the basic info of the track :
+        [track_id, measurement_type, central_freq_hz,
+            bandwitdh_hz, average_azimut_deg]
+    """
+    info_from_track = []
+    info_from_track.append(track.id.most_significant)
+    info_from_track.append(track.itr_measurement.type)
+    info_from_track.append(track.itr_measurement.central_freq_hz)
+    info_from_track.append(track.itr_measurement.bandwidth_hz)
+    info_from_track.append(track.average_azimut_deg)
     return info_from_track
 
 
