@@ -10,7 +10,7 @@ class DropZone extends Component {
     return (
         <div style={{styles}}>
         <FileDrop onDrop={this.props.handleDrop}>
-          Drop some files here!
+          {this.props.text}
         </FileDrop>
       </div>)
       

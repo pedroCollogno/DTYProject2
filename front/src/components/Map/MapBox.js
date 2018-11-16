@@ -1,9 +1,5 @@
 import React, { Component } from "react";
-<<<<<<< HEAD
-import ReactMapboxGl, { Cluster, Marker, GeoJSONLayer } from "react-mapbox-gl";
-=======
 import ReactMapboxGl, { Layer, Marker, Feature} from "react-mapbox-gl";
->>>>>>> 022a3989ea0d96c6639b74fe8f4637a7c54741a0
 import colormap from "colormap";
 import Stations from "./Stations.js";
 import stationImage from "./satellite.png";

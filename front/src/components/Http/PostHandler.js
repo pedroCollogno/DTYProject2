@@ -10,8 +10,10 @@ class HttpRequestHandler extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            files: {},
-            loaded : false // Contains all the uploaded files
+            files: [],
+            fileNames : {},
+            loaded : false, // Contains all the uploaded files
+            dropText : "Drop your files here !"
         };
         this.onFormSubmit = this.onFormSubmit.bind(this);
         this.onChange = this.onChange.bind(this);
@@ -33,13 +35,14 @@ class HttpRequestHandler extends Component {
     }
     onChange(e) { // When entering files with input ()
         for(let f of e.target.files) {
-            if(!this.state.files[f.name]) {
-                let dic = JSON.parse(JSON.stringify(this.state.files));
-                dic[f.name] = f;
-                this.setState({files : dic});
+            if(!this.state.fileNames[f.name]) {
+                let dic = JSON.parse(JSON.stringify(this.state.fileNames));
+                dic[f.name] = 1;
+                let array = this.state.files;
+                array.push(f);
+                this.setState({files : array, fileNames : dic});
             }
         }
-        this.setState({ files: e.target.files });
     }
 
     onStart(e) { // Start simulation button
@@ -51,8 +54,9 @@ class HttpRequestHandler extends Component {
         const url = 'http://localhost:8000/upload'; // server route to POST request
         const formData = new FormData();
         let i = 0;
-        for (let fileName of Object.keys(files)) {
-            formData.append("File" + i, files[fileName], fileName); // standardized name for formData entry : "File{i}"
+        console.log(files);
+        for (let file of files) {
+            formData.append("File" + i, file, file.name); // standardized name for formData entry : "File{i}"
             i += 1;
         }
         const config = {
@@ -66,10 +70,14 @@ class HttpRequestHandler extends Component {
     onDrop(file, e) {
         if(file) {
             for(let f of file) {
-                if(!this.state.files[f.name]) {
-                    let dic = JSON.parse(JSON.stringify(this.state.files));
-                    dic[f.name] = f;
-                    this.setState({files : dic});
+                if(!this.state.fileNames[f.name]) {
+                    let dic = JSON.parse(JSON.stringify(this.state.fileNames));
+                    dic[f.name] = 1;
+                    let text = "" + Object.keys(dic).length + " files dropped.";
+                    console.log(dic);
+                    let array = this.state.files;
+                    array.push(f);
+                    this.setState({files : array, dropText : text, fileNames : dic});
                 }
             }
         }
@@ -84,7 +92,7 @@ class HttpRequestHandler extends Component {
                 </p>
                 <div class="file has-name is-boxed is-centered is-fullwidth" >
                 {/* CSS !! */}
-                    <DropZone handleDrop = {this.onDrop}/> 
+                    <DropZone handleDrop = {this.onDrop} text = {this.state.dropText}/> 
                     {/* CSS !! */}
                     <label class="file-label" >
                         <input type="file" className="file-input" multiple onChange={this.onChange} />
