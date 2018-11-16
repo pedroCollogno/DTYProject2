@@ -31,7 +31,7 @@ class HttpRequestHandler extends Component {
             }
         })
     }
-    onChange(e) {
+    onChange(e) { // When entering files with input ()
         for(let f of e.target.files) {
             if(!this.state.files[f.name]) {
                 let dic = JSON.parse(JSON.stringify(this.state.files));
@@ -42,7 +42,7 @@ class HttpRequestHandler extends Component {
         this.setState({ files: e.target.files });
     }
 
-    onStart(e) {
+    onStart(e) { // Start simulation button
         axios.get("http://localhost:8000/startsimulation")
             .then((res) => console.log("Simulation started !"));
     }
