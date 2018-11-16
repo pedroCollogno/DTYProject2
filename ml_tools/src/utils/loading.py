@@ -1,10 +1,3 @@
-<<<<<<< HEAD:ml_tools/src/utils/loading.py
-=======
-import sys
-sys.path.append("..")
-
-import gen.TrackstreamEx_pb2 as ts
->>>>>>> 67678cda9fc7961589ccfe2d60e574f253a52a3a:backdjango/channels_back/utils/loading.py
 import os
 from ..gen import TrackstreamEx_pb2 as ts
 

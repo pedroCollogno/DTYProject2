@@ -4,3 +4,6 @@ scikit-learn
 progressbar
 PyGeodesy
 protobuf
+keras
+pandas
+csv
