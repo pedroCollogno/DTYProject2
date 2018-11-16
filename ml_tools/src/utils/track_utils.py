@@ -7,7 +7,7 @@ def get_track_info(track):
     :param track: the track from which info should be extracted
     :return: a list containing the basic info of the track :
         [measurement_type, central_freq_hz,
-            bandwitdh_hz, average_azimut_deg, begin_date_ms]
+            bandwitdh_hz, average_azimut_deg, begin_date_ms, track_id]
     """
     info_from_track = []
     info_from_track.append(track.itr_measurement.type)
