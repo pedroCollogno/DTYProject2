@@ -4,4 +4,8 @@ build/
 *.idea
 *.egg-info
 *__pycache__
+
+# Deep Learning Folders
 pkl/
+pkl2/
+weights/

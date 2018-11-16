@@ -67,11 +67,3 @@ def get_track_stream_exs_from_prp(filepath):
             TSEX.ParseFromString(frame['data'])
             track_stream_exs.append(TSEX)
     return(track_stream_exs)
-
-
-def create_new_folder(directory):
-    try:
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-    except OSError:
-        print('Error: Creating directory. ' + directory)

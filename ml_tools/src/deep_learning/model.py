@@ -164,6 +164,7 @@ def test():
             'X_new': X_new,
             'Y_new': Y_new
         }, columns=['X_new', 'Y_new'])
+    create_new_folder('pkl2', '.')
     df.to_pickle('./pkl2/{}.pkl'.format(sys.argv[1]))
     X = []
     Y = []
@@ -229,4 +230,4 @@ def train2():
     :param 1: name of file in /pkl folder
 """
 if __name__ == '__main__':
-    train()
+    train2()
