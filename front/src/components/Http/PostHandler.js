@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import axios from "axios";
+import DropZone from "./Drag&Drop";
 import './PostHandler.css';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -7,13 +8,15 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 class HttpRequestHandler extends Component {
 
     constructor(props) {
-        super(props); // TODO : get props from Drag&Drop Component
+        super(props);
         this.state = {
-            files: {} // Contains all the uploaded files
+            files: {},
+            loaded : false // Contains all the uploaded files
         };
         this.onFormSubmit = this.onFormSubmit.bind(this);
         this.onChange = this.onChange.bind(this);
         this.fileUpload = this.fileUpload.bind(this);
+        this.onDrop = this.onDrop.bind(this);
     }
     onFormSubmit(e) {
         e.preventDefault() // Stop form submit
@@ -23,21 +26,33 @@ class HttpRequestHandler extends Component {
                 axios.get("http://localhost:8000/getstations")
                     .then((response) => {
                         this.props.getStations(response);
-                        axios.get("http://localhost:8000/startsimulation")
-                            .then((res) => console.log("Simulation started !"))
+                        this.setState({loaded : true});
                     })
             }
         })
     }
     onChange(e) {
+        for(let f of e.target.files) {
+            if(!this.state.files[f.name]) {
+                let dic = JSON.parse(JSON.stringify(this.state.files));
+                dic[f.name] = f;
+                this.setState({files : dic});
+            }
+        }
         this.setState({ files: e.target.files });
     }
+
+    onStart(e) {
+        axios.get("http://localhost:8000/startsimulation")
+            .then((res) => console.log("Simulation started !"));
+    }
+
     fileUpload(files) {
         const url = 'http://localhost:8000/upload'; // server route to POST request
         const formData = new FormData();
         let i = 0;
-        for (let file of files) {
-            formData.append("File" + i, file, file.name); // standardized name for formData entry : "File{i}"
+        for (let fileName of Object.keys(files)) {
+            formData.append("File" + i, files[fileName], fileName); // standardized name for formData entry : "File{i}"
             i += 1;
         }
         const config = {
@@ -48,13 +63,29 @@ class HttpRequestHandler extends Component {
         return axios.post(url, formData, config) // sends POST request
     }
 
-    render() { // temporary form
+    onDrop(file, e) {
+        if(file) {
+            for(let f of file) {
+                if(!this.state.files[f.name]) {
+                    let dic = JSON.parse(JSON.stringify(this.state.files));
+                    dic[f.name] = f;
+                    this.setState({files : dic});
+                }
+            }
+        }
+    }
+
+    render() {
         return (
+            <div>
             <form onSubmit={this.onFormSubmit} className="container">
                 <p>
                     <strong className="has-text-white-ter">Upload your .PRP files</strong>
                 </p>
                 <div class="file has-name is-boxed is-centered is-fullwidth" >
+                {/* CSS !! */}
+                    <DropZone handleDrop = {this.onDrop}/> 
+                    {/* CSS !! */}
                     <label class="file-label" >
                         <input type="file" className="file-input" multiple onChange={this.onChange} />
                         <span class="file-cta">
@@ -77,6 +108,12 @@ class HttpRequestHandler extends Component {
                     </button>
                 </div>
             </form>
+            {/* CSS !! */}
+            <button class="button" disabled={!this.state.loaded} onClick = {this.onStart}>
+            Start simulation</button>
+            {/* CSS !! */}
+            </div>
+
         )
     }
 }

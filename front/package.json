@@ -19,6 +19,7 @@
     "react": "^16.4.1",
     "react-audio": "0.0.1",
     "react-dom": "^16.4.1",
+    "react-file-drop": "^0.2.7",
     "react-mapbox-gl": "^3.9.2",
     "react-scripts": "1.1.4",
     "react-websocket": "^2.0.0",
