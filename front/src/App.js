@@ -15,10 +15,12 @@ class App extends Component {
   constructor() {
     super();
     this.state = {
-      station: { network_id: 0, coordinates: { lat: 0, lng: 0 }, track_id: 0 },
-      stations: {} // list of all the detected stations so far
+      station : { network_id : 0, coordinates : { lat: 0, lng: 0 }, track_id : 0 },
+      emittors : {}, // list of all the detected stations so far
+      stations : {}
     };
     this.newEmittor = this.newEmittor.bind(this);
+    this.getStations = this.getStations.bind(this);
   }
 
 
@@ -26,19 +28,20 @@ class App extends Component {
     if (station) {
       let stat = JSON.parse(station);
       if (stat.coordinates) {
-        let dic = JSON.parse(JSON.stringify(this.state.stations));
+        let dic = JSON.parse(JSON.stringify(this.state.emittors));
         if (dic["" + stat.network_id]) {
           dic["" + stat.network_id].push(stat);
         }
         else {
           dic["" + stat.network_id] = [stat];
         }
-        this.setState({ stations: dic, station: stat });
+        this.setState({emittors : dic, station : stat });
       }
     }
   }
 
   getStations(response) {
+    this.setState({stations : response.data});
     console.log(response.data);
   }
 
@@ -58,15 +61,16 @@ class App extends Component {
             </div>
           </div>
         </section>
-        < SocketHandler handleData={this.newEmittor} />
+
+        < SocketHandler handleData = {this.newEmittor} />
 
         <div className="container">
-          <MapBox stations={this.state.stations} />
+          <MapBox stations = {this.state.emittors} recStations = {this.state.stations} />
           <div className="tile is-fullwidth">
-            <PostHandler getStations={this.getStations} />
+            <PostHandler getStations = {this.getStations} />
             <table className='container table'>
               <tr>
-                <th >Last station</th>
+                <th>Last station</th>
                 <th colSpan='2'>Coordinates</th>
                 <th>Network</th>
               </tr>
