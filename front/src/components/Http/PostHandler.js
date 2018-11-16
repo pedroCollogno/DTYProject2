@@ -8,9 +8,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 class HttpRequestHandler extends Component {
 
     constructor(props) {
-        super(props); // TODO : get props from Drag&Drop Component
+        super(props);
         this.state = {
-            files: {} // Contains all the uploaded files
+            files: {},
+            loaded : false // Contains all the uploaded files
         };
         this.onFormSubmit = this.onFormSubmit.bind(this);
         this.onChange = this.onChange.bind(this);
@@ -25,8 +26,7 @@ class HttpRequestHandler extends Component {
                 axios.get("http://localhost:8000/getstations")
                     .then((response) => {
                         this.props.getStations(response);
-                        axios.get("http://localhost:8000/startsimulation")
-                            .then((res) => console.log("Simulation started !"))
+                        this.setState({loaded : true});
                     })
             }
         })
@@ -41,6 +41,12 @@ class HttpRequestHandler extends Component {
         }
         this.setState({ files: e.target.files });
     }
+
+    onStart(e) {
+        axios.get("http://localhost:8000/startsimulation")
+            .then((res) => console.log("Simulation started !"));
+    }
+
     fileUpload(files) {
         const url = 'http://localhost:8000/upload'; // server route to POST request
         const formData = new FormData();
@@ -69,14 +75,17 @@ class HttpRequestHandler extends Component {
         }
     }
 
-    render() { // temporary form
+    render() {
         return (
+            <div>
             <form onSubmit={this.onFormSubmit} className="container">
                 <p>
                     <strong className="has-text-white-ter">Upload your .PRP files</strong>
                 </p>
                 <div class="file has-name is-boxed is-centered is-fullwidth" >
-                    <DropZone handleDrop = {this.onDrop}/>
+                {/* CSS !! */}
+                    <DropZone handleDrop = {this.onDrop}/> 
+                    {/* CSS !! */}
                     <label class="file-label" >
                         <input type="file" className="file-input" multiple onChange={this.onChange} />
                         <span class="file-cta">
@@ -99,6 +108,11 @@ class HttpRequestHandler extends Component {
                     </button>
                 </div>
             </form>
+            {/* CSS !! */}
+            <button class="button" disabled={!this.state.loaded} onClick = {this.onStart}>
+            Start simulation</button>
+            {/* CSS !! */}
+            </div>
 
         )
     }
