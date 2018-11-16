@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-tests/
-=======
 tests/
 dist/
 build/
@@ -12,4 +9,3 @@ build/
 pkl/
 pkl2/
 weights/
->>>>>>> DeepLearning

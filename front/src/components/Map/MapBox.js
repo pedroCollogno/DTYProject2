@@ -1,9 +1,5 @@
 import React, { Component } from "react";
-<<<<<<< HEAD
-import ReactMapboxGl, { Cluster, Marker, GeoJSONLayer } from "react-mapbox-gl";
-=======
-import ReactMapboxGl, { Layer, Marker, Feature} from "react-mapbox-gl";
->>>>>>> 022a3989ea0d96c6639b74fe8f4637a7c54741a0
+import ReactMapboxGl, { Layer, Marker, Feature } from "react-mapbox-gl";
 import colormap from "colormap";
 import Stations from "./Stations.js";
 import stationImage from "./satellite.png";
@@ -83,7 +79,6 @@ class MapBox extends Component {
             colors[network] = this.state.colors[i];
             i += 1;
         }
-<<<<<<< HEAD
         return (
             <Map
                 style="mapbox://styles/mapbox/outdoors-v9"
@@ -93,63 +88,40 @@ class MapBox extends Component {
                 }}
                 zoom={[6]}
                 center={this.center()} >
+                <Layer
+                    id="stations"
+                    type="symbol"
+                    layout={{
+                        "icon-image": "stationImage",
+                        "icon-size": 0.05
+                    }}
+                    images={images} >
+                    {
+                        Object.keys(this.props.recStations).map((station, k) =>
+                            <Feature coordinates={[this.props.recStations[station].coordinates.lng, this.props.recStations[station].coordinates.lat]}></Feature>
+                        )
+                    }
+                </Layer>
                 {
                     this.state.networksLabels.map((network, k) => {
                         let clusterCenter = this.clusterCenter(network);
                         return (
-                            <div>
-                                <Marker
-                                    key={"center" + network}
-                                    coordinates={clusterCenter}>
-                                    <div className="centerMarker" style={{ "backgroundColor": colors[network] }}></div>
-                                </Marker>
-                                <Stations stations={this.state.stations[network]} color={this.state.colors[network]} />
+                            <div id={"cluster" + k}>
+                                <Lines
+                                    clusterCenter={clusterCenter} color={colors[network]}
+                                    network={network} stations={this.state.stations[network]} />
+                                <Layer
+                                    id={"center" + network}
+                                    type="circle"
+                                    paint={{
+                                        "circle-color": colors[network],
+                                        "circle-radius": 3
+                                    }}>
+                                    <Feature coordinates={clusterCenter} ></Feature>
+                                </Layer>
+                                <Stations
+                                    stations={this.state.stations[network]} network={network} color={this.state.colors[network]} />
                             </div>)
-=======
-        return(
-        <Map
-            style="mapbox://styles/mapbox/outdoors-v9"
-            containerStyle={{
-            height: "500px",
-            width: "1000px",
-            }}
-            zoom = {[6]}
-            center = {this.center()} >
-            <Layer
-                id = "stations"
-                type = "symbol"
-                layout = {{
-                    "icon-image" : "stationImage",
-                    "icon-size" : 0.05
-                }}
-                images = {images} >
-                {
-                    Object.keys(this.props.recStations).map((station, k) =>
-                        <Feature coordinates={[this.props.recStations[station].coordinates.lng, this.props.recStations[station].coordinates.lat]}></Feature>
-                    )
-                }
-            </Layer>
-            {
-                this.state.networksLabels.map((network, k) => {
-                    let clusterCenter = this.clusterCenter(network);
-                    return(
-                        <div id = {"cluster" + k}>
-                            <Lines 
-                                clusterCenter = {clusterCenter} color = {colors[network]}
-                                network = {network} stations = {this.state.stations[network]} />
-                            <Layer
-                                id = {"center" + network}
-                                type = "circle"
-                                paint = {{
-                                    "circle-color" : colors[network],
-                                    "circle-radius" : 3
-                                }}>
-                                <Feature coordinates = {clusterCenter} ></Feature>
-                            </Layer>
-                            <Stations 
-                                stations = {this.state.stations[network]} network = {network} color = {this.state.colors[network]} />
-                        </div>)
->>>>>>> 022a3989ea0d96c6639b74fe8f4637a7c54741a0
                     })
                 }
                 )
