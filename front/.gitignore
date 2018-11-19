@@ -1,5 +1,6 @@
 # See https://help.github.com/ignore-files/ for more about ignoring files.
 
+.gitignore
 # dependencies
 /node_modules
 
@@ -8,6 +9,7 @@
 
 # production
 /build
+public/maps
 
 # misc
 .DS_Store
@@ -19,3 +21,8 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+*__pycache__
+*scenarios
+*logs
+
+package-lock.json
