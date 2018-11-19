@@ -58,7 +58,7 @@ def fake_data(sequence_size, all=True, n_samples=1000, equalize=False):
         fakeX = []
         items = [[0, 0], [0, 1], [1, 0], [1, 1]]
         for k in range(n_samples):
-            fakeX.append([random.choices(items, weights=[50, 10, 10, 4])[0]
+            fakeX.append([random.choices(items, weights=[50, 10, 10, 1])[0]
                           for i in range(sequence_size)])
         print(fakeX[0])
         fakeY = [1]*len(fakeX)
@@ -233,7 +233,7 @@ def train2():
         predict = 1
         #product = np.prod(X_new[i])
         mean = np.divide(1, np.square(X[i])).mean()
-        if mean > 10e5:
+        if mean > 10:
             predict = 0
         else:
             predict = 1

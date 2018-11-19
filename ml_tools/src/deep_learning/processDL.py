@@ -92,9 +92,10 @@ def predict_all_ids(tsexs):
     stations_data = []
     for tsex in tsexs:
         raw_tracks = get_track_stream_ex_info(tsex, raw_tracks)
-    y_pred, ids = get_dbscan_prediction_min(raw_tracks)
+    y_pred, ids= get_dbscan_prediction_min(raw_tracks)
     stations_data.append([y_pred, ids])
     return [y_pred, ids]
+
 
 
 def get_last_track_by_id(tsexs, id):
@@ -104,7 +105,6 @@ def get_last_track_by_id(tsexs, id):
     :param id: id of the emitter to process
     :return: last track of an emitter
     """
-    print("id", id)
     raw_tracks = []
     for tsex in tsexs:
         tracks = tsex.data.tracks
@@ -128,7 +128,6 @@ def get_start_and_end(tsexs):
         for track in tracks:
             raw_tracks.append(get_track_info_with_alternates(track))
     # raw_tracks : all the tracks with alternates info from a prp
-    print(raw_tracks)
     start_date = raw_tracks[0][6][0][0]
     end_date = raw_tracks[-1][6][0][1]
     sequence_size = (end_date-start_date)/time_step_ms
@@ -182,7 +181,7 @@ def process_data(tsexs, file_name):
         progress += 1
         pbar.update(progress)
         pbar.finish()
-    print(len(emitter_infos))
+    return (emitter_infos)
 
     X = []
     Y = []
@@ -240,7 +239,17 @@ if __name__ == '__main__':
     root = tk.Tk()
     root.withdraw()
     file_path = filedialog.askopenfilename()
-
     tsexs = get_track_stream_exs_from_prp(file_path)
-    process_data(tsexs, sys.argv[1])
+    ei=process_data(tsexs, file_path)
+    i=0
+    for k in ei:
+        if ei[k]['network']>=i:
+            i=ei[k]['network']
+    clusters={}
+    for k in range(i+1):
+        clusters[k]=[]
+    for k in ei:
+        clusters[ei[k]['network']].append(k)
+    print(clusters)
+    print(i)
     # checkPkl(sys.argv[1])
