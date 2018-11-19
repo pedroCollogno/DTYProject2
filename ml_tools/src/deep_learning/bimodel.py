@@ -60,7 +60,6 @@ def fake_data(sequence_size, all=True, n_samples=1000, equalize=False):
         for k in range(n_samples):
             fakeX.append([random.choices(items, weights=[50, 10, 10, 4])[0]
                           for i in range(sequence_size)])
-        print(fakeX[0])
         fakeY = [1]*len(fakeX)
         for i in range(len(fakeX)):
             for couple in fakeX[i]:
@@ -92,7 +91,7 @@ def train():
     Y = np.array(data[1])
 
     model = Sequential()
-    model.add(LSTM(units=128, input_shape=(None,2)))
+    model.add(Bidirectional(LSTM(units=128), input_shape=(None,2)))
     #model.add(LSTM(units = 128, input_shape=(None , 2)))
     #model.add(Dense(2, activation='relu'))
     model.add(Dense(1, activation="sigmoid"))
@@ -117,7 +116,7 @@ def train():
 
     # Use this to save the weights to be able to reload them while testing
     create_new_folder('weights', '.')
-    model.save_weights('./weights/my_model_weights.h5')
+    model.save_weights('./weights/my_bimodel_weights.h5')
 
 
 def test():
@@ -146,12 +145,12 @@ def test():
     Y = np.array(list(df['Y'].values))
 
     model = Sequential()
-    model.add(LSTM(units=128, input_shape=(None,2)))
+    model.add(Bidirectional(LSTM(units=128), input_shape=(None,2)))
     #model.add(Dense(2, activation='relu'))
     model.add(Dense(1, activation="sigmoid"))
     model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=[
                   'accuracy', metrics.f1_score_threshold(), metrics.precision_threshold(), metrics.recall_threshold()])
-    model.load_weights('./weights/my_model_weights.h5')
+    model.load_weights('./weights/my_bimodel_weights.h5')
 
     #ones_index = np.where(Y==1)[0]
 
@@ -207,7 +206,7 @@ def train2():
     #print(df['X_new'][0])
 
     model2 = Sequential()
-    model2.add((LSTM(units=128, input_shape=(None,1))))
+    model2.add(Bidirectional(LSTM(units=128), input_shape=(None,1)))
     #model2.add(Dense(2, activation='relu'))
     model2.add(Dense(1, activation="sigmoid"))
 
@@ -265,4 +264,4 @@ def train2():
     :param 1: name of file in /pkl folder
 """
 if __name__ == '__main__':
-    train2()
+    train()
