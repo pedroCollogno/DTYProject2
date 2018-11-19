@@ -1,13 +1,14 @@
 import React, { Component } from "react";
-import ReactMapboxGl, { Layer, Marker, Feature } from "react-mapbox-gl";
+import ReactMapboxGl, { Layer, Marker, Feature, ZoomControl, ScaleControl } from "react-mapbox-gl";
 import colormap from "colormap";
 import Stations from "./Stations.js";
 import stationImage from "./satellite.png";
 import Lines from "./Lines.js";
-
+import { style } from "./style";
+//let mapboxgl = require("./mapbox-gl/mapbox-gl")
 import "./MapBox.css";
 
-const Map = ReactMapboxGl({ // !! REQUIRES INTERNET CONNECTION !! MapBox API (temporary)
+const Map = ReactMapboxGl({ // Only set in case internet is used, as an optional feature.
     accessToken: "pk.eyJ1IjoicGllcnJvdGNvIiwiYSI6ImNqbzc5YjVqODB0Z2Mzd3FxYjVsNHNtYm8ifQ.S_87byMcZ0YDwJzTdloBvw"
 });
 
@@ -23,8 +24,13 @@ class MapBox extends Component {
                 nshades: Math.max(Object.keys(this.props.stations).length, 8),
                 format: 'hex',
                 alpha: 1
-            })
+            }),
+            style: {
+                online: 'mapbox://styles/mapbox/streets-v9',
+                offline: style
+            }
         };
+
     }
 
     componentWillReceiveProps(nextProps) {
@@ -50,11 +56,13 @@ class MapBox extends Component {
         return [this.props.stations[keys[0]][0].coordinates.lng, this.props.stations[keys[0]][0].coordinates.lat];
     }
 
-    clusterMarker = (coordinates) => (
-        <Marker coordinates={coordinates}>
+    clusterMarker(coordinates) {
+        return (
+            <Marker coordinates={coordinates}>
 
-        </Marker>
-    );
+            </Marker>
+        );
+    }
 
     clusterCenter(network) {
         let x = 0;
@@ -82,12 +90,12 @@ class MapBox extends Component {
         return (
             <div className="map-container">
                 <Map
-                    style="mapbox://styles/mapbox/basic-v9"
+                    style={this.state.style[this.props.connection]}
                     containerStyle={{
-                        height: "500px",
+                        height: "100%",
                         width: "100%",
                     }}
-                    zoom={[6]}
+                    zoom={[4]}
                     center={this.center()} >
                     <Layer
                         id="stations"
@@ -125,10 +133,24 @@ class MapBox extends Component {
                                 </div>)
                         })
                     }
+                    <ZoomControl></ZoomControl>
+                    <ScaleControl></ScaleControl>
                 </Map>
             </div>
         )
     }
-}
 
+
+}
+/**
+ * componentDidMount() {
+        let map = new mapboxgl.Map({
+            container: 'map',
+            center: [8.3221, 46.5928],
+            zoom: 1,
+            style: style
+        });
+        map.addControl(new mapboxgl.Navigation());
+    }
+ */
 export default MapBox;
