@@ -84,17 +84,29 @@ def test():
 
     to_predict=np.array(real_data)
     predictions=model.predict(to_predict)
-    predictions=np.array([(k[0]>0.5) for k in predictions])
+    predictions=np.array([k[0] for k in predictions])
     labels=np.array(labels)
-    for i in range(len(predictions)):
-        if (predictions[i]!=labels[i]):
-            print(real_data[i])
-            print(predictions[i])
-            print(labels[i])
-            break
-    print(len(predictions))
+    print(len(labels))
+    new_labels=[]
+    new_predictions=[]
+    for k in range(len(labels)/39):
+        total_prediction=0
+        isLabelTrue=labels[39*k]
+        for i in range(39):
+            total_prediction+=predictions[39*k+i]
+            if not(isLabelTrue==(labels[39*k+i])):
+                print('PROBLEM')
+        new_labels.append(isLabelTrue)
+        new_predictions.append(total_prediction)
+    print(len(new_labels))
+    print(len(new_predictions))
     print(recall_score(labels,predictions))
     print(recall_score(labels,predictions, pos_label=0))
+    print(precision_score(labels,predictions))
+    print(precision_score(labels,predictions, pos_label=0))
+    print('reworked')
+    print(recall_score(new_labels,new_predictions))
+    print(recall_score(new_labels,new_predictions, pos_label=0))
     print(precision_score(labels,predictions))
     print(precision_score(labels,predictions, pos_label=0))
     
