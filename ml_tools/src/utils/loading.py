@@ -67,3 +67,23 @@ def get_track_stream_exs_from_prp(filepath):
             TSEX.ParseFromString(frame['data'])
             track_stream_exs.append(TSEX)
     return(track_stream_exs)
+
+
+def get_track_streams_from_prp(filepath):
+    """Reads a .prp file, and takes TrackStream objects from it
+
+    :param filepath: path to the .prp file to read
+    :return: the list of all TrackStream objects in the .prp file
+    """
+    frames = read_prp(filepath)
+    track_streams = []
+    for frame in frames:
+        if frame['data_type'] == 512:
+            track_stream = ts.TrackStream()
+            track_stream.ParseFromString(frame['data'])
+            track_streams.append(track_stream)
+        elif frame['data_type'] == 518:
+            TSEX = ts.TrackStreamEx()
+            TSEX.ParseFromString(frame['data'])
+            track_streams.append(TSEX.data)
+    return(track_streams)

@@ -251,4 +251,4 @@ def train2():
     :param 1: name of file in /pkl folder
 """
 if __name__ == '__main__':
-    train2()
+    train()

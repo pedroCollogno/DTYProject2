@@ -30,7 +30,7 @@ def main(*args, debug=False, sender_function=None):
     all_tracks_data = {}
     n = len(args[0])
 
-    for i in range(1, n, 50):
+    for i in range(1, n, 30):
         track_streams = []
         for arg in args:
             track_streams.append(arg[:i])

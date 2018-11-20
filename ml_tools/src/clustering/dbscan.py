@@ -3,7 +3,7 @@ from sklearn.cluster import DBSCAN
 
 
 def get_dbscan_prediction_min(data):
-    """ Function that clusters data from TrackStreamEx objects
+    """ Function that clusters data from TrackStream objects
 
     :param data: The data to cluster using the dbscan algorithm
     :return: a tuple, in which there is :
@@ -16,7 +16,7 @@ def get_dbscan_prediction_min(data):
 
 
 def get_dbscan_prediction(data, all_tracks_data={}):
-    """ Function that clusters data from TrackStreamEx objects
+    """ Function that clusters data from TrackStream objects
 
     :param data: The data to cluster using the dbscan algorithm
     :param all_tracks_data: the dict containing all data on found tracks

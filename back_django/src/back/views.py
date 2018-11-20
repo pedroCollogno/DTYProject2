@@ -36,7 +36,7 @@ def send_stations_positions(request):
     track_streams = []
     for path in paths:
         if path is not None:
-            track_stream = load.get_track_stream_exs_from_prp(path)
+            track_stream = load.get_track_streams_from_prp(path)
             track_streams.append(track_stream)
     json_obj = station_utils.get_station_coordinates(*track_streams)
     Group('users').send({
@@ -61,7 +61,7 @@ def startsimulation(request):
     track_streams = []
     for path in paths:
         if path is not None:
-            track_stream = load.get_track_stream_exs_from_prp(path)
+            track_stream = load.get_track_streams_from_prp(path)
             track_streams.append(track_stream)
     station_utils.sync_stations(*track_streams)
 

@@ -23,12 +23,12 @@ def sync_station_streams(station_1_track_stream, station_2_track_stream):
     :param station_1_track_stream: track stream for first station
     :param station_2_track_stream: track stream for second station
     """
-    s_1_dates = [station_1_track_stream[i].data.debut_cycle.date_ms for i in range(
+    s_1_dates = [station_1_track_stream[i].debut_cycle.date_ms for i in range(
         len(station_1_track_stream))]
-    s_2_dates = [station_2_track_stream[i].data.debut_cycle.date_ms for i in range(
+    s_2_dates = [station_2_track_stream[i].debut_cycle.date_ms for i in range(
         len(station_2_track_stream))]
     min_cycle_duration = min(
-        station_1_track_stream[0].data.duree_cycle_ms, station_2_track_stream[0].data.duree_cycle_ms)
+        station_1_track_stream[0].duree_cycle_ms, station_2_track_stream[0].duree_cycle_ms)
 
     while s_1_dates[0] - s_2_dates[0] > min_cycle_duration:
         s_2_dates.pop(0)
@@ -76,7 +76,7 @@ def get_fused_station_tracks(station_1_track_streams, station_2_track_streams, a
 
     :param station_1_track_streams: the track streams from the first station
     :param station_2_track_streams: the track streams from the second station
-    :param are_lists: (optional) list of two booleans, to allow you to replace a trackstreamex object
+    :param are_lists: (optional) list of two booleans, to allow you to replace a TrackStream object
         by a list of tracks in input.
     """
     global_track_streams = []
@@ -87,12 +87,12 @@ def get_fused_station_tracks(station_1_track_streams, station_2_track_streams, a
 
     for i in range(n):
         if not are_lists[0]:
-            track_stream_1 = station_1_track_streams[i].data.tracks
+            track_stream_1 = station_1_track_streams[i].tracks
         else:
             track_stream_1 = station_1_track_streams[i]
 
         if not are_lists[1]:
-            track_stream_2 = station_2_track_streams[i].data.tracks
+            track_stream_2 = station_2_track_streams[i].tracks
         else:
             track_stream_2 = station_2_track_streams[i]
 
@@ -148,8 +148,8 @@ def get_station_coordinates(*args):
     i = 1
     found_station = False
     for arg in args:
-        for trackstream in arg:
-            for track in trackstream.data.tracks:
+        for track_stream in arg:
+            for track in track_stream.tracks:
                 if len(track.alternates) > 0:
                     station_name = 'station' + str(i)
                     station_coords[station_name] = {}

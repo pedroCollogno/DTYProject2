@@ -19,14 +19,14 @@ def get_track_info(track):
     return info_from_track
 
 
-def get_track_stream_ex_info(track_stream_ex, data=[]):
-    """ Takes essential information out of a given TrackStreamEx object
+def get_track_stream_info(track_stream, data=[]):
+    """ Takes essential information out of a given TrackStream object
 
-    :param track_stream_ex: the TrackStreamEx object from which info should be extracted
-    :param data: (optional) the data from other TrackStreamEx objects, that needs to be updated with new info
-    :return: a list containing the basic info of every track contained in the TrackStreamEx object.
+    :param track_stream: the TrackStream object from which info should be extracted
+    :param data: (optional) the data from other TrackStream objects, that needs to be updated with new info
+    :return: a list containing the basic info of every track contained in the TrackStream object.
     """
-    tracks = track_stream_ex.data.tracks
+    tracks = track_stream.tracks
     for track in tracks:
         batch = get_track_info(track)
         if batch not in data:
