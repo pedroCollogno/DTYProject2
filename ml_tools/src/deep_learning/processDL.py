@@ -235,12 +235,15 @@ def process_data(tsexs, file_name):
     :param 1: name of prp file in /prod to load
     :param 2: name of pkl file that will be saved in /pkl
 """
-if __name__ == '__main__':
-    root = tk.Tk()
+
+def create_clusters():
+    root=tk.Tk()
     root.withdraw()
-    file_path = filedialog.askopenfilename()
-    tsexs = get_track_stream_exs_from_prp(file_path)
+    file_path=filedialog.askopenfilename()
+    tsexs= get_track_stream_exs_from_prp(file_path)
     ei=process_data(tsexs, file_path)
+    print('hello')
+    print(len(ei))
     i=0
     for k in ei:
         if ei[k]['network']>=i:
@@ -250,6 +253,14 @@ if __name__ == '__main__':
         clusters[k]=[]
     for k in ei:
         clusters[ei[k]['network']].append(k)
-    print(clusters)
-    print(i)
+    return(clusters, ei)
+
+if __name__ == '__main__':
+    root = tk.Tk()
+    root.withdraw()
+    #file_path = filedialog.askopenfilename()
+    #tsexs = get_track_stream_exs_from_prp(file_path)
+    #process_data(tsexs, file_path)
+    create_clusters()
+
     # checkPkl(sys.argv[1])
