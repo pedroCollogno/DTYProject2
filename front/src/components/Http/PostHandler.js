@@ -75,9 +75,9 @@ class HttpRequestHandler extends Component {
                 if (!this.state.fileNames[f.name]) {
                     let dic = JSON.parse(JSON.stringify(this.state.fileNames));
                     dic[f.name] = 1;
-                    let text = "" + Object.keys(dic).length + " files dropped.";
                     let array = this.state.files;
                     array.push(f);
+                    let text = "" + array.length + " files dropped.";
                     this.setState({ files: array, dropText: text, fileNames: dic });
                 }
             }
