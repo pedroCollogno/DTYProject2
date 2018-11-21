@@ -4,7 +4,6 @@
 
 # Logs
 logs/
-tracks_json/
 src/logs
 
 # Other files
