@@ -71,14 +71,12 @@ class App extends Component {
                 </h2>
               </div>
 
-
               <div className="field switch-container">
                 <input id="switchRoundedOutlinedInfo" type="checkbox" name="switchRoundedOutlinedInfo" className="switch is-rtl is-rounded is-outlined is-info" onChange={this.handleChange} />
                 <label htmlFor="switchRoundedOutlinedInfo"><strong>Check to use online map</strong></label>
               </div>
             </div>
           </div>
-
         </section>
 
         < SocketHandler handleData={this.newEmittor} />
@@ -121,13 +119,10 @@ class App extends Component {
                       )
                     })
                   }
-
                 </table>
               </div> : null)
           }
-
         </div>
-
       </div >
     );
   }
