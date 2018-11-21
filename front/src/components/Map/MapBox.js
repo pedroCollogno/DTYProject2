@@ -5,7 +5,6 @@ import Stations from "./Stations.js";
 import stationImage from "./satellite.png";
 import Lines from "./Lines.js";
 import { style } from "./style";
-//let mapboxgl = require("./mapbox-gl/mapbox-gl")
 import "./MapBox.css";
 
 const Map = ReactMapboxGl({ // Only set in case internet is used, as an optional feature.
@@ -17,6 +16,7 @@ class MapBox extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            zoom: 4,
             stations: this.props.stations,
             networksLabels: Object.keys(this.props.stations),
             colors: colormap({
@@ -28,9 +28,19 @@ class MapBox extends Component {
             style: {
                 online: 'mapbox://styles/mapbox/streets-v9',
                 offline: style
+            },
+            networksToggled: {
             }
         };
+<<<<<<< HEAD
+        for (let label of Object.keys(this.props.stations)) {
+            this.state.networksToggled[label] = false;
+        }
+        this.toggleNetwork = this.toggleNetwork.bind(this);
+
+=======
         this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
+>>>>>>> 94284f88c33ef95edbe9bb129e7a0acf49ae9392
     }
 
     componentWillReceiveProps(nextProps) {
@@ -69,7 +79,15 @@ class MapBox extends Component {
     }
 
     toggleNetwork(network) {
+<<<<<<< HEAD
+        console.log(Map.get);
+        let toggled = this.state.networksToggled[network];
+        let networksToggledCopy = JSON.parse(JSON.stringify(this.state.networksToggled));
+        networksToggledCopy[network] = !toggled;
+        this.setState({ networksToggled: networksToggledCopy });
+=======
 
+>>>>>>> 94284f88c33ef95edbe9bb129e7a0acf49ae9392
     }
 
     render() {
@@ -90,8 +108,8 @@ class MapBox extends Component {
                         height: "100%",
                         width: "100%",
                     }}
-                    zoom={[4]}
-                    center={this.center()} >
+
+                >
                     <Layer
                         id="stations"
                         type="symbol"
@@ -109,29 +127,41 @@ class MapBox extends Component {
                         this.state.networksLabels.map((network, k) => {
                             let clusterCenter = this.clusterCenter(network);
                             return (
+<<<<<<< HEAD
+                                <div id={"cluster" + k}>
+                                    {this.state.networksToggled[network] &&
+                                        <Lines
+                                            clusterCenter={clusterCenter} color={colors[network]}
+                                            network={network} stations={this.state.stations[network]} />
+                                    }
+=======
                                 <div id={"cluster" + k} key={"cluster" + k}>
                                     <Lines
                                         clusterCenter={clusterCenter} color={colors[network]}
                                         network={network} stations={this.state.stations[network]} />
+>>>>>>> 94284f88c33ef95edbe9bb129e7a0acf49ae9392
                                     <Layer
                                         id={"center" + network}
                                         type="circle"
                                         onClick={this.toggleNetwork(network)}
                                         paint={{
                                             "circle-color": colors[network],
-                                            "circle-radius": 3
+                                            "circle-radius": 6
                                         }}>
-                                        <Feature coordinates={clusterCenter} ></Feature>
+                                        <Feature coordinates={clusterCenter} onClick={() => this.toggleNetwork(network)}></Feature>
                                     </Layer>
-                                    <Stations
-                                        stations={this.state.stations[network]} network={network} color={this.state.colors[network]} />
+                                    {this.state.networksToggled[network] &&
+                                        <Stations
+                                            stations={this.state.stations[network]} network={network}
+                                            color={this.state.colors[network]} />
+                                    }
                                 </div>)
                         })
                     }
                     <ZoomControl></ZoomControl>
                     <ScaleControl></ScaleControl>
-                </Map>
-            </div>
+                </Map >
+            </div >
         )
     }
 
