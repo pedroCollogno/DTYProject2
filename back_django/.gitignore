@@ -4,10 +4,9 @@
 
 # Logs
 logs/
-tracks_json/
 src/logs
 
 # Other files
 src/db.sqlite3
-src/tracks_json
+tracks_json/
 scenarios
