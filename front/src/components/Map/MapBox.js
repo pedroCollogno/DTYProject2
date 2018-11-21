@@ -30,20 +30,20 @@ class MapBox extends Component {
                 offline: style
             }
         };
-
+        this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
     }
 
     componentWillReceiveProps(nextProps) {
         if (nextProps.stations !== this.props.stations) {
             this.setState({
-                stations: this.props.stations,
-                networksLabels: Object.keys(this.props.stations),
+                stations: nextProps.stations,
+                networksLabels: Object.keys(nextProps.stations),
                 colors: colormap({
                     colormap: 'jet',
-                    nshades: Math.max(Object.keys(this.props.stations).length, 8),
+                    nshades: Math.max(Object.keys(nextProps.stations).length, 8),
                     format: 'hex',
                     alpha: 1
-                })
+                }) // once component received new props and has set its state, render component anew with new state.
             });
         }
     }
@@ -51,17 +51,9 @@ class MapBox extends Component {
     center() {
         let keys = this.state.networksLabels;
         if (keys.length === 0) {
-            return [2.33, 48.86]; // centered on Paname bb
+            return [2.33, 48.86]; // centered on Paris
         }
         return [this.props.stations[keys[0]][0].coordinates.lng, this.props.stations[keys[0]][0].coordinates.lat];
-    }
-
-    clusterMarker(coordinates) {
-        return (
-            <Marker coordinates={coordinates}>
-
-            </Marker>
-        );
     }
 
     clusterCenter(network) {
@@ -76,13 +68,16 @@ class MapBox extends Component {
         return [x / count, y / count];
     }
 
+    toggleNetwork(network) {
+
+    }
 
     render() {
+        let colors = {}
+        let i = 0;
         let image = new Image(512, 512);
         image.src = stationImage;
         let images = ["stationImage", image];
-        let colors = {}
-        let i = 0;
         for (let network of this.state.networksLabels) {
             colors[network] = this.state.colors[i];
             i += 1;
@@ -107,21 +102,21 @@ class MapBox extends Component {
                         images={images} >
                         {
                             Object.keys(this.props.recStations).map((station, k) =>
-                                <Feature coordinates={[this.props.recStations[station].coordinates.lng, this.props.recStations[station].coordinates.lat]}></Feature>
+                                <Feature coordinates={[this.props.recStations[station].coordinates.lng, this.props.recStations[station].coordinates.lat]} key={100 * this.props.recStations[station].coordinates.lng + this.props.recStations[station].coordinates.lat}></Feature>
                             )
                         }
-                    </Layer>
-                    {
+                    </Layer>                    {
                         this.state.networksLabels.map((network, k) => {
                             let clusterCenter = this.clusterCenter(network);
                             return (
-                                <div id={"cluster" + k}>
+                                <div id={"cluster" + k} key={"cluster" + k}>
                                     <Lines
                                         clusterCenter={clusterCenter} color={colors[network]}
                                         network={network} stations={this.state.stations[network]} />
                                     <Layer
                                         id={"center" + network}
                                         type="circle"
+                                        onClick={this.toggleNetwork(network)}
                                         paint={{
                                             "circle-color": colors[network],
                                             "circle-radius": 3
