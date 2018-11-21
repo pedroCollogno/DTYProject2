@@ -2,10 +2,10 @@
 
 import numpy as np
 
-from utils.log import logger, create_new_folder
-from utils.station_utils import *
-from utils.track_utils import *
-from clustering.dbscan import *
+from .utils.log import logger, create_new_folder
+from .utils.station_utils import *
+from .utils.track_utils import *
+from .clustering.dbscan import *
 
 import json
 import copy

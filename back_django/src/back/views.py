@@ -7,8 +7,7 @@ from .forms import FileForm
 from django.core.files.storage import FileSystemStorage
 import os
 
-
-from ml_tools.clustering.threads import DataProcessThread
+from ml_tools.threads import DataProcessThread
 from ml_tools.utils import station_utils
 from ml_tools.utils import loading as load
 
