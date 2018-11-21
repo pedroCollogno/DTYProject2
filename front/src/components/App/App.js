@@ -87,26 +87,45 @@ class App extends Component {
           <MapBox stations={this.state.emittors} recStations={this.state.stations} connection={this.state.connection} />
 
           <PostHandler getStations={this.getStations} />
+          {
+            (Object.keys(this.state.emittors).length > 0 ?
+              <div className="tile is-fullwidth" id="tabletile">
+                <table className='table is-hoverable'>
+                  <thead>
+                    <tr>
+                      <th>Emittor ID</th>
+                      <th colSpan='2'>Coordinates</th>
+                      <th>Frequency</th>
+                      <th>Network</th>
+                    </tr>
+                  </thead>
+                  {
+                    Object.keys(this.state.emittors).map((key) => {
+                      return (
+                        <tbody key={key}>
+                          {
+                            this.state.emittors[key].map((emittor) => {
+                              return (
+                                <tr key={emittor.track_id}>
+                                  <td>{emittor.track_id}</td>
+                                  <td>{emittor.coordinates.lat}</td>
+                                  <td>{emittor.coordinates.lng}</td>
+                                  <td>{emittor.frequency}</td>
+                                  <td>{emittor.network_id + 1}</td>
+                                </tr>
+                              )
+                            })
+                          }
+                          <tr></tr>
+                        </tbody>
+                      )
+                    })
+                  }
 
-          <div className="tile is-fullwidth" id="tabletile">
-            <table className='table'>
-              <thead>
-                <tr>
-                  <th>Last station</th>
-                  <th colSpan='2'>Coordinates</th>
-                  <th>Network</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>{this.state.station.track_id}</td>
-                  <td>{this.state.station.coordinates.lat}</td>
-                  <td>{this.state.station.coordinates.lng}</td>
-                  <td>{this.state.station.network_id}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+                </table>
+              </div> : null)
+          }
+
         </div>
 
       </div >
