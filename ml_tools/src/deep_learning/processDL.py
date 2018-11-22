@@ -28,21 +28,21 @@ from clustering.dbscan import get_dbscan_prediction_min
 time_step_ms = 500
 
 
-def removeFiles(directory):
-    """ Removes all files from a directory
+def createFolder(directory):
+    try:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+    except OSError:
+        print('Error: Creating directory. ' + directory)
 
-    :param directory: the directory from which files should be removed
-    """
+
+def removeFiles(directory):
     filelist = [f for f in os.listdir(directory)]
     for f in filelist:
         os.remove(os.path.join(directory, f))
 
 
 def checkPkl(file):
-    """ TODO: COMPLETE DOCS
-
-    :param file: TODO: COMPLETE DOCS
-    """
     file_path = './pkl/{}'.format(sys.argv[1])
     df = pd.read_pickle('./pkl/{}'.format(sys.argv[1]))
     print(df)
@@ -162,7 +162,7 @@ def process_data(tsexs, file_name):
     """
     preds = predict_all_ids(tsexs)
     test_ids = set(preds[1])
-    print("Number of emitters :", len(test_ids), len(preds[1]))
+    #print("Number of emitters :", len(test_ids), len(preds[1]))
 
     temporal_data = get_start_and_end(tsexs)
     start_date_ms = temporal_data[0]
@@ -181,7 +181,6 @@ def process_data(tsexs, file_name):
         progress += 1
         pbar.update(progress)
         pbar.finish()
-    print(len(emitter_infos))
 
     X = []
     Y = []
@@ -191,10 +190,8 @@ def process_data(tsexs, file_name):
     pbar2 = ProgressBar(maxval=(len(preds[0])*len(preds[0]))/2)
     pbar2.start()
 
-    create_new_folder(file_name, './pkl')
+    createFolder('./pkl/{}'.format(file_name))
     removeFiles('./pkl/{}'.format(file_name))
-
-    print('coucou',len(list(itertools.combinations(preds[1], 2))))
 
     for couple in itertools.combinations(preds[1], 2):
         Y_value = int(emitter_infos[couple[0]]["network"]

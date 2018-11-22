@@ -123,12 +123,17 @@ def train():
     #model.save_weights('./weights/my_model_weights.h5')
 
 
-def test():
+def test(file_name):
     """
         Tests stuff
         TODO: COMPLETE DOCS 
     """
-    file_path = './pkl/{}'.format(sys.argv[1])
+
+    file_path = './pkl/{}'.format(file_name)
+
+    if len(sys.argv) > 1:
+        file_path = './pkl/{}'.format(sys.argv[1])
+
     filelist = [f for f in os.listdir(file_path)]
     df = pd.DataFrame(columns=['X', 'Y', 'id_Couple'])
 
@@ -138,7 +143,7 @@ def test():
 
     print("Getting the files...")
     for f in filelist:
-        df_temp = pd.read_pickle('./pkl/{0}/{1}'.format(sys.argv[1], f))
+        df_temp = pd.read_pickle(file_path + '/{}'.format(f))
         df = pd.concat([df, df_temp], ignore_index=True)
         df_temp = None
         progress += 1
@@ -192,7 +197,8 @@ def test():
             'id_Couple' : id_Couple
         }, columns=['X_new', 'Y_new', 'id_Couple'])
     create_new_folder('pkl2', '.')
-    df.to_pickle('./pkl2/{}.pkl'.format(sys.argv[1]))
+    file_to_save_path = './pkl2/{}.pkl'.format(file_name)
+    df.to_pickle(file_to_save_path)
     X = []
     Y = []
 
@@ -204,12 +210,15 @@ def test():
     # print(predictions, predictions.count(1))
 
 
-def train2():
+def train2(file_name):
     """ 
         Trains a model on data from '.pkl2' folder
         TODO: COMPLETE DOCS 
     """
-    df = pd.read_pickle('./pkl2/{}.pkl'.format(sys.argv[1]))
+
+    file_path = './pkl2/{}.pkl'.format(file_name)
+
+    df = pd.read_pickle(file_path)
 
     # model2 = Sequential()
     # model2.add(LSTM(units=128, input_shape=(None, 1)))
@@ -241,7 +250,7 @@ def train2():
 
     id1 = [couple[0] for couple in id_Couple]
     id2 = [couple[1] for couple in id_Couple]
-    distance = [np.subtract(1, np.square(X[i])).mean() for i in range(len(X))]
+    distance = [np.divide(1, (X[i])).mean() for i in range(len(X))]
     df = pd.DataFrame(
         {
             'id1': id1,
@@ -270,8 +279,9 @@ def train2():
 
     np_data = np.array(normalized_distance_matrix)
     #print(np_data)
-    prediction = DBSCAN(min_samples=1, metric="precomputed").fit_predict(np_data)
-    print(prediction)
+    prediction = DBSCAN(eps=0.0000002, min_samples=1, metric="precomputed").fit_predict(np_data)
+    
+    return(prediction, list(index))
 
 
 

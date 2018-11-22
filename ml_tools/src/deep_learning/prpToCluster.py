@@ -20,10 +20,13 @@ if __name__ == "__main__" :
     root = tk.Tk()
     root.withdraw()
     file_path = filedialog.askopenfilename()
-    print(file_path)
+
+    file_name = file_path.split('/')[-1][:-4]
 
     tsexs = get_track_stream_exs_from_prp(file_path)
-    processDL.process_data(tsexs, sys.argv[1])
-    model.test()
+    processDL.process_data(tsexs, file_name)
+    model.test(file_name)
+    model.train2(file_name)
+
 
 
