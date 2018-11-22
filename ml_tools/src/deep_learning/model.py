@@ -273,7 +273,8 @@ def train2(file_name):
     print("Before normalization", distance_matrix)
 
     # Normalize the distance matrix
-    xmax, xmin = distance_matrix.max(), distance_matrix.min()
+    xmax, xmin = max(distance_matrix.max()), min(distance_matrix.min())
+    print("X-Max :", xmax)
     normalized_distance_matrix = (distance_matrix - xmin)/(xmax - xmin)
     print("After normalization", normalized_distance_matrix)
 
