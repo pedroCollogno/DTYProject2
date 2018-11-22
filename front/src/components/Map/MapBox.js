@@ -156,7 +156,16 @@ class MapBox extends Component {
                                             "circle-stroke-width": this.state.highlights["" + network]
                                         }}>
                                         <Feature coordinates={clusterCenter} onClick={() => this.toggleNetwork(network)}
-                                            onMouseEnter={() => this.mouseEnter(network)} onMouseLeave={() => this.mouseExit(network)}></Feature>
+                                            onMouseEnter={() => {
+                                                if (this.state.stations[network].length > 1) {
+                                                    this.mouseEnter(network)
+                                                }
+                                            }}
+                                            onMouseLeave={() => {
+                                                if (this.state.stations[network].length > 1) {
+                                                    this.mouseExit(network)
+                                                }
+                                            }}></Feature>
                                     </Layer>
                                     {this.state.networksToggled[network] &&
                                         <Stations
