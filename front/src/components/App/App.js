@@ -18,11 +18,14 @@ class App extends Component {
       station: { network_id: 0, coordinates: { lat: 0, lng: 0 }, track_id: 0 },
       emittors: {}, // list of all the detected stations so far
       stations: {},
-      connection: 'offline'
+      connection: 'offline',
+      networksToggled: {
+      }
     };
     this.newEmittor = this.newEmittor.bind(this);
     this.getStations = this.getStations.bind(this);
     this.handleChange = this.handleChange.bind(this);
+    this.toggleNetwork = this.toggleNetwork.bind(this);
   }
 
   handleChange(event) {
@@ -55,6 +58,23 @@ class App extends Component {
     console.log(response.data);
   }
 
+  toggleNetwork(network) {
+    let networksToggledCopy = JSON.parse(JSON.stringify(this.state.networksToggled));
+    if (networksToggledCopy[network] == undefined) {
+      networksToggledCopy[network] = true;
+    }
+    else {
+      networksToggledCopy[network] = !networksToggledCopy[network];
+    }
+    this.setState({ networksToggled: networksToggledCopy });
+  }
+
+  getBorderStyle(network) {
+    if (this.state.networksToggled[network] == undefined || !this.state.networksToggled[network]) {
+      return "none";
+    }
+    return "solid";
+  }
 
   render() {
     return (
@@ -82,7 +102,8 @@ class App extends Component {
         < SocketHandler handleData={this.newEmittor} />
 
         <div className="container">
-          <MapBox stations={this.state.emittors} recStations={this.state.stations} connection={this.state.connection} />
+          <MapBox stations={this.state.emittors} recStations={this.state.stations} connection={this.state.connection}
+            toggleNetwork={this.toggleNetwork} />
 
           <PostHandler getStations={this.getStations} />
           {
@@ -100,7 +121,11 @@ class App extends Component {
                   {
                     Object.keys(this.state.emittors).map((key) => {
                       return (
-                        <tbody key={key}>
+                        <tbody key={key} style={{
+                          borderStyle: this.getBorderStyle(key),
+                          borderColor: "red",
+                          borderWidth: 5
+                        }}>
                           {
                             this.state.emittors[key].map((emittor) => {
                               return (
