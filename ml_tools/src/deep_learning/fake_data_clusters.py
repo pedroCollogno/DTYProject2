@@ -4,6 +4,13 @@ from progressbar import ProgressBar
 from time import time
 
 def fake_data_generator(sequence_size,n_clusters, avg_n_emittors_in_clusters):
+    """
+    Creates fake clusters, emittors and emissions with a certain sequence_size
+    :param sequence_size: Size of the sequence built by the function
+    :param n_clusters: Number of clusters to build
+    :param avg_n_emitros_in_clusters: Number of emittors in a cluster
+    :return: A list of clusters containing a list of emissions indexed by emittor_id
+    """
     clusters=[]
     for i in range(n_clusters):
         sum=sequence_size
@@ -36,6 +43,13 @@ def fake_data_generator(sequence_size,n_clusters, avg_n_emittors_in_clusters):
     return(clusters)
 
 def create_cluster_comparison(sequence_size, n_clusters, avg_n_emittors_in_clusters):
+    """
+    Uses the fake clusters generated to build data to train the deep_learning algorithm
+    :param sequence_size: Size of the sequence built by the function$
+    :param n_clusters: Number of clusters to build
+    :param avg_n_emitros_in_clusters: Number of emittors in a cluster
+    :return: The comparison of every emittor to the total emission of every cluster and if it belongs to it
+    """
     clusters=fake_data_generator(sequence_size, n_clusters, avg_n_emittors_in_clusters)
     labels=[]
     data_for_deep=[]
@@ -55,6 +69,14 @@ def create_cluster_comparison(sequence_size, n_clusters, avg_n_emittors_in_clust
     return(labels, data_for_deep)
 
 def multiple_fake_clusters(n_samples, sequence_size, n_clusters, avg_n_emittors_in_clusters):
+    """
+    Creates multiple different situations with the previous functions
+    :param n_samples: Number of situations to be created
+    :param sequence_size: Sequence size of the emittors to create
+    :param n_clusters: Number of clusters per situation created
+    :param avg_n_emittors_in_clusters: Number of emittors per cluster
+    :return: A list of comparison between emittor emission and cluster emissions and if the emittor belongs to the cluster
+    """
     full_labels=[]
     full_data=[]
     for k in range(n_samples):

@@ -83,7 +83,7 @@ def fake_data(sequence_size, all=True, n_samples=1000, equalize=False):
 
 def train():
     """ 
-        Trains a model on data produced with fake_data function. Saves weights to './weights' folder
+        Trains a Bi-LSTM model on data produced with fake_data function. Saves weights to './weights' folder
     """
     data = fake_data(50, all=False, equalize=False)
 

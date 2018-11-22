@@ -155,11 +155,12 @@ def get_steps_track(tsexs, id, sequence_size, start_date_ms):
     return(data)
 
 
-def process_data(tsexs, file_name):
-    """ Process the data from the prp file into a dataframe that can be used in the deep learning models.
+def process_data_clusters(tsexs, file_name):
+    """ Process the data from the prp file and returns a network and steps object for each emittor,
+    this prediction uses the dbscan
 
     :param tsexs: track stream to process
-    :param file_name: file name of the pkl file in /pkl where data will be saved
+    :return: network and steps for each emittor
     """
     preds = predict_all_ids(tsexs)
     print(preds)
@@ -183,67 +184,20 @@ def process_data(tsexs, file_name):
         pbar.finish()
     return (emitter_infos)
 
-    X = []
-    Y = []
-    print('Processing data')
-    progress = 0
-    pbar2 = ProgressBar(maxval=(len(preds[0])*len(preds[0]))/2)
-    pbar2.start()
-
-    create_new_folder(file_name, './pkl')
-    removeFiles('./pkl/{}'.format(file_name))
-
-    for couple in itertools.combinations(preds[1], 2):
-        Y_value = int(emitter_infos[couple[0]]["network"]
-                      == emitter_infos[couple[1]]["network"])
-        steps1 = emitter_infos[couple[0]]["steps"]
-        steps2 = emitter_infos[couple[1]]["steps"]
-        X_value = []
-        for i in range(int(sequence_size)):
-            X_value.append([steps1[i], steps2[i]])
-        X.append(X_value)
-        Y.append(Y_value)
-        progress += 1
-        if progress % 2000 == 0:
-            df = pd.DataFrame(
-                {
-                    'X': X,
-                    'Y': Y
-                }, columns=['X', 'Y'])
-            df.to_pickle(
-                './pkl/{0}/{1}_{2}.pkl'.format(file_name, file_name, progress))
-            X = []
-            Y = []
-            print(
-                "Pickle saved in /pkl/{0}/{1}_{2}.pkl".format(file_name, file_name, progress))
-        pbar2.update(progress)
-    df = pd.DataFrame(
-        {
-            'X': X,
-            'Y': Y
-        }, columns=['X', 'Y'])
-    df.to_pickle(
-        './pkl/{0}/{1}_{2}.pkl'.format(file_name, file_name, progress))
-    X = []
-    Y = []
-    print(
-        "Pickle saved in /pkl/{0}/{1}_{2}.pkl".format(file_name, file_name, progress))
-    pbar2.finish()
-
-
-"""This part runs if you run 'python processDL.py prp_name pkl_name' in the console
-    :param 1: name of prp file in /prod to load
-    :param 2: name of pkl file that will be saved in /pkl
-"""
 
 def create_clusters():
+    """
+    Creates an object indexed by cluster id from the object indexed by emittor_id. Lets the user choose the PRP to process
+
+    :return: Object indexed by cluster_id containing list of emittor_id and object indexed by emittor_id containing steps
+
+    """
     root=tk.Tk()
     root.withdraw()
     file_path=filedialog.askopenfilename()
     tsexs= get_track_stream_exs_from_prp(file_path)
-    ei=process_data(tsexs, file_path)
-    print('hello')
-    print(len(ei))
+    ei=process_data_clusters(tsexs, file_path)
+
     i=0
     for k in ei:
         if ei[k]['network']>=i:
@@ -264,3 +218,35 @@ if __name__ == '__main__':
     create_clusters()
 
     # checkPkl(sys.argv[1])
+
+def create_emittor_comparison_with_cluster(real_clusters, ei):
+    """
+    Uses the clusters from simulator data to build comparison between emittor and clusters for every possible tuple
+    :param real_clusters: The clusters containing the emittor ids
+    :param ei: The emittor infos, the vluster it belongs to and the steps of emissions
+    :return: List of emissions of emittor and cluster and if the emittor belongs to the cluster
+    """
+    labels = []
+    real_data = []
+    print(real_clusters)
+    for cluster in real_clusters:
+        for emittor in real_clusters[cluster]:
+            step_nb = len(ei[emittor]['steps'])
+            for cluster_secondary in real_clusters:
+                cluster_secondary_cumulated = [0 for k in range(step_nb)]
+                if cluster == cluster_secondary:
+                    label = True
+                else:
+                    label = False
+                for emittor_secondary in real_clusters[cluster_secondary]:
+                    if emittor != emittor_secondary:
+                        cluster_secondary_cumulated = [int(
+                            cluster_secondary_cumulated[k] or ei[emittor_secondary]['steps'][k]) for k in range(step_nb)]
+                if not (len(real_clusters[cluster])==1 and cluster_secondary==cluster):
+                    for sequence_iterator in range(step_nb//50):
+                        real_data.append([ei[emittor]['steps'][sequence_iterator*50:(sequence_iterator+1)*50],
+                                            cluster_secondary_cumulated[sequence_iterator*50:(sequence_iterator+1)*50]])
+                        labels.append(label)
+                else:
+                    print("1 emittor cluster comparing with itself")
+    return(real_data, labels)
