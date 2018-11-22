@@ -16,7 +16,7 @@ import processDL as processDL
 import model as model
 
 
-if __name__ == "__main__" :
+if __name__ == "__main__":
     root = tk.Tk()
     root.withdraw()
     file_path = filedialog.askopenfilename()
@@ -26,7 +26,4 @@ if __name__ == "__main__" :
     tsexs = get_track_stream_exs_from_prp(file_path)
     processDL.process_data(tsexs, file_name)
     model.test(file_name)
-    model.train2(file_name)
-
-
-
+    print(model.train2(file_name))

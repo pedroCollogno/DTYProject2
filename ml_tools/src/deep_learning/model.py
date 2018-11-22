@@ -119,8 +119,8 @@ def train():
     )
 
     # Use this to save the weights to be able to reload them while testing
-    #create_new_folder('weights', '.')
-    #model.save_weights('./weights/my_model_weights.h5')
+    create_new_folder('weights', '.')
+    model.save_weights('./weights/my_model_weights.h5')
 
 
 def test(file_name):
@@ -445,4 +445,4 @@ def createNetworks(Y, Y_predicted, id_Couple, allLinks=False):
     :param 1: nampe of file in /pkl folder
 """
 if __name__ == '__main__':
-    train2()
+    train()
