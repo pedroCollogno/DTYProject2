@@ -7,3 +7,4 @@ protobuf
 keras
 pandas
 tensorflow
+networkx

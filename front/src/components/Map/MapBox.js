@@ -184,15 +184,4 @@ class MapBox extends Component {
 
 
 }
-/**
- * componentDidMount() {
-        let map = new mapboxgl.Map({
-            container: 'map',
-            center: [8.3221, 46.5928],
-            zoom: 1,
-            style: style
-        });
-        map.addControl(new mapboxgl.Navigation());
-    }
- */
 export default MapBox;
