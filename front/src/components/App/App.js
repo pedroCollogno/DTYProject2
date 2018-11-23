@@ -36,6 +36,13 @@ class App extends Component {
     }
   }
 
+  getConnection() {
+    if (this.state.connection == "online") {
+      return "offline";
+    }
+    return "online";
+  }
+
 
   newEmittor(station) {
     if (station) {
@@ -93,7 +100,7 @@ class App extends Component {
 
               <div className="field switch-container">
                 <input id="switchRoundedOutlinedInfo" type="checkbox" name="switchRoundedOutlinedInfo" className="switch is-rtl is-rounded is-outlined is-info" onChange={this.handleChange} />
-                <label htmlFor="switchRoundedOutlinedInfo"><strong>Check to use online map</strong></label>
+                <label htmlFor="switchRoundedOutlinedInfo"><strong>Switch to {this.getConnection()} map</strong></label>
               </div>
             </div>
           </div>
