@@ -20,6 +20,7 @@ if __name__ == "__main__":
     sys.path.append(os.path.abspath(
         os.path.dirname(file_dir)))
 
+from utils.log import create_new_folder
 from utils.loading import *
 from utils.track_utils import *
 from clustering.dbscan import get_dbscan_prediction_min
@@ -28,21 +29,21 @@ from clustering.dbscan import get_dbscan_prediction_min
 time_step_ms = 500
 
 
-def removeFiles(directory):
-    """ Removes all files from a directory
+def createFolder(directory):
+    try:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+    except OSError:
+        print('Error: Creating directory. ' + directory)
 
-    :param directory: the directory from which files should be removed
-    """
+
+def removeFiles(directory):
     filelist = [f for f in os.listdir(directory)]
     for f in filelist:
         os.remove(os.path.join(directory, f))
 
 
 def checkPkl(file):
-    """ TODO: COMPLETE DOCS
-
-    :param file: TODO: COMPLETE DOCS
-    """
     file_path = './pkl/{}'.format(sys.argv[1])
     df = pd.read_pickle('./pkl/{}'.format(sys.argv[1]))
     print(df)
@@ -82,7 +83,7 @@ def get_track_info_with_alternates(track):
     return new_info_from_track
 
 
-def predict_all_ids(tsexs):
+def predict_all_ids(track_streams):
     """ Uses DBSCAN to label all the networks
 
     :param station_1_track_stream: track stream for first station
@@ -90,61 +91,59 @@ def predict_all_ids(tsexs):
     """
     raw_tracks = []
     stations_data = []
-    for tsex in tsexs:
-        raw_tracks = get_track_stream_ex_info(tsex, raw_tracks)
+    for track_stream in track_streams:
+        raw_tracks = get_track_stream_info(track_stream, raw_tracks)
     y_pred, ids = get_dbscan_prediction_min(raw_tracks)
     stations_data.append([y_pred, ids])
     return [y_pred, ids]
 
 
-def get_last_track_by_id(tsexs, id):
+def get_last_track_by_id(track_streams, id):
     """ Get the last track of an emitter
 
-    :param tsexs: track stream to process
+    :param track_streams: track stream to process
     :param id: id of the emitter to process
     :return: last track of an emitter
     """
-    print("id", id)
     raw_tracks = []
-    for tsex in tsexs:
-        tracks = tsex.data.tracks
+    for track_stream in track_streams:
+        tracks = track_stream.tracks
         for track in tracks:
             if get_track_id(track) == id:
                 raw_tracks = get_track_info_with_alternates(track)
     return raw_tracks
 
 
-def get_start_and_end(tsexs):
+def get_start_and_end(track_streams):
     """ Create a list of emission/nonemission at each time steps for an emitter
 
-    :param tsexs: track stream to process
+    :param track_streams: track stream to process
     :return start_date: start date of recording
     :return end_date: end date of recording
     :return sequence_size: number of time steps
     """
     raw_tracks = []
-    for tsex in tsexs:
-        tracks = tsex.data.tracks
+    for track_stream in track_streams:
+        tracks = track_stream.tracks
         for track in tracks:
             raw_tracks.append(get_track_info_with_alternates(track))
     # raw_tracks : all the tracks with alternates info from a prp
-    print(raw_tracks)
     start_date = raw_tracks[0][6][0][0]
     end_date = raw_tracks[-1][6][0][1]
     sequence_size = (end_date-start_date)/time_step_ms
     return(start_date, end_date, sequence_size)
 
 
-def get_steps_track(tsexs, id, sequence_size, start_date_ms):
+def get_steps_track(track_streams, id, sequence_size, start_date_ms):
     """ Create a list of emission/nonemission at each time steps for an emitter
 
-    :param tsexs: track stream to process
+    :param track_streams: track stream to process
     :param id: id of the emitter
     :param sequence_size: number of time steps
     :param start_date_ms: start date of recordingg
     :return: a list of 0 or 1, 0 is the emitter was not emitting, 1 if it was
     """
-    last_track_id = get_last_track_by_id(tsexs, id)
+    last_track_id = get_last_track_by_id(track_streams, id)
     data = []
     for i in range(int(sequence_size)):
         found = 0
@@ -156,16 +155,17 @@ def get_steps_track(tsexs, id, sequence_size, start_date_ms):
     return(data)
 
 
-def process_data(tsexs, file_name):
+def process_data(track_streams, file_name):
     """ Process the data from the prp file into a dataframe that can be used in the deep learning models.
 
-    :param tsexs: track stream to process
+    :param track_streams: track stream to process
     :param file_name: file name of the pkl file in /pkl where data will be saved
     """
-    preds = predict_all_ids(tsexs)
-    print(preds)
+    preds = predict_all_ids(track_streams)
+    test_ids = set(preds[1])
+    #print("Number of emitters :", len(test_ids), len(preds[1]))
 
-    temporal_data = get_start_and_end(tsexs)
+    temporal_data = get_start_and_end(track_streams)
     start_date_ms = temporal_data[0]
     sequence_size = temporal_data[2]
 
@@ -177,21 +177,21 @@ def process_data(tsexs, file_name):
     for i in range(len(preds[0])):
         emitter_infos[preds[1][i]] = {
             "network": preds[0][i],
-            "steps": get_steps_track(tsexs, preds[1][i], sequence_size, start_date_ms)
+            "steps": get_steps_track(track_streams, preds[1][i], sequence_size, start_date_ms)
         }
         progress += 1
         pbar.update(progress)
         pbar.finish()
-    print(len(emitter_infos))
 
     X = []
     Y = []
+    id_Couple = []
     print('Processing data')
     progress = 0
     pbar2 = ProgressBar(maxval=(len(preds[0])*len(preds[0]))/2)
     pbar2.start()
 
-    create_new_folder(file_name, './pkl')
+    createFolder('./pkl/{}'.format(file_name))
     removeFiles('./pkl/{}'.format(file_name))
 
     for couple in itertools.combinations(preds[1], 2):
@@ -204,29 +204,34 @@ def process_data(tsexs, file_name):
             X_value.append([steps1[i], steps2[i]])
         X.append(X_value)
         Y.append(Y_value)
+        id_Couple.append([couple[0], couple[1]])
         progress += 1
         if progress % 2000 == 0:
             df = pd.DataFrame(
                 {
                     'X': X,
-                    'Y': Y
-                }, columns=['X', 'Y'])
+                    'Y': Y,
+                    'id_Couple': id_Couple
+                }, columns=['X', 'Y', 'id_Couple'])
             df.to_pickle(
                 './pkl/{0}/{1}_{2}.pkl'.format(file_name, file_name, progress))
             X = []
             Y = []
+            id_Couple = []
             print(
                 "Pickle saved in /pkl/{0}/{1}_{2}.pkl".format(file_name, file_name, progress))
         pbar2.update(progress)
     df = pd.DataFrame(
         {
             'X': X,
-            'Y': Y
-        }, columns=['X', 'Y'])
+            'Y': Y,
+            'id_Couple': id_Couple
+        }, columns=['X', 'Y', 'id_Couple'])
     df.to_pickle(
         './pkl/{0}/{1}_{2}.pkl'.format(file_name, file_name, progress))
     X = []
     Y = []
+    id_Couple = []
     print(
         "Pickle saved in /pkl/{0}/{1}_{2}.pkl".format(file_name, file_name, progress))
     pbar2.finish()
@@ -241,6 +246,6 @@ if __name__ == '__main__':
     root.withdraw()
     file_path = filedialog.askopenfilename()
 
-    tsexs = get_track_stream_exs_from_prp(file_path)
-    process_data(tsexs, sys.argv[1])
+    track_streams = get_track_streams_from_prp(file_path)
+    process_data(track_streams, sys.argv[1])
     # checkPkl(sys.argv[1])

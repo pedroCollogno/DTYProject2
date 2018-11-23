@@ -1,18 +1,19 @@
 import matplotlib.pyplot as plt
-from .loading import get_track_stream_exs_from_prp
+from .loading import get_track_streams_from_prp
+
 
 def display_alternates(*args):
     """ Function that displays all the alternates detected by a station
 
     :args: the prp files from all the stations
     """
-    prps = [get_track_stream_exs_from_prp(args[i]) for i in range(len(args))]
+    prps = [get_track_streams_from_prp(args[i]) for i in range(len(args))]
     all_alternates = {}
     for i in range(len(prps)):
         all_alternates_current_prp = {}
-        for tsex in prps[i]:
-            if tsex.data.tracks:
-                for track in tsex.data.tracks:
+        for track_stream in prps[i]:
+            if track_stream.tracks:
+                for track in track_stream.tracks:
                     key_id = track.id.most_significant
                     all_alternates_current_prp[key_id] = track.alternates
                     """ if key_id in all_alternates_current_prp:
