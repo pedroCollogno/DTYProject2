@@ -16,14 +16,31 @@ import processDL as processDL
 import model as model
 
 
+def main(track_streams, file_name):
+    """
+    Main function for this script. 
+    This is the function mainly used when exporting the deep_learning module.
+
+    :param track_streams: the track_streams from the station to analyse
+    :param file_name: the name of the .PRP file, used to name similar files in .PKL format
+    :returns: a tuple, containing the labels for clustering the tracks, and the list of the IDS of tracks corresponding to the labels
+    """
+    processDL.process_data(track_streams, file_name)
+    model.test(file_name)
+    result = model.train2(file_name)
+    return(result)
+
+
 if __name__ == "__main__":
     root = tk.Tk()
     root.withdraw()
     file_path = filedialog.askopenfilename()
+    root.update()
+    root.destroy()
 
     file_name = file_path.split('/')[-1][:-4]
 
-    tsexs = get_track_stream_exs_from_prp(file_path)
-    processDL.process_data(tsexs, file_name)
-    model.test(file_name)
-    print(model.train2(file_name))
+    track_streams = get_track_streams_from_prp(file_path)
+
+    result = main(track_streams, file_name)
+    print(result)

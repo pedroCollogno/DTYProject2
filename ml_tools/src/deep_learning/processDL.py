@@ -238,13 +238,14 @@ def process_data(track_streams, file_name):
 
 
 """This part runs if you run 'python processDL.py prp_name pkl_name' in the console
-    :param 1: name of prp file in /prod to load
-    :param 2: name of pkl file that will be saved in /pkl
+    :param 1: name of pkl file that will be saved in /pkl
 """
 if __name__ == '__main__':
     root = tk.Tk()
     root.withdraw()
     file_path = filedialog.askopenfilename()
+    root.update()
+    root.destroy()
 
     track_streams = get_track_streams_from_prp(file_path)
     process_data(track_streams, sys.argv[1])
