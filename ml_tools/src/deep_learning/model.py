@@ -1,7 +1,3 @@
-import json
-with open('../config.json', 'r') as f:
-    config = json.load(f)
-
 from keras.models import Sequential, load_model
 from keras.layers import LSTM, Dense, Dropout, Embedding
 from keras.callbacks import TensorBoard, Callback, EarlyStopping
@@ -32,11 +28,13 @@ if __name__ == "__main__":
     sys.path.append(os.path.abspath(
         os.path.dirname(file_dir)))
 
+from utils import config
 from utils.log import create_new_folder, logger
 
 PKL_DIR = config['PATH']['pkl']
 PKL2_DIR = config['PATH']['pkl2']
 WEIGHTS_DIR = config['PATH']['weights']
+LOG_DIR = os.path.join(config['PATH']['logs'], 'tensorboard')
 DATA_DIR = config['PATH']['data']
 
 
@@ -110,8 +108,9 @@ def train():
     #model.add(LSTM(units = 128, input_shape=(None , 2)))
     model.add(Dense(1, activation="sigmoid"))
 
+    callback_dir = os.path.join(LOG_DIR, time())
     my_callbacks = [EarlyStopping(monitor='auc_roc', patience=300, verbose=1, mode='max'),
-                    TensorBoard(log_dir="logs/{}".format(time()))]
+                    TensorBoard(log_dir=callback_dir)]
 
     model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=[
                   'accuracy', metrics.auc_roc, metrics.f1_score_threshold(), metrics.precision_threshold(), metrics.recall_threshold()])

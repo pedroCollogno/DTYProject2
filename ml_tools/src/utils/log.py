@@ -1,9 +1,7 @@
 import logging
 import os
-import json
 
-with open('../config.json', 'r') as f:
-    config = json.load(f)
+from .config import config
 
 
 def set_logger_up():

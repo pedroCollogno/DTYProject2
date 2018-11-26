@@ -1,7 +1,3 @@
-import json
-with open('../config.json', 'r') as f:
-    config = json.load(f)
-
 import matplotlib
 matplotlib.use("TkAgg")
 
@@ -26,6 +22,7 @@ if __name__ == "__main__":
     sys.path.append(os.path.abspath(
         os.path.dirname(file_dir)))
 
+from utils import config
 from utils.log import create_new_folder, logger
 from utils.loading import get_track_streams_from_prp
 from utils.track_utils import get_track_stream_info, get_track_info, get_track_id
