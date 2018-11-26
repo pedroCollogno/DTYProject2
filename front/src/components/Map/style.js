@@ -8,11 +8,11 @@ exports.countries = {
     "sources": {
         "countries": {
             "type": "vector",
-            "tiles": [config.URLS.BASE.back + config.URLS.PORT.back + "/static" + "/country-vectors/{z}/{x}/{y}.pbf"],
+            "tiles": [location.origin + location.pathname + "mapbox-gl/country-vectors/{z}/{x}/{y}.pbf"],
             "maxzoom": 6
         }
     },
-    "glyphs": config.URLS.BASE.back + config.URLS.PORT.back + "/static" + "/font/{fontstack}/{range}.pbf",
+    "glyphs": location.origin + location.pathname + "mapbox-gl/font/{fontstack}/{range}.pbf",
     "layers": [{
         "id": "background",
         "type": "background",
@@ -250,11 +250,11 @@ exports.global = {
     "sources": {
         "countries": {
             "type": "raster",
-            "tiles": [config.URLS.BASE.back + config.URLS.PORT.back + "/static" + "/cholet-tiles/{z}/{x}/{y}.png"],
+            "tiles": [location.origin + location.pathname + "mapbox-gl/cholet-tiles/{z}/{x}/{y}.png"],
             "maxzoom": 15
         }
     },
-    "glyphs": config.URLS.BASE.back + config.URLS.PORT.back + "/static" + "/font/{fontstack}/{range}.pbf",
+    "glyphs": location.origin + location.pathname + "mapbox-gl/font/{fontstack}/{range}.pbf",
     "layers": [{
         "id": "background",
         "type": "background",

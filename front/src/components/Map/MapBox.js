@@ -27,12 +27,11 @@ class MapBox extends Component {
             }),
             style: {
                 online: 'mapbox://styles/mapbox/streets-v9',
-                offline: global
+                offline: countries
             },
             networksToggled: {
             },
             highlights: {
-
             }
         };
         for (let label of Object.keys(this.props.stations)) {

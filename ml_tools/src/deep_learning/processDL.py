@@ -1,5 +1,5 @@
 import json
-with open('config.json', 'r') as f:
+with open('../config.json', 'r') as f:
     config = json.load(f)
 
 import matplotlib
@@ -16,6 +16,8 @@ import tkinter as tk
 
 import os
 import sys
+import shutil
+import argparse
 import itertools
 
 if __name__ == "__main__":
@@ -24,9 +26,9 @@ if __name__ == "__main__":
     sys.path.append(os.path.abspath(
         os.path.dirname(file_dir)))
 
-from utils.log import create_new_folder
-from utils.loading import *
-from utils.track_utils import *
+from utils.log import create_new_folder, logger
+from utils.loading import get_track_streams_from_prp
+from utils.track_utils import get_track_stream_info, get_track_info, get_track_id
 from clustering.dbscan import get_dbscan_prediction_min
 
 
@@ -34,24 +36,10 @@ time_step_ms = config['VARS']['time_step_ms']
 PKL_DIR = config['PATH']['pkl']
 
 
-def createFolder(directory):
-    try:
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-    except OSError:
-        print('Error: Creating directory. ' + directory)
-
-
-def removeFiles(directory):
-    filelist = [f for f in os.listdir(directory)]
-    for f in filelist:
-        os.remove(os.path.join(directory, f))
-
-
-def checkPkl(file):
-    file_path = './pkl/{}'.format(sys.argv[1])
+def checkPkl(file, file_name):
+    file_path = './pkl/{}'.format(file_name)
     df = pd.read_pickle('./pkl/{}'.format(sys.argv[1]))
-    print(df)
+    logger.info(df)
     df = df.loc[df['Y'] == 1]
     X = df['X'].values
     Y = df['Y'].values
@@ -67,7 +55,7 @@ def checkPkl(file):
         plt.plot(emitter1, color='green')
 
         plt.plot(emitter2, color='blue')
-        print(Y[k])
+        logger.info(Y[k])
         plt.show()
 
 
@@ -175,7 +163,7 @@ def process_data(track_streams, file_name):
     sequence_size = temporal_data[2]
 
     emitter_infos = {}
-    print('Getting the steps from all the tracks')
+    logger.info('Getting the steps from all the tracks')
     progress = 0
     pbar = ProgressBar(maxval=(len(preds[0])))
     pbar.start()
@@ -191,13 +179,13 @@ def process_data(track_streams, file_name):
     X = []
     Y = []
     id_Couple = []
-    print('Processing data')
+    logger.info('Processing data')
     progress = 0
     pbar2 = ProgressBar(maxval=(len(preds[0])*len(preds[0]))/2)
     pbar2.start()
 
-    createFolder('./pkl/{}'.format(file_name))
-    removeFiles('./pkl/{}'.format(file_name))
+    create_new_folder(file_name, PKL_DIR)
+    path_to_save = os.path.join(PKL_DIR, file_name)
 
     for couple in itertools.combinations(preds[1], 2):
         Y_value = int(emitter_infos[couple[0]]["network"]
@@ -218,13 +206,13 @@ def process_data(track_streams, file_name):
                     'Y': Y,
                     'id_Couple': id_Couple
                 }, columns=['X', 'Y', 'id_Couple'])
-            df.to_pickle(
-                './pkl/{0}/{1}_{2}.pkl'.format(file_name, file_name, progress))
+            name = '{0}_{1}.pkl'.format(file_name, progress)
+            df.to_pickle(os.path.join(path_to_save, name))
             X = []
             Y = []
             id_Couple = []
-            print(
-                "Pickle saved in /pkl/{0}/{1}_{2}.pkl".format(file_name, file_name, progress))
+            logger.info("Pickle saved in {0}".format(
+                os.path.join(path_to_save, name)))
         pbar2.update(progress)
     df = pd.DataFrame(
         {
@@ -232,25 +220,67 @@ def process_data(track_streams, file_name):
             'Y': Y,
             'id_Couple': id_Couple
         }, columns=['X', 'Y', 'id_Couple'])
-    df.to_pickle(
-        './pkl/{0}/{1}_{2}.pkl'.format(file_name, file_name, progress))
+
+    name = '{0}_{1}.pkl'.format(file_name, progress)
+    df.to_pickle(os.path.join(path_to_save, name))
+
     X = []
     Y = []
     id_Couple = []
-    print(
-        "Pickle saved in /pkl/{0}/{1}_{2}.pkl".format(file_name, file_name, progress))
+    logger.info("Pickle saved in {0}".format(
+        os.path.join(path_to_save, name)))
     pbar2.finish()
 
 
-"""This part runs if you run 'python processDL.py prp_name pkl_name' in the console
+def input_confirmation():
+    """
+    Asks to prompt confirmation for an command line operation.
+
+    :return: True if the operation is confirmed, False otherwise
+    """
+    logger.info("Do you want to continue ? (y/[n])")
+    choice = input().lower()
+    if choice == "y" or choice == "yes":
+        return True
+    else:
+        return False
+
+
+def main(file_path, file_name):
+    """
+    Main function. Launches this scrpt with the given arguments.
+
+    :param file_path: the path to the .PRP files to process
+    :param file_name: the name of the .PKL file to create
+    """
+    track_streams = get_track_streams_from_prp(file_path)
+    process_data(track_streams, file_name)
+    # checkPkl(sys.argv[1])
+
+
+"""This part runs if you run 'python processDL.py pkl_name' in the console
     :param 1: name of prp file in /prod to load
     :param 2: name of pkl file that will be saved in /pkl
 """
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(
+        description="Process the data from the prp file into a dataframe that can be used in the deep learning models")
+    parser.add_argument('--name', metavar='path', required=True,
+                        help='The name of the file to create to store the data')
+    args = parser.parse_args()
+
+    # If a run with the same name as the inputed one is found
+    if os.path.exists(os.path.join(PKL_DIR, args.name)):
+        logger.info(
+            "A previous run exists with this name : %s. Proceeding wil erase it." % args.name)
+        result = input_confirmation()
+        if result:
+            shutil.rmtree(os.path.join(PKL_DIR, args.name))
+        else:
+            raise ValueError("You cannot overwrite this run : %s" % args.name)
+
     root = tk.Tk()
     root.withdraw()
     file_path = filedialog.askopenfilename()
 
-    track_streams = get_track_streams_from_prp(file_path)
-    process_data(track_streams, sys.argv[1])
-    # checkPkl(sys.argv[1])
+    main(file_path, args.name)

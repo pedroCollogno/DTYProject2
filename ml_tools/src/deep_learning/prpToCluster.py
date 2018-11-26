@@ -12,6 +12,7 @@ if __name__ == "__main__":
 
 from utils.loading import *
 from utils.track_utils import *
+from utils.log import logger
 import processDL as processDL
 import model as model
 
@@ -23,7 +24,8 @@ if __name__ == "__main__":
 
     file_name = os.path.basename(file_path)
 
-    tsexs = get_track_stream_exs_from_prp(file_path)
-    processDL.process_data(tsexs, file_name)
+    track_streams = get_track_streams_from_prp(file_path)
+    processDL.process_data(track_streams, file_name)
     model.test(file_name)
-    print(model.train2(file_name))
+
+    logger.info(model.train2(file_name))

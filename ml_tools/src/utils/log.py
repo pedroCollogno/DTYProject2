@@ -2,7 +2,7 @@ import logging
 import os
 import json
 
-with open('config.json', 'r') as f:
+with open('../config.json', 'r') as f:
     config = json.load(f)
 
 
@@ -18,7 +18,8 @@ def set_logger_up():
     fh_formatter = logging.Formatter(
         '%(asctime)s - %(levelname)s - %(message)s')
 
-    fh = logging.FileHandler(config['PATH']['logs'])
+    logs_file = os.path.join(config['PATH']['logs'], "logs.txt")
+    fh = logging.FileHandler(logs_file)
     fh.setLevel(logging.WARNING)
     fh.setFormatter(fh_formatter)
     logger.addHandler(fh)
