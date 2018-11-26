@@ -1,4 +1,3 @@
-
 import matplotlib
 matplotlib.use("TkAgg")
 from tkinter import filedialog
@@ -11,6 +10,9 @@ from src.utils.log import logger
 
 
 def mock_sender_function(json_obj):
+    """
+    A mock sender_function, to be able to test the ML algorithms without running the backend.
+    """
     logger.debug(json_obj)
 
 

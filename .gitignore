@@ -1,0 +1,19 @@
+*.DS_Store
+*__pycache__
+*logs/
+*dist/
+*build/
+*.egg-info
+
+#tests
+*.pytest_cache
+.idea
+
+#Virtual environments
+/back_django/py36_back_env
+/ml_tools/py36_ml_env
+
+#data
+prod/
+data/
+

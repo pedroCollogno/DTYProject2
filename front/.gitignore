@@ -4,8 +4,10 @@
 # dependencies
 /node_modules
 
-# testing
-/coverage
+# map tiles
+cholet-tiles/
+country-vectors/
+font/
 
 # production
 /build

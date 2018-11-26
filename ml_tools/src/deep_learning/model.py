@@ -1,3 +1,7 @@
+import json
+with open('../config.json', 'r') as f:
+    config = json.load(f)
+
 from keras.models import Sequential, load_model
 from keras.layers import LSTM, Dense, Dropout, Embedding
 from keras.callbacks import TensorBoard, Callback, EarlyStopping
@@ -28,7 +32,12 @@ if __name__ == "__main__":
     sys.path.append(os.path.abspath(
         os.path.dirname(file_dir)))
 
-from utils.log import create_new_folder
+from utils.log import create_new_folder, logger
+
+PKL_DIR = config['PATH']['pkl']
+PKL2_DIR = config['PATH']['pkl2']
+WEIGHTS_DIR = config['PATH']['weights']
+DATA_DIR = config['PATH']['data']
 
 
 def random_product(*args, repeat=1):
@@ -64,7 +73,7 @@ def fake_data(sequence_size, all=True, n_samples=1000, equalize=False):
         for k in range(n_samples):
             fakeX.append([random.choices(items, weights=[50, 10, 10, 1])[0]
                           for i in range(sequence_size)])
-        print(fakeX[0])
+        logger.info(fakeX[0])
         fakeY = [1]*len(fakeX)
         for i in range(len(fakeX)):
             for couple in fakeX[i]:
@@ -73,16 +82,17 @@ def fake_data(sequence_size, all=True, n_samples=1000, equalize=False):
                     break
     # If we want to get as much 0s as 1s in the labels (in case there are too many 0s)
     if equalize:
-        indices = [i for i, x in enumerate(fakeY) if x == 0]
-        print("How many 0s :", len(indices))
+        indices = [i for (i, x) in enumerate(fakeY) if x == 0]
+        logger.info("How many 0s : %s" % len(indices))
         n_ones = fakeY.count(1)
-        print("How many 1s :", n_ones)
+        logger.info("How many 1s : %s" % n_ones)
         indices_to_delete = random.sample(indices, len(indices)-n_ones)
-        print("How many indices to delete:", len(indices_to_delete))
+        logger.info("How many indices to delete: %s" % len(indices_to_delete))
         for index in sorted(indices_to_delete, reverse=True):
             del fakeX[index]
             del fakeY[index]
-    print("How manys 0s :", fakeY.count(0), "\nHow manys 1s :", fakeY.count(1))
+    logger.info("How manys 0s : %s" % fakeY.count(0))
+    logger.info("How manys 1s : %s" % fakeY.count(1))
     return(fakeX, fakeY)
 
 
@@ -119,8 +129,8 @@ def train():
     )
 
     # Use this to save the weights to be able to reload them while testing
-    create_new_folder('weights', '.')
-    model.save_weights('./weights/my_model_weights.h5')
+    create_new_folder('weights', DATA_DIR)
+    model.save_weights(os.path.join(WEIGHTS_DIR, 'my_model_weights.h5'))
 
 
 def test(file_name):
@@ -129,10 +139,10 @@ def test(file_name):
         TODO: COMPLETE DOCS 
     """
 
-    file_path = './pkl/{}'.format(file_name)
+    file_path = os.path.join(PKL_DIR, file_name)
 
     if len(sys.argv) > 1:
-        file_path = './pkl/{}'.format(sys.argv[1])
+        file_path = os.path.join(PKL_DIR, sys.argv[1])
 
     filelist = [f for f in os.listdir(file_path)]
     df = pd.DataFrame(columns=['X', 'Y', 'id_Couple'])
@@ -141,9 +151,9 @@ def test(file_name):
     pbar = ProgressBar(maxval=(len(filelist)))
     pbar.start()
 
-    print("Getting the files...")
+    logger.info("Getting the files...")
     for f in filelist:
-        df_temp = pd.read_pickle(file_path + '/{}'.format(f))
+        df_temp = pd.read_pickle(os.path.join(file_path, f))
         df = pd.concat([df, df_temp], ignore_index=True)
         df_temp = None
         progress += 1
@@ -153,14 +163,14 @@ def test(file_name):
     X = np.array(list(df['X'].values))
     Y = np.array(list(df['Y'].values))
     id_Couple = (list(df['id_Couple'].values))
-    print(id_Couple)
+    logger.info(id_Couple)
 
     model = Sequential()
     model.add(LSTM(units=128, input_shape=(None, 2)))
     model.add(Dense(1, activation="sigmoid"))
     model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=[
                   'accuracy', metrics.f1_score_threshold(), metrics.precision_threshold(), metrics.recall_threshold()])
-    model.load_weights('./weights/my_model_weights.h5')
+    model.load_weights(os.path.join(WEIGHTS_DIR, 'my_model_weights.h5'))
 
     #ones_index = np.where(Y==1)[0]
 
@@ -169,7 +179,7 @@ def test(file_name):
     progress2 = 0
     pbar2 = ProgressBar(maxval=len(X))
     pbar2.start()
-    print("Passing some data in the first network...")
+    logger.info("Passing some data in the first network...")
     #random_indexs = random.sample(range(0, len(X)), 50)
 
     for itemindex in range(len(X)):
@@ -194,15 +204,18 @@ def test(file_name):
         {
             'X_new': X_new,
             'Y_new': Y_new,
-            'id_Couple' : id_Couple
+            'id_Couple': id_Couple
         }, columns=['X_new', 'Y_new', 'id_Couple'])
-    create_new_folder('pkl2', '.')
-    file_to_save_path = './pkl2/{}.pkl'.format(file_name)
+
+    name = '{}.pkl'.format(file_name)
+    create_new_folder('pkl2', DATA_DIR)
+    file_to_save_path = os.path.join(PKL2_DIR, name)
+
     df.to_pickle(file_to_save_path)
     X = []
     Y = []
 
-    print(df)
+    logger.info(df)
 
     # predictions = []
     # for item in to_predict:
@@ -216,7 +229,8 @@ def train2(file_name):
         TODO: COMPLETE DOCS 
     """
 
-    file_path = './pkl2/{}.pkl'.format(file_name)
+    name = '{}.pkl'.format(file_name)
+    file_path = os.path.join(PKL2_DIR, name)
 
     df = pd.read_pickle(file_path)
 
@@ -243,8 +257,8 @@ def train2(file_name):
 
     # How many 0 or 1
 
-    print("How many 0s :", np.count_nonzero(Y == 0))
-    print("How many 1s :", np.count_nonzero(Y == 1))
+    logger.info("How many 0s :", np.count_nonzero(Y == 0))
+    logger.info("How many 1s :", np.count_nonzero(Y == 1))
 
     # If we want to use a DBSCAN
 
@@ -256,31 +270,34 @@ def train2(file_name):
             'id1': id1,
             'id2': id2,
             'distance': distance
-        }, columns= ['id1', 'id2', 'distance']
+        }, columns=['id1', 'id2', 'distance']
     )
 
     # Convert the df in a matrix
-    distance_matrix = pd.pivot_table(df,index='id1',columns='id2',values='distance')
-    distance_matrix.fillna(0,inplace=True)
+    distance_matrix = pd.pivot_table(
+        df, index='id1', columns='id2', values='distance')
+    distance_matrix.fillna(0, inplace=True)
 
     # Add rows and columns to index, fill with 0 the diag
     index = distance_matrix.index.union(distance_matrix.columns)
-    print(len(distance))
-    distance_matrix = distance_matrix.reindex(index=index, columns=index, fill_value=0)
+    logger.info(len(distance))
+    distance_matrix = distance_matrix.reindex(
+        index=index, columns=index, fill_value=0)
 
     # Add the transposed to get the whole distance matrix
     distance_matrix = distance_matrix + distance_matrix.T
-    print("Before normalization", distance_matrix)
+    logger.info("Before normalization", distance_matrix)
 
     # Normalize the distance matrix
     xmax, xmin = max(distance_matrix.max()), min(distance_matrix.min())
-    print("X-Max :", xmax)
+    logger.info("X-Max :", xmax)
     normalized_distance_matrix = (distance_matrix - xmin)/(xmax - xmin)
-    print("After normalization", normalized_distance_matrix)
+    logger.info("After normalization", normalized_distance_matrix)
 
     np_data = np.array(normalized_distance_matrix)
-    #print(np_data)
-    prediction = DBSCAN(eps=0.0000002, min_samples=1, metric="precomputed").fit_predict(np_data)
+    # print(np_data)
+    prediction = DBSCAN(eps=0.0000002, min_samples=1,
+                        metric="precomputed").fit_predict(np_data)
 
     # If we want to use the tresholds method
     threshold = True
@@ -297,13 +314,14 @@ def train2(file_name):
 
         createNetworks(Y, np.array(Y_predicted), id_Couple)
 
-        plotCompareThresholds(X,Y)
-    
+        plotCompareThresholds(X, Y)
+
     return(prediction, list(index))
-    
+
 
 def plotCompareThresholds(X, Y):
-    thresholds = [10e3, 10e4, 5*10e4, 10e5, 5*10e5, 10e6,2*10e6, 5*10e6, 6*10e6, 7*10e6, 8*10e6, 9*10e6, 10e7, 2*10e7, 5*10e7, 10e8, 10e9, 10e10, 10e30]
+    thresholds = [10e3, 10e4, 5*10e4, 10e5, 5*10e5, 10e6, 2*10e6, 5*10e6, 6*10e6,
+                  7*10e6, 8*10e6, 9*10e6, 10e7, 2*10e7, 5*10e7, 10e8, 10e9, 10e10, 10e30]
     precision0 = []
     precision1 = []
     recall0 = []
@@ -351,6 +369,7 @@ def plotCompareThresholds(X, Y):
     plt.legend()
     plt.show()
 
+
 def createNetworks(Y, Y_predicted, id_Couple, allLinks=False):
 
     if allLinks:
@@ -362,9 +381,9 @@ def createNetworks(Y, Y_predicted, id_Couple, allLinks=False):
                 'id1': id1,
                 'id2': id2,
                 'link': Y_predicted
-            }, columns= ['id1', 'id2', 'link']
+            }, columns=['id1', 'id2', 'link']
         )
-        print(df)
+        logger.info(df)
 
         fig, ax = plt.subplots()
         G = nx.from_pandas_edgelist(df, 'id1', 'id2', edge_attr='link')
@@ -374,9 +393,9 @@ def createNetworks(Y, Y_predicted, id_Couple, allLinks=False):
 
         color_names = ['r', 'b']
         colors = [color_names[i['link']] for i in dict(G.edges).values()]
-        print(colors)
+        logger.info(colors)
 
-        nx.draw_networkx_nodes(G, pos, ax = ax, labels=True)
+        nx.draw_networkx_nodes(G, pos, ax=ax, labels=True)
         nx.draw_networkx_edges(G, pos, edge_color=colors, ax=ax)
         _ = nx.draw_networkx_labels(G, pos, ax=ax)
 
@@ -403,12 +422,14 @@ def createNetworks(Y, Y_predicted, id_Couple, allLinks=False):
 
         df_predicted = pd.crosstab(df.Id1, df.Id2)
         idx_predicted = df_predicted.columns.union(df_predicted.index)
-        df_predicted = df_predicted.reindex(index = idx_predicted, columns=idx_predicted, fill_value=0)
+        df_predicted = df_predicted.reindex(
+            index=idx_predicted, columns=idx_predicted, fill_value=0)
 
         G_predicted = nx.from_pandas_adjacency(df_predicted)
         pos_predicted = nx.spring_layout(G_predicted)
 
-        nx.draw_networkx(G_predicted, ax=ax[0], pos=pos_predicted, with_labels=True)
+        nx.draw_networkx(
+            G_predicted, ax=ax[0], pos=pos_predicted, with_labels=True)
         ax[0].set_axis_off()
 
         # Draw the graph for the true data
@@ -427,7 +448,8 @@ def createNetworks(Y, Y_predicted, id_Couple, allLinks=False):
 
         df_true = pd.crosstab(df.Id1, df.Id2)
         idx_true = df_true.columns.union(df_true.index)
-        df_true = df_true.reindex(index = idx_true, columns=idx_true, fill_value=0)
+        df_true = df_true.reindex(
+            index=idx_true, columns=idx_true, fill_value=0)
 
         G_true = nx.from_pandas_adjacency(df_true)
         pos_true = nx.spring_layout(G_true)
@@ -441,7 +463,7 @@ def createNetworks(Y, Y_predicted, id_Couple, allLinks=False):
 
 
 """This part runs if you run 'python model.py file_name' in the console
-    :param 1: nampe of file in /pkl folder
+    :param 1: name of file in /pkl folder
 """
 if __name__ == '__main__':
     train2(sys.argv[1])

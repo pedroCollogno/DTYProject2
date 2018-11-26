@@ -2,7 +2,6 @@
 @import '../../node_modules/bulma/sass/utilities/initial-variables';
 @import '../../node_modules/bulma/sass/utilities/functions';
 @import './mixins/variables.scss';
-
 // Add a serif family
 $family-serif: 'Verdana', 'Merriweather', 'Georgia', serif;
 $gap: 70px;
@@ -52,3 +51,5 @@ body{
 
 // 6. Import the rest of Bulma
 @import '../../node_modules/bulma/bulma';
+@import '../../node_modules/bulma-extensions/bulma-switch/dist/css/bulma-switch.sass';
+

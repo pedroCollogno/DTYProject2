@@ -1,9 +1,11 @@
 import numpy as np
 from sklearn.cluster import DBSCAN
 
+from utils.log import logger
+
 
 def get_dbscan_prediction_min(data):
-    """ Function that clusters data from TrackStreamEx objects
+    """ Function that clusters data from TrackStream objects
 
     :param data: The data to cluster using the dbscan algorithm
     :return: a tuple, in which there is :
@@ -16,7 +18,7 @@ def get_dbscan_prediction_min(data):
 
 
 def get_dbscan_prediction(data, all_tracks_data={}):
-    """ Function that clusters data from TrackStreamEx objects
+    """ Function that clusters data from TrackStream objects
 
     :param data: The data to cluster using the dbscan algorithm
     :param all_tracks_data: the dict containing all data on found tracks
@@ -33,7 +35,7 @@ def get_dbscan_prediction(data, all_tracks_data={}):
 
     dbscan_model = DBSCAN(min_samples=1).fit(np_all_tracks[:, :3])
     prediction = dbscan_predict(dbscan_model, np_data[:, :3])
-    n_cluster = len(dbscan_model.labels_)
+    n_cluster = len(list(set(dbscan_model.labels_)))
 
     return prediction, np_data[:, -1], n_cluster
 
