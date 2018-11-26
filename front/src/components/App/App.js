@@ -47,16 +47,17 @@ class App extends Component {
   }
 
 
-  newEmittor(station) {
-    if (station) {
-      let stat = JSON.parse(station);
+  newEmittor(emittor) {
+    if (emittor) {
+      let stat = JSON.parse(emittor);
       if (stat.coordinates) {
         let dic = JSON.parse(JSON.stringify(this.state.emittors));
         if (dic["" + stat.network_id]) {
-          dic["" + stat.network_id].push(stat);
+          dic["" + stat.network_id][stat.track_id] = stat;
         }
         else {
-          dic["" + stat.network_id] = [stat];
+          dic["" + stat.network_id] = {};
+          dic["" + stat.network_id][stat.track_id] = stat;
         }
         this.setState({ emittors: dic, station: stat });
       }
@@ -127,7 +128,7 @@ class App extends Component {
         < SocketHandler handleData={this.newEmittor} />
 
         <div className="container">
-          <MapBox stations={this.state.emittors} recStations={this.state.stations} connection={this.state.connection}
+          <MapBox emittors={this.state.emittors} recStations={this.state.stations} connection={this.state.connection}
             toggleNetwork={this.toggleNetwork} switchAll={this.switchAll} switch={this.state.switch} />
 
           <PostHandler getStations={this.getStations} />
@@ -152,14 +153,15 @@ class App extends Component {
                           borderWidth: 5
                         }}>
                           {
-                            this.state.emittors[key].map((emittor) => {
+                            Object.keys(this.state.emittors[key]).map((emittor_id) => {
+                              console.log(this.state.emittors);
                               return (
-                                <tr key={emittor.track_id}>
-                                  <td>{emittor.track_id}</td>
-                                  <td>{emittor.coordinates.lat}</td>
-                                  <td>{emittor.coordinates.lng}</td>
-                                  <td>{emittor.frequency}</td>
-                                  <td>{emittor.network_id + 1}</td>
+                                <tr key={this.state.emittors[key][emittor_id].track_id}>
+                                  <td>{this.state.emittors[key][emittor_id].track_id}</td>
+                                  <td>{this.state.emittors[key][emittor_id].coordinates.lat}</td>
+                                  <td>{this.state.emittors[key][emittor_id].coordinates.lng}</td>
+                                  <td>{this.state.emittors[key][emittor_id].frequency}</td>
+                                  <td>{this.state.emittors[key][emittor_id].network_id + 1}</td>
                                 </tr>
                               )
                             })
