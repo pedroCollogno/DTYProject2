@@ -273,20 +273,16 @@ def train2(file_name):
     print("Before normalization", distance_matrix)
 
     # Normalize the distance matrix
-    xmax, xmin = distance_matrix.max(), distance_matrix.min()
+    xmax, xmin = max(distance_matrix.max()), min(distance_matrix.min())
     normalized_distance_matrix = (distance_matrix - xmin)/(xmax - xmin)
     print("After normalization", normalized_distance_matrix)
 
     np_data = np.array(normalized_distance_matrix)
     #print(np_data)
     prediction = DBSCAN(eps=0.0000002, min_samples=1, metric="precomputed").fit_predict(np_data)
-    
-    return(prediction, list(index))
-
-
 
     # If we want to use the tresholds method
-    threshold = False
+    threshold = True
     if threshold:
 
         Y_predicted = []
@@ -301,6 +297,8 @@ def train2(file_name):
         createNetworks(Y, np.array(Y_predicted), id_Couple)
 
         plotCompareThresholds(X,Y)
+    
+    return(prediction, list(index))
     
 
 def plotCompareThresholds(X, Y):
@@ -445,4 +443,4 @@ def createNetworks(Y, Y_predicted, id_Couple, allLinks=False):
     :param 1: nampe of file in /pkl folder
 """
 if __name__ == '__main__':
-    train2()
+    train2(sys.argv[1])

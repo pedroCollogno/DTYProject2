@@ -9,3 +9,8 @@ build/
 pkl/
 pkl2/
 weights/
+prod/
+pkl/
+pkl2/
+logs/
+logs2/
