@@ -163,7 +163,6 @@ def process_data_clusters(tsexs, file_name):
     :return: network and steps for each emittor
     """
     preds = predict_all_ids(tsexs)
-    print(preds)
 
     temporal_data = get_start_and_end(tsexs)
     start_date_ms = temporal_data[0]
@@ -174,6 +173,8 @@ def process_data_clusters(tsexs, file_name):
     progress = 0
     pbar = ProgressBar(maxval=(len(preds[0])))
     pbar.start()
+    j=0
+    
     for i in range(len(preds[0])):
         emitter_infos[preds[1][i]] = {
             "network": preds[0][i],
@@ -182,6 +183,9 @@ def process_data_clusters(tsexs, file_name):
         progress += 1
         pbar.update(progress)
         pbar.finish()
+    for k in emitter_infos:
+        j+=1
+    print(j)
     return (emitter_infos)
 
 
@@ -195,6 +199,7 @@ def create_clusters():
     root=tk.Tk()
     root.withdraw()
     file_path=filedialog.askopenfilename()
+    root.update()
     tsexs= get_track_stream_exs_from_prp(file_path)
     ei=process_data_clusters(tsexs, file_path)
 
@@ -231,9 +236,9 @@ def create_emittor_comparison_with_cluster(real_clusters, ei):
     print(real_clusters)
     for cluster in real_clusters:
         for emittor in real_clusters[cluster]:
-            step_nb = len(ei[emittor]['steps'])
+            step_nb = len(ei[emittor]['steps'])-(len(ei[emittor]['steps'])%50)
             for cluster_secondary in real_clusters:
-                cluster_secondary_cumulated = [0 for k in range(step_nb)]
+                cluster_secondary_cumulated = [0 for k in range(len(ei[emittor]['steps']))]
                 if cluster == cluster_secondary:
                     label = True
                 else:
@@ -242,6 +247,39 @@ def create_emittor_comparison_with_cluster(real_clusters, ei):
                     if emittor != emittor_secondary:
                         cluster_secondary_cumulated = [int(
                             cluster_secondary_cumulated[k] or ei[emittor_secondary]['steps'][k]) for k in range(step_nb)]
+                if not (len(real_clusters[cluster])==1 and cluster_secondary==cluster):
+                    for sequence_iterator in range(step_nb//50):
+                        real_data.append([ei[emittor]['steps'][sequence_iterator*50:(sequence_iterator+1)*50],
+                                            cluster_secondary_cumulated[sequence_iterator*50:(sequence_iterator+1)*50]])
+                        labels.append(label)
+                else:
+                    print("1 emittor cluster comparing with itself")
+    return(real_data, labels)
+
+def create_cheat_comparison_with_cluster(real_clusters, ei):
+    """
+    Uses the clusters from simulator data to build comparison between emittor and clusters for every possible tuple
+    :param real_clusters: The clusters containing the emittor ids
+    :param ei: The emittor infos, the vluster it belongs to and the steps of emissions
+    :return: List of emissions of emittor and cluster and if the emittor belongs to the cluster
+    """
+    labels = []
+    real_data = []
+    print(real_clusters)
+    for cluster in real_clusters:
+        for emittor in real_clusters[cluster]:
+            step_nb = len(ei[emittor]['steps'])-(len(ei[emittor]['steps'])%50)
+            print(step_nb)
+            for cluster_secondary in real_clusters:
+                cluster_secondary_cumulated = [0 for k in range(step_nb)]
+                label=True
+                for emittor_secondary in real_clusters[cluster_secondary]:
+                    if emittor != emittor_secondary:
+                        cluster_secondary_cumulated = [int(
+                            cluster_secondary_cumulated[k] or ei[emittor_secondary]['steps'][k]) for k in range(step_nb)]
+                        for k in range(step_nb):
+                            if ei[emittor]['steps'][k]+ei[emittor_secondary]['steps'][k]==2:
+                                label=False
                 if not (len(real_clusters[cluster])==1 and cluster_secondary==cluster):
                     for sequence_iterator in range(step_nb//50):
                         real_data.append([ei[emittor]['steps'][sequence_iterator*50:(sequence_iterator+1)*50],
