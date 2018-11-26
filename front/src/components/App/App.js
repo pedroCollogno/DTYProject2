@@ -18,14 +18,17 @@ class App extends Component {
       station: { network_id: 0, coordinates: { lat: 0, lng: 0 }, track_id: 0 },
       emittors: {}, // list of all the detected stations so far
       stations: {},
-      connection: 'offline',
+      connection: "offline",
       networksToggled: {
-      }
+      },
+      switch: "Show"
     };
     this.newEmittor = this.newEmittor.bind(this);
     this.getStations = this.getStations.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.toggleNetwork = this.toggleNetwork.bind(this);
+    this.switchAll = this.switchAll.bind(this);
+
   }
 
   handleChange(event) {
@@ -83,6 +86,21 @@ class App extends Component {
     return "solid";
   }
 
+  switchAll(networksToggled) {
+    if (this.state.switch === "Show") {
+      this.setState({
+        switch: "Hide",
+        networksToggled: networksToggled
+      });
+    }
+    else {
+      this.setState({
+        switch: "Show",
+        networksToggled: networksToggled
+      });
+    }
+  }
+
   render() {
     return (
       <div className="App">
@@ -110,7 +128,7 @@ class App extends Component {
 
         <div className="container">
           <MapBox stations={this.state.emittors} recStations={this.state.stations} connection={this.state.connection}
-            toggleNetwork={this.toggleNetwork} />
+            toggleNetwork={this.toggleNetwork} switchAll={this.switchAll} switch={this.state.switch} />
 
           <PostHandler getStations={this.getStations} />
           {

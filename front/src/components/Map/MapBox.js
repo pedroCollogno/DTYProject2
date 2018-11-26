@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import ReactMapboxGl, { Layer, Marker, Feature, ZoomControl, ScaleControl } from "react-mapbox-gl";
 import colormap from "colormap";
 import Stations from "./Stations.js";
-import stationImage from "./satellite.png";
+import stationImage from "./EW_high.png";
 import Lines from "./Lines.js";
 import { style } from "./style";
 import "./MapBox.css";
@@ -42,6 +42,7 @@ class MapBox extends Component {
         this.toggleNetwork = this.toggleNetwork.bind(this);
         this.mouseEnter = this.mouseEnter.bind(this);
         this.mouseExit = this.mouseExit.bind(this);
+        this.switchAll = this.switchAll.bind(this);
 
     }
 
@@ -113,12 +114,29 @@ class MapBox extends Component {
         return "white";
     }
 
+    switchAll() {
+        let newNetworksToggled = {};
+        if (this.props.switch === "Show") {
+            for (let network of Object.keys(this.state.stations)) {
+                newNetworksToggled[network] = true;
+            }
+        }
+        this.setState({
+            networksToggled: newNetworksToggled
+        });
+        this.props.switchAll(newNetworksToggled);
+    }
+
     render() {
-        let image = new Image(512, 512);
+        let image = new Image(934, 1321);
         image.src = stationImage;
         let images = ["stationImage", image];
         return (
             <div className="map-container">
+                <div className="field switch-container">
+                    <input id="switchAll" type="checkbox" name="switchAll" className="switch is-rtl is-rounded is-outlined is-info" onChange={this.switchAll} />
+                    <label htmlFor="switchAll"><strong>{this.props.switch} all</strong></label>
+                </div>
                 <Map
                     style={this.state.style[this.props.connection]}
                     containerStyle={{
@@ -128,7 +146,7 @@ class MapBox extends Component {
                     center={this.center()}>
                     <Layer id="stations" type="symbol" layout={{
                         "icon-image": "stationImage",
-                        "icon-size": 0.05
+                        "icon-size": 0.03
                     }} images={images} >
                         {
                             Object.keys(this.props.recStations).map((station, k) =>
@@ -156,7 +174,16 @@ class MapBox extends Component {
                                             "circle-stroke-width": this.state.highlights["" + network]
                                         }}>
                                         <Feature coordinates={clusterCenter} onClick={() => this.toggleNetwork(network)}
-                                            onMouseEnter={() => this.mouseEnter(network)} onMouseLeave={() => this.mouseExit(network)}></Feature>
+                                            onMouseEnter={() => {
+                                                if (this.state.stations[network].length > 1) {
+                                                    this.mouseEnter(network)
+                                                }
+                                            }}
+                                            onMouseLeave={() => {
+                                                if (this.state.stations[network].length > 1) {
+                                                    this.mouseExit(network)
+                                                }
+                                            }}></Feature>
                                     </Layer>
                                     {this.state.networksToggled[network] &&
                                         <Stations
