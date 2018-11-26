@@ -34,6 +34,8 @@ from utils.log import create_new_folder, logger
 PKL_DIR = config['PATH']['pkl']
 PKL2_DIR = config['PATH']['pkl2']
 WEIGHTS_DIR = config['PATH']['weights']
+
+create_new_folder('tensorboard', config['PATH']['logs'])
 LOG_DIR = os.path.join(config['PATH']['logs'], 'tensorboard')
 DATA_DIR = config['PATH']['data']
 
