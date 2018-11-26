@@ -21,7 +21,7 @@ if __name__ == "__main__":
     root.withdraw()
     file_path = filedialog.askopenfilename()
 
-    file_name = file_path.split('/')[-1][:-4]
+    file_name = os.path.basename(file_path)
 
     tsexs = get_track_stream_exs_from_prp(file_path)
     processDL.process_data(tsexs, file_name)

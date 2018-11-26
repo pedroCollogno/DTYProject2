@@ -4,7 +4,7 @@ import colormap from "colormap";
 import Stations from "./Stations.js";
 import stationImage from "./satellite.png";
 import Lines from "./Lines.js";
-import { style } from "./style";
+import { countries, global } from "./style";
 import "./MapBox.css";
 
 const Map = ReactMapboxGl({ // Only set in case internet is used, as an optional feature.
@@ -27,7 +27,7 @@ class MapBox extends Component {
             }),
             style: {
                 online: 'mapbox://styles/mapbox/streets-v9',
-                offline: style
+                offline: global
             },
             networksToggled: {
             },

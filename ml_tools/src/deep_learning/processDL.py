@@ -1,3 +1,7 @@
+import json
+with open('config.json', 'r') as f:
+    config = json.load(f)
+
 import matplotlib
 matplotlib.use("TkAgg")
 
@@ -26,7 +30,8 @@ from utils.track_utils import *
 from clustering.dbscan import get_dbscan_prediction_min
 
 
-time_step_ms = 500
+time_step_ms = config['VARS']['time_step_ms']
+PKL_DIR = config['PATH']['pkl']
 
 
 def createFolder(directory):
