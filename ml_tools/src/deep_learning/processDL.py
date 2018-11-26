@@ -36,9 +36,9 @@ time_step_ms = config['VARS']['time_step_ms']
 PKL_DIR = config['PATH']['pkl']
 
 
-def checkPkl(file, file_name):
-    file_path = './pkl/{}'.format(file_name)
-    df = pd.read_pickle('./pkl/{}'.format(sys.argv[1]))
+def checkPkl(file_name):
+    file_path = os.path.join(PKL_DIR, file_name)
+    df = pd.read_pickle(file_path)
     logger.info(df)
     df = df.loc[df['Y'] == 1]
     X = df['X'].values
@@ -255,7 +255,7 @@ def main(file_path, file_name):
     """
     track_streams = get_track_streams_from_prp(file_path)
     process_data(track_streams, file_name)
-    # checkPkl(sys.argv[1])
+    # checkPkl(file_name)
 
 
 """This part runs if you run 'python processDL.py pkl_name' in the console
