@@ -4,7 +4,7 @@ import colormap from "colormap";
 import Stations from "./Stations.js";
 import stationImage from "./EW_high.png";
 import Lines from "./Lines.js";
-import { style } from "./style";
+import { countries, global } from "./style";
 import "./MapBox.css";
 
 const Map = ReactMapboxGl({ // Only set in case internet is used, as an optional feature.
@@ -27,12 +27,11 @@ class MapBox extends Component {
             }),
             style: {
                 online: 'mapbox://styles/mapbox/streets-v9',
-                offline: style
+                offline: countries
             },
             networksToggled: {
             },
             highlights: {
-
             }
         };
         for (let label of Object.keys(this.props.stations)) {
@@ -202,15 +201,4 @@ class MapBox extends Component {
 
 
 }
-/**
- * componentDidMount() {
-        let map = new mapboxgl.Map({
-            container: 'map',
-            center: [8.3221, 46.5928],
-            zoom: 1,
-            style: style
-        });
-        map.addControl(new mapboxgl.Navigation());
-    }
- */
 export default MapBox;

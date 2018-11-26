@@ -11,10 +11,13 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
 import os
+import json
+with open('config.json', 'r') as f:
+    config = json.load(f)
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+DATA_DIR = config['PATH']['data']
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/
@@ -54,7 +57,7 @@ MIDDLEWARE = [
 ]
 
 CORS_ORIGIN_WHITELIST = (
-    "localhost:4200"
+    "localhost:4200",
 )
 
 ROOT_URLCONF = 'channels_back.urls'
@@ -125,7 +128,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
+
 STATIC_URL = '/static/'
+
+STATICFILES_DIRS = [
+    os.path.join(DATA_DIR, "tiles"),
+]
 
 
 """

@@ -29,6 +29,13 @@ class HttpRequestHandler extends Component {
             if (response.data === "POST ok !") {
                 axios.get("http://localhost:8000/getstations")
                     .then((response) => {
+                        axios.get("http://localhost:8000/static/country-vectors/countries/6/32/21.pbf")
+                            .then((res) => {
+                                console.log("BIIIITE");
+                                console.log(res);
+                                console.log("BIIIITE");
+
+                            })
                         this.props.getStations(response);
                         this.setState({ loaded: true });
                     })

@@ -1,0 +1,24 @@
+{
+    "PATH": {
+        "data": "/absolute/path/to/data",
+        "logs": "/absolute/path/to/logs",
+        "pkl": "/absolute/path/to/data/pkl",
+        "pkl2": "/absolute/path/to/data/pkl2",
+        "tiles": "/absolute/path/to/data/tiles",
+        "weights": "/absolute/path/to/data/weights"
+    },
+    "VARS": {
+        "cycles_per_batch": 30,
+        "time_step_ms": 500
+    },
+    "URLS": {
+        "BASE": {
+            "back": "http://localhost:",
+            "front": "http://localhost:"
+        },
+        "PORT": {
+            "back": 8000,
+            "front": 4200
+        }
+    }
+}
