@@ -8,7 +8,6 @@
         "weights": "/Users/piaverous/Documents/DTY/Projet_Thales/thales-project/data/weights"
     },
     "VARS": {
-        "cycles_per_batch": 30,
         "time_step_ms": 500
     },
     "URLS": {

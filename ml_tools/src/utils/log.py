@@ -12,7 +12,6 @@ def set_logger_up():
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
 
-    create_new_folder('logs', config['PATH']['data'])
     fh_formatter = logging.Formatter(
         '%(asctime)s - %(levelname)s - %(message)s')
 
