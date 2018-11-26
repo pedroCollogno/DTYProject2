@@ -14,3 +14,6 @@ pkl/
 pkl2/
 logs/
 logs2/
+
+# Others
+tracks_json/
