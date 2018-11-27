@@ -29,6 +29,13 @@ class HttpRequestHandler extends Component {
             if (response.data === "POST ok !") {
                 axios.get("http://localhost:8000/getstations")
                     .then((response) => {
+                        axios.get("http://localhost:8000/static/country-vectors/countries/6/32/21.pbf")
+                            .then((res) => {
+                                console.log("BIIIITE");
+                                console.log(res);
+                                console.log("BIIIITE");
+
+                            })
                         this.props.getStations(response);
                         this.setState({ loaded: true });
                     })
@@ -75,9 +82,9 @@ class HttpRequestHandler extends Component {
                 if (!this.state.fileNames[f.name]) {
                     let dic = JSON.parse(JSON.stringify(this.state.fileNames));
                     dic[f.name] = 1;
-                    let text = "" + Object.keys(dic).length + " files dropped.";
                     let array = this.state.files;
                     array.push(f);
+                    let text = "" + array.length + " files dropped.";
                     this.setState({ files: array, dropText: text, fileNames: dic });
                 }
             }

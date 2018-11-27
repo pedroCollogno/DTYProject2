@@ -11,10 +11,10 @@ class DataProcessThread(threading.Thread):
     def __init__(self, *args, debug=False):
         """ Initiates the Thread
 
-        :param *args: an unpacked list of all TrackStreamEx objects to analyse
+        :param *args: an unpacked list of all TrackStream objects to analyse
         :param debug: (optional) a kwarg to set the debug mode
         """
-        self.track_stream_ex_s = args
+        self.track_streams = args
         self.debug = debug
         threading.Thread.__init__(self)
 
@@ -28,7 +28,7 @@ class DataProcessThread(threading.Thread):
     def run(self):
         """ Runs the given thread. 
         """
-        main(*self.track_stream_ex_s, debug=self.debug,
+        main(*self.track_streams, debug=self.debug,
              sender_function=self.sender_function)
         self.__dict__.clear()
         print('Finished !')

@@ -67,3 +67,67 @@ def get_track_stream_exs_from_prp(filepath):
             TSEX.ParseFromString(frame['data'])
             track_stream_exs.append(TSEX)
     return(track_stream_exs)
+
+
+def get_track_streams_from_prp(filepath):
+    """Reads a .prp file, and takes TrackStream objects from it
+
+    :param filepath: path to the .prp file to read
+    :return: the list of all TrackStream objects in the .prp file
+    """
+    frames = read_prp(filepath)
+    track_streams = []
+    real_data = False
+    for frame in frames:
+        if frame['data_type'] == 512:
+            real_data = True
+            track_stream = ts.TrackStream()
+            track_stream.ParseFromString(frame['data'])
+            track_streams.append(track_stream)
+        elif frame['data_type'] == 518:
+            TSEX = ts.TrackStreamEx()
+            TSEX.ParseFromString(frame['data'])
+            track_streams.append(TSEX.data)
+
+    if real_data:
+        for i in range(len(track_streams) - 1):
+            for old_track in track_streams[i].tracks:
+                for new_track in track_streams[i+1].tracks:
+                    if is_same_station_track(old_track, new_track):
+                        new_track.new_track = False
+                        new_track.begin_date.date_ms = old_track.begin_date.date_ms
+
+    for track in track_streams[15].tracks:
+        logger.info("New track : %s" % str(track.new_track))
+
+    return(track_streams)
+
+
+def is_same_station_track(old_track, new_track):
+    """ Lets you know if two tracks, taken on the same station at a different time, are from the same emittor
+
+    :param old_track: a track from cycle number i
+    :param new_track: a track from cycle number i+1
+    """
+    freq1 = int(old_track.itr_measurement.central_freq_hz/100000)
+    em_type1 = old_track.itr_measurement.type
+
+    freq2 = int(new_track.itr_measurement.central_freq_hz/100000)
+    em_type2 = new_track.itr_measurement.type
+
+    if freq1 == freq2 and em_type1 == em_type2:
+
+        azim1 = old_track.average_azimut_deg
+        azim_dev1 = old_track.standard_deviation_az_deg
+        azim2 = new_track.average_azimut_deg
+        azim_dev2 = new_track.standard_deviation_az_deg
+
+        db1 = old_track.itr_measurement.rx_level_dbm
+        db2 = new_track.itr_measurement.rx_level_dbm
+
+        if azim2 < azim1 + 1+azim_dev1 and azim2 > azim1 - 1-azim_dev1:
+            return True
+        elif db2 > db1 - 2 and db2 < db1 + 2:
+            return True
+
+    return False
