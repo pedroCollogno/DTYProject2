@@ -4,7 +4,7 @@ import colormap from "colormap";
 import Stations from "./Stations.js";
 import stationImage from "./EW_high.png";
 import Lines from "./Lines.js";
-import { style } from "./style";
+import { countries, global } from "./style";
 import "./MapBox.css";
 
 const Map = ReactMapboxGl({ // Only set in case internet is used, as an optional feature.
@@ -27,7 +27,7 @@ class MapBox extends Component {
             }),
             style: {
                 online: 'mapbox://styles/mapbox/streets-v9',
-                offline: style
+                offline: global
             },
             networksToggled: {
             },
@@ -36,13 +36,10 @@ class MapBox extends Component {
             }
         };
         for (let label of Object.keys(this.props.emittors)) {
-            this.state.networksToggled[label] = false;
             this.state.highlights[label] = 0;
         }
-        this.toggleNetwork = this.toggleNetwork.bind(this);
         this.mouseEnter = this.mouseEnter.bind(this);
         this.mouseExit = this.mouseExit.bind(this);
-        this.switchAll = this.switchAll.bind(this);
 
     }
 
@@ -61,7 +58,8 @@ class MapBox extends Component {
                     format: 'hex',
                     alpha: 1
                 }), // once component received new props and has set its state, render component anew with new state.
-                highlights: highlights
+                highlights: highlights,
+                networksToggled: nextProps.networksToggled
             });
         }
     }
@@ -88,14 +86,6 @@ class MapBox extends Component {
         return [x / count, y / count];
     }
 
-    toggleNetwork(network) {
-        let toggled = this.state.networksToggled[network];
-        let networksToggledCopy = JSON.parse(JSON.stringify(this.state.networksToggled));
-        networksToggledCopy[network] = !toggled;
-        this.setState({ networksToggled: networksToggledCopy });
-        this.props.toggleNetwork(network);
-    }
-
     mouseEnter(network) {
         let highlights = JSON.parse(JSON.stringify(this.state.highlights));
         highlights[network] = 2;
@@ -116,18 +106,6 @@ class MapBox extends Component {
         return "white";
     }
 
-    switchAll() {
-        let newNetworksToggled = {};
-        if (this.props.switch === "Show") {
-            for (let network of Object.keys(this.state.emittors)) {
-                newNetworksToggled[network] = true;
-            }
-        }
-        this.setState({
-            networksToggled: newNetworksToggled
-        });
-        this.props.switchAll(newNetworksToggled);
-    }
 
     render() {
         let image = new Image(934, 1321);
@@ -139,13 +117,19 @@ class MapBox extends Component {
                     style={this.state.style[this.props.connection]}
                     containerStyle={{
                         height: "100%",
-                        width: "100%",
+                        width: "100%"
                     }}
                     center={this.center()}>
                     {/* CSS ! */}
-                    <div className="field switch-container" >
-                        <input id="switchAll" type="checkbox" name="switchAll" className="switch is-rtl is-rounded is-outlined is-info" onChange={this.switchAll} />
-                        <label htmlFor="switchAll"><strong>{this.props.switch} all</strong></label>
+                    <div className={"tile is-vertical"} id="showhide">
+                        <label className={"checkbox"}>
+                            <input type="checkbox" onClick={() => this.props.switchAll(true)} />
+                            Show all
+                    </label>
+                        <label className={"checkbox"}>
+                            <input type="checkbox" onClick={() => this.props.switchAll(false)} />
+                            Hide all
+                    </label>
                     </div>
                     {/* CSS ! */}
                     <Layer id="emittors" type="symbol" layout={{
@@ -171,13 +155,13 @@ class MapBox extends Component {
                                     <Layer
                                         id={"center" + network}
                                         type="circle"
-                                        onClick={() => { this.toggleNetwork(network) }}
+                                        onClick={() => { this.props.toggleNetwork(network) }}
                                         paint={{
                                             "circle-color": color,
                                             "circle-radius": 6,
                                             "circle-stroke-width": this.state.highlights["" + network]
                                         }}>
-                                        <Feature coordinates={clusterCenter} onClick={() => this.toggleNetwork(network)}
+                                        <Feature coordinates={clusterCenter} onClick={() => this.props.toggleNetwork(network)}
                                             onMouseEnter={() => {
                                                 if (this.state.emittors[network].length > 1) {
                                                     this.mouseEnter(network)
