@@ -307,9 +307,6 @@ def process_data_clusters(track_streams, file_name):
     return (emitter_infos)
 
 
-
-
-
 def create_emittor_comparison_with_cluster(real_clusters, ei):
     """
     Uses the clusters from simulator data to build comparison between emittor and clusters for every possible tuple
@@ -378,6 +375,29 @@ def create_cheat_comparison_with_cluster(real_clusters, ei):
                 else:
                     print("1 emittor cluster comparing with itself")
     return(real_data, labels, step_nb)
+
+
+def create_comparison_one_to_one(emittor_id,  emissions, ids_in_cluster, sequence_size):
+    """
+    Creates list of data to use the model's prediction (e.g: the emission activity of the cluster and the emittor's emission activity), 
+    samples the emissions based on sequence_size.
+    :param emittor_id: The emittor's id to be compared with the cluster
+    :param emissions: The list of emissions of all the emittors
+    :param ids_in_cluster: List of emittors ids in the cluster you want to compare with the emittor
+    :param sequence_size: The size of the sequence you want to compare
+    """
+    list_of_data = []
+    step_nb = len(emissions[emittor_id]['steps']) - \
+        (len(emissions[emittor_id]['steps']) % sequence_size)
+    cluster_secondary_cumulated = [0 for k in range(step_nb)]
+    for emittor_secondary in ids_in_cluster:
+        if emittor_secondary != emittor_id:
+            cluster_secondary_cumulated = [int(
+                cluster_secondary_cumulated[k] or emissions[emittor_secondary]['steps'][k]) for k in range(step_nb)]
+    for sequence_iterator in range(step_nb//sequence_size):
+        list_of_data.append([emissions[emittor_id]['steps'][sequence_iterator*sequence_size:(sequence_iterator+1)
+                                                            * sequence_size], cluster_secondary_cumulated[sequence_iterator*sequence_size:(sequence_iterator+1)*sequence_size]])
+    return(list_of_data, step_nb)
 
 
 def main(file_path, file_name):

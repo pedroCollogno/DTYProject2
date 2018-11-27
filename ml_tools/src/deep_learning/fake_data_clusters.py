@@ -3,7 +3,7 @@ import random
 from progressbar import ProgressBar
 from time import time
 
-def fake_data_generator(sequence_size,n_clusters, avg_n_emittors_in_clusters):
+def fake_data_generator(sequence_size,n_clusters, avg_n_emittors_in_clusters, silence_time):
     """
     Creates fake clusters, emittors and emissions with a certain sequence_size
     :param sequence_size: Size of the sequence built by the function
@@ -15,7 +15,7 @@ def fake_data_generator(sequence_size,n_clusters, avg_n_emittors_in_clusters):
     for i in range(n_clusters):
         sum=sequence_size
         n=avg_n_emittors_in_clusters+1
-        rnd_array=np.random.multinomial(sum,np.concatenate((np.ones(n-1)/(n+9), np.array([20/(n+19)]))), size=1)[0]#20 corresponds to the silence time in each sequence
+        rnd_array=np.random.multinomial(sum,np.concatenate((np.ones(n-1)/(n+silence_time-1), np.array([silence_time/(n+silence_time-1)]))), size=1)[0]#20 corresponds to the silence time in each sequence
         fake_X=[-1 for j in range(sequence_size)]
         count_visited=0
         for a in range(n):
@@ -38,7 +38,7 @@ def fake_data_generator(sequence_size,n_clusters, avg_n_emittors_in_clusters):
         clusters.append(emissions)
     return(clusters)
 
-def create_cluster_comparison(sequence_size, n_clusters, avg_n_emittors_in_clusters):
+def create_cluster_comparison(sequence_size, n_clusters, avg_n_emittors_in_clusters, silence_time):
     """
     Uses the fake clusters generated to build data to train the deep_learning algorithm
     :param sequence_size: Size of the sequence built by the function$
@@ -46,7 +46,7 @@ def create_cluster_comparison(sequence_size, n_clusters, avg_n_emittors_in_clust
     :param avg_n_emitros_in_clusters: Number of emittors in a cluster
     :return: The comparison of every emittor to the total emission of every cluster and if it belongs to it
     """
-    clusters=fake_data_generator(sequence_size, n_clusters, avg_n_emittors_in_clusters)
+    clusters=fake_data_generator(sequence_size, n_clusters, avg_n_emittors_in_clusters, silence_time)
     labels=[]
     data_for_deep=[]
     for cluster in clusters:
@@ -64,7 +64,7 @@ def create_cluster_comparison(sequence_size, n_clusters, avg_n_emittors_in_clust
                 labels.append(label)
     return(labels, data_for_deep)
 
-def multiple_fake_clusters(n_samples, sequence_size, n_clusters, avg_n_emittors_in_clusters):
+def multiple_fake_clusters(n_samples, sequence_size, n_clusters, avg_n_emittors_in_clusters, silence_time):
     """
     Creates multiple different situations with the previous functions
     :param n_samples: Number of situations to be created
@@ -76,7 +76,7 @@ def multiple_fake_clusters(n_samples, sequence_size, n_clusters, avg_n_emittors_
     full_labels=[]
     full_data=[]
     for k in range(n_samples):
-        labels,data_for_deep=create_cluster_comparison(sequence_size, n_clusters,avg_n_emittors_in_clusters)
+        labels,data_for_deep=create_cluster_comparison(sequence_size, n_clusters,avg_n_emittors_in_clusters, silence_time)
         full_labels=full_labels+labels
         full_data=full_data+data_for_deep
     return(full_data,full_labels)
