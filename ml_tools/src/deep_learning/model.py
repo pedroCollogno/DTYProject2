@@ -13,13 +13,10 @@ from time import time
 import sys
 import os
 import random
-import metrics
-
 import itertools
+
 import numpy as np
 import pandas as pd
-
-
 import networkx as nx
 
 if __name__ == "__main__":
@@ -28,8 +25,9 @@ if __name__ == "__main__":
     sys.path.append(os.path.abspath(
         os.path.dirname(file_dir)))
 
-from utils import config
-from utils.log import create_new_folder, logger
+from .metrics import *
+from ..utils import config
+from ..utils.log import create_new_folder, logger
 
 PKL_DIR = config['PATH']['pkl']
 PKL2_DIR = config['PATH']['pkl2']
@@ -115,7 +113,7 @@ def train():
                     TensorBoard(log_dir=callback_dir)]
 
     model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=[
-                  'accuracy', metrics.auc_roc, metrics.f1_score_threshold(), metrics.precision_threshold(), metrics.recall_threshold()])
+                  'accuracy', auc_roc, f1_score_threshold(), precision_threshold(), recall_threshold()])
 
     model.summary()
 
@@ -142,9 +140,6 @@ def test(file_name):
 
     file_path = os.path.join(PKL_DIR, file_name)
 
-    if len(sys.argv) > 1:
-        file_path = os.path.join(PKL_DIR, sys.argv[1])
-
     filelist = [f for f in os.listdir(file_path)]
     df = pd.DataFrame(columns=['X', 'Y', 'id_Couple'])
 
@@ -170,7 +165,7 @@ def test(file_name):
     model.add(LSTM(units=128, input_shape=(None, 2)))
     model.add(Dense(1, activation="sigmoid"))
     model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=[
-                  'accuracy', metrics.f1_score_threshold(), metrics.precision_threshold(), metrics.recall_threshold()])
+                  'accuracy', f1_score_threshold(), precision_threshold(), recall_threshold()])
     model.load_weights(os.path.join(WEIGHTS_DIR, 'my_model_weights.h5'))
 
     #ones_index = np.where(Y==1)[0]
@@ -182,7 +177,6 @@ def test(file_name):
     pbar2.start()
     logger.info("Passing some data in the first network...")
     #random_indexs = random.sample(range(0, len(X)), 50)
-
     for itemindex in range(len(X)):
         X_test = X[itemindex]
         Y_test = Y[itemindex]
@@ -216,7 +210,7 @@ def test(file_name):
     X = []
     Y = []
 
-    logger.info(df)
+    logger.debug(df)
 
     # predictions = []
     # for item in to_predict:
@@ -258,13 +252,14 @@ def train2(file_name):
 
     # How many 0 or 1
 
-    logger.info("How many 0s :", np.count_nonzero(Y == 0))
-    logger.info("How many 1s :", np.count_nonzero(Y == 1))
+    logger.info("How many 0s : %s" % np.count_nonzero(Y == 0))
+    logger.info("How many 1s : %s" % np.count_nonzero(Y == 1))
 
     # If we want to use a DBSCAN
 
     id1 = [couple[0] for couple in id_Couple]
     id2 = [couple[1] for couple in id_Couple]
+
     distance = [np.divide(1, (X[i])).mean() for i in range(len(X))]
     df = pd.DataFrame(
         {
@@ -281,27 +276,29 @@ def train2(file_name):
 
     # Add rows and columns to index, fill with 0 the diag
     index = distance_matrix.index.union(distance_matrix.columns)
-    logger.info(len(distance))
     distance_matrix = distance_matrix.reindex(
         index=index, columns=index, fill_value=0)
 
     # Add the transposed to get the whole distance matrix
     distance_matrix = distance_matrix + distance_matrix.T
-    logger.info("Before normalization", distance_matrix)
+    logger.debug("Before normalization")
+    logger.debug(distance_matrix)
 
     # Normalize the distance matrix
     xmax, xmin = max(distance_matrix.max()), min(distance_matrix.min())
-    logger.info("X-Max :", xmax)
+    logger.debug("X-Max :")
+    logger.debug(xmax)
     normalized_distance_matrix = (distance_matrix - xmin)/(xmax - xmin)
-    logger.info("After normalization", normalized_distance_matrix)
+    logger.debug("After normalization")
+    logger.debug(normalized_distance_matrix)
 
     np_data = np.array(normalized_distance_matrix)
     # print(np_data)
-    prediction = DBSCAN(eps=0.0000002, min_samples=1,
+    prediction = DBSCAN(eps=0.000000002, min_samples=1,
                         metric="precomputed").fit_predict(np_data)
 
     # If we want to use the tresholds method
-    threshold = True
+    threshold = False
     if threshold:
 
         Y_predicted = []
@@ -384,7 +381,7 @@ def createNetworks(Y, Y_predicted, id_Couple, allLinks=False):
                 'link': Y_predicted
             }, columns=['id1', 'id2', 'link']
         )
-        logger.info(df)
+        logger.debug(df)
 
         fig, ax = plt.subplots()
         G = nx.from_pandas_edgelist(df, 'id1', 'id2', edge_attr='link')
@@ -394,7 +391,7 @@ def createNetworks(Y, Y_predicted, id_Couple, allLinks=False):
 
         color_names = ['r', 'b']
         colors = [color_names[i['link']] for i in dict(G.edges).values()]
-        logger.info(colors)
+        logger.debug(colors)
 
         nx.draw_networkx_nodes(G, pos, ax=ax, labels=True)
         nx.draw_networkx_edges(G, pos, edge_color=colors, ax=ax)

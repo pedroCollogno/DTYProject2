@@ -5,7 +5,10 @@ import numpy as np
 from .utils.log import logger, create_new_folder
 from .utils.station_utils import *
 from .utils.track_utils import *
+from .utils.config import config
 from .clustering.dbscan import *
+from .deep_learning.processDL import process_data
+from .deep_learning.model import test, train2
 
 import json
 import copy
@@ -15,8 +18,10 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from mpl_toolkits.mplot3d import Axes3D
 
+cycles_per_batch = config['VARS']['cycles_per_batch']
 
-def main(*args, debug=False, sender_function=None):
+
+def main(*args, debug=False, sender_function=None, is_deep=False):
     """Main function, executes when the script is executed.
 
     :param debug: (optional) default is to False, set to True to enter debug mode (more prints)
@@ -30,23 +35,30 @@ def main(*args, debug=False, sender_function=None):
     all_tracks_data = {}
     n = len(args[0])
 
-    for i in range(1, n, 10):
+    j = cycles_per_batch
+    k = 1
+    if is_deep:
+        k = n-1
+        j = 1
+
+    for i in range(k, n, j):
+
         track_streams = []
         for arg in args:
             track_streams.append(arg[:i])
 
         logger.info(
-            "\nMerging info from all stations... Reading %s sensor cycles..." % str(i-1))
+            "\nMerging info from all stations... Reading %s sensor cycles... Last cycle is cycle n.%s" % (len(track_streams[0]), i))
         prev_tracks_data = copy.deepcopy(all_tracks_data)
 
         global_track_streams, all_tracks_data = fuse_all_station_tracks(
             *track_streams)
         logger.debug("Merge done !")
         make_emittor_clusters(global_track_streams,
-                              all_tracks_data, prev_tracks_data, debug=debug, sender_function=sender_function)
+                              all_tracks_data, prev_tracks_data, debug=debug, sender_function=sender_function, is_deep=is_deep)
 
 
-def make_emittor_clusters(global_track_streams, all_tracks_data, prev_tracks_data, debug=False, sender_function=None):
+def make_emittor_clusters(global_track_streams, all_tracks_data, prev_tracks_data, debug=False, sender_function=None, is_deep=False):
     """ Makes the whole job of clustering emittors together from tracks
 
         Clusters emittors into networks using DBSCAN clustering algorithm. Updates the
@@ -62,8 +74,8 @@ def make_emittor_clusters(global_track_streams, all_tracks_data, prev_tracks_dat
     if sender_function is None:
         raise ValueError("No sender function, cannot interact with backend.")
 
-    logger.debug("Taking track info out of %s track streams..." %
-                 len(global_track_streams))
+    logger.info("Taking track info out of %s track streams..." %
+                len(global_track_streams))
     for tracks in global_track_streams:
         raw_tracks = get_track_list_info(tracks, raw_tracks)
     logger.debug("Done !")
@@ -73,16 +85,30 @@ def make_emittor_clusters(global_track_streams, all_tracks_data, prev_tracks_dat
                 len(all_tracks_data.keys()))
 
     if len(raw_tracks) > 1:
-        y_pred, ids, n_cluster = get_dbscan_prediction(
-            raw_tracks, all_tracks_data)
+        if is_deep:
+            file_name = "prout"
+            process_data(global_track_streams, file_name)
+            test(file_name)
+            y_pred, ids = train2(file_name)
+            n_cluster = len(set(y_pred))
+        else:
+            y_pred, ids, n_cluster = get_dbscan_prediction(
+                raw_tracks, all_tracks_data)
+
         i = 0
         for label in y_pred:
             track_id = get_track_id(raw_tracks[i])
             # Need to convert np.int64 to int for JSON format
             try:
+                if int(label) is None:
+                    raise ValueError(
+                        "Network label is not defined for track %s" % track_id)
                 all_tracks_data[track_id]['network_id'] = int(label)
-            except KeyError:
-                logger.error("Keyerror on track %s : %s" % (i, raw_tracks[i]))
+                logger.warning("Label for track %s is %s" %
+                               (track_id, int(label)))
+
+            except (KeyError, ValueError) as err:
+                logger.error("Error on track %s : \n\t%s" % (track_id, err))
             i += 1
         logger.info("Found %s networks on the field.\n" % n_cluster)
         logger.info("Sending emittors through socket")

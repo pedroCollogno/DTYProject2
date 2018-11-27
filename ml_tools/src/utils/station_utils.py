@@ -79,62 +79,79 @@ def get_fused_station_tracks(station_1_track_streams, station_2_track_streams, a
     :param are_lists: (optional) list of two booleans, to allow you to replace a TrackStream object
         by a list of tracks in input.
     """
-    global_track_streams = []
-    n = min(len(station_1_track_streams), len(station_2_track_streams))
-    progress = 0
-    pbar = ProgressBar(maxval=n)
-    pbar.start()
+    try:
+        global_track_streams = []
+        n = min(len(station_1_track_streams), len(station_2_track_streams))
+        progress = 0
+        pbar = ProgressBar(maxval=n)
+        pbar.start()
 
-    for i in range(n):
-        if not are_lists[0]:
-            track_stream_1 = station_1_track_streams[i].tracks
-        else:
-            track_stream_1 = station_1_track_streams[i]
+        for i in range(n):
+            if not are_lists[0]:
+                track_stream_1 = station_1_track_streams[i].tracks
+            else:
+                track_stream_1 = station_1_track_streams[i]
 
-        if not are_lists[1]:
-            track_stream_2 = station_2_track_streams[i].tracks
-        else:
-            track_stream_2 = station_2_track_streams[i]
+            if not are_lists[1]:
+                track_stream_2 = station_2_track_streams[i].tracks
+            else:
+                track_stream_2 = station_2_track_streams[i]
 
-        track_stream = []
-        for track in track_stream_1:
-            track_id = get_track_id(track)
-            if track_id not in all_track_data.keys():
-                add_track_to_dict(track, all_track_data)
-            if track_id not in met_track_ids:
-                met_track_ids.append(track_id)
-            track_stream.append(track)
+            track_stream = []
+            for track in track_stream_1:
+                track_id = get_track_id(track)
+                if track_id not in all_track_data.keys():
+                    add_track_to_dict(track, all_track_data)
+                if track_id not in met_track_ids:
+                    met_track_ids.append(track_id)
+                track_stream.append(track)
 
-        for track_2 in track_stream_2:
-            is_in_other = False
-            track_2_id = get_track_id(track_2)
-            if track_2_id not in met_track_ids:
-                met_track_ids.append(track_2_id)
-                track_stream.append(track_2)
+            for track_2 in track_stream_2:
+                is_in_other = False
+                track_2_id = get_track_id(track_2)
 
-            for track_1 in track_stream:
-                track_1_id = get_track_id(track_1)
+                if track_2_id not in met_track_ids:
+                    met_track_ids.append(track_2_id)
+                    track_stream.append(track_2)
 
-                if track_2_id not in all_track_data.keys():
-                    lat, lng = coords_from_tracks(track_1, track_2)
-                    coords = {
-                        'lat': lat,
-                        'lng': lng
-                    }
-                    add_track_to_dict(track_2, all_track_data, coords=coords)
+                for track_1 in track_stream:
+                    track_1_id = get_track_id(track_1)
 
-                elif all_track_data[track_2_id]['coordinates'] is None and track_1_id == track_2_id:
-                    lat, lng = coords_from_tracks(track_1, track_2)
-                    all_track_data[track_2_id]['coordinates'] = {
-                        'lat': lat,
-                        'lng': lng
-                    }
+                    if track_2_id not in all_track_data.keys():
+                        lat, lng = coords_from_tracks(track_1, track_2)
+                        coords = {
+                            'lat': lat,
+                            'lng': lng
+                        }
+                        add_track_to_dict(
+                            track_2, all_track_data, coords=coords)
 
-        global_track_streams.append(track_stream)
-        progress += 1
-        pbar.update(progress)
+                    elif track_1_id == track_2_id:
+                        lat, lng = coords_from_tracks(track_1, track_2)
+                        all_track_data[track_2_id]['coordinates'] = {
+                            'lat': lat,
+                            'lng': lng
+                        }
 
-    pbar.finish()
+            global_track_streams.append(track_stream)
+            progress += 1
+            pbar.update(progress)
+
+        pbar.finish()
+
+    except ValueError as e:
+        logger.error("Ran into ValueError : %s \nWhen comparing looking at track %s" % (
+            e, track_2_id))
+        logger.warning(
+            "BIIIIIIIIIIIIIIIIIIIIIIIIITEEEEEEEEEEEEEEE")
+
+        logger.warning(track_stream_2)
+        logger.warning(
+            "BIIIIIIIIIIIIIIIIIIIIIIIIITEEEEEEEEEEEEEEE")
+
+        logger.warning(track_stream)
+        logger.warning(
+            "BIIIIIIIIIIIIIIIIIIIIIIIIITEEEEEEEEEEEEEEE")
 
     return(global_track_streams, all_track_data, met_track_ids)
 

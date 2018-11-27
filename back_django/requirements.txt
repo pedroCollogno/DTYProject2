@@ -6,3 +6,10 @@ progressbar
 django-cors-headers
 daphne==1.4.1
 redis==2.10.6
+matplotlib
+scikit-learn
+PyGeodesy
+keras
+pandas
+tensorflow
+networkx

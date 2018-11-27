@@ -27,7 +27,7 @@ class MapBox extends Component {
             }),
             style: {
                 online: 'mapbox://styles/mapbox/streets-v9',
-                offline: countries
+                offline: global
             },
             networksToggled: {
             },
@@ -162,7 +162,7 @@ class MapBox extends Component {
                             let color = this.getColor(network);
                             return (
                                 <div id={"cluster" + k} key={"cluster" + k}>
-                                    {this.state.networksToggled[network] &&
+                                    {true &&
                                         <Lines
                                             clusterCenter={clusterCenter} color={color}
                                             network={network} stations={this.state.emittors[network]} />
@@ -188,7 +188,7 @@ class MapBox extends Component {
                                                 }
                                             }}></Feature>
                                     </Layer>
-                                    {this.state.networksToggled[network] &&
+                                    {true &&
                                         <Stations
                                             stations={this.state.emittors[network]} network={network}
                                             color={color} />

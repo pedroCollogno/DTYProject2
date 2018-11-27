@@ -15,10 +15,6 @@
 
 #data
 prod/
-<<<<<<< HEAD
-
-=======
 data/
 
 config.json
->>>>>>> toggle_networks

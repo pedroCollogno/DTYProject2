@@ -19,6 +19,19 @@ def get_track_info(track):
     return info_from_track
 
 
+def is_in(batch, data):
+    """ Checks if a batch is in a data list, bu checking the ID (last position in batch)
+
+    :param batch: the batch containing track info
+    :param data: the list of data
+    """
+    _id = batch[-1]
+    for d in data:
+        if d[-1] == _id:
+            return True
+    return False
+
+
 def get_track_stream_info(track_stream, data=[]):
     """ Takes essential information out of a given TrackStream object
 
@@ -29,7 +42,7 @@ def get_track_stream_info(track_stream, data=[]):
     tracks = track_stream.tracks
     for track in tracks:
         batch = get_track_info(track)
-        if batch not in data:
+        if not is_in(batch, data):
             data.append(batch)
     return data
 
@@ -43,7 +56,7 @@ def get_track_list_info(tracks, data=[]):
     """
     for track in tracks:
         batch = get_track_info(track)
-        if batch not in data:
+        if not is_in(batch, data):
             data.append(batch)
     return data
 
@@ -66,8 +79,8 @@ def get_track_id(track):
     track_begin_date = int(track_begin_date/100)*100
     #freq = int(freq/1000)*1000
 
-    track_id = track_begin_date*100**3 + freq * \
-        100**2 + em_type*100**1
+    track_id = track_begin_date*100**1 + freq * \
+        100**2 + em_type*100**3
 
     return(track_id)
 

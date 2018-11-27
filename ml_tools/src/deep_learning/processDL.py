@@ -22,11 +22,11 @@ if __name__ == "__main__":
     sys.path.append(os.path.abspath(
         os.path.dirname(file_dir)))
 
-from utils import config
-from utils.log import create_new_folder, logger
-from utils.loading import get_track_streams_from_prp
-from utils.track_utils import get_track_stream_info, get_track_info, get_track_id
-from clustering.dbscan import get_dbscan_prediction_min
+from ..utils import config
+from ..utils.log import create_new_folder, logger
+from ..utils.loading import get_track_streams_from_prp
+from ..utils.track_utils import get_track_stream_info, get_track_info, get_track_id, get_track_list_info
+from ..clustering.dbscan import get_dbscan_prediction_min
 
 
 time_step_ms = config['VARS']['time_step_ms']
@@ -82,7 +82,7 @@ def predict_all_ids(track_streams):
     raw_tracks = []
     stations_data = []
     for track_stream in track_streams:
-        raw_tracks = get_track_stream_info(track_stream, raw_tracks)
+        raw_tracks = get_track_list_info(track_stream, raw_tracks)
     y_pred, ids = get_dbscan_prediction_min(raw_tracks)
     stations_data.append([y_pred, ids])
     return [y_pred, ids]
@@ -97,8 +97,7 @@ def get_last_track_by_id(track_streams, id):
     """
     raw_tracks = []
     for track_stream in track_streams:
-        tracks = track_stream.tracks
-        for track in tracks:
+        for track in track_stream:
             if get_track_id(track) == id:
                 raw_tracks = get_track_info_with_alternates(track)
     return raw_tracks
@@ -114,8 +113,7 @@ def get_start_and_end(track_streams):
     """
     raw_tracks = []
     for track_stream in track_streams:
-        tracks = track_stream.tracks
-        for track in tracks:
+        for track in track_stream:
             raw_tracks.append(get_track_info_with_alternates(track))
     # raw_tracks : all the tracks with alternates info from a prp
     start_date = raw_tracks[0][6][0][0]
@@ -229,10 +227,6 @@ def process_data(track_streams, file_name):
     pbar2.finish()
 
 
-<<<<<<< HEAD
-"""This part runs if you run 'python processDL.py prp_name pkl_name' in the console
-    :param 1: name of pkl file that will be saved in /pkl
-=======
 def input_confirmation():
     """
     Asks to prompt confirmation for an command line operation.
@@ -262,7 +256,6 @@ def main(file_path, file_name):
 """This part runs if you run 'python processDL.py pkl_name' in the console
     :param 1: name of prp file in /prod to load
     :param 2: name of pkl file that will be saved in /pkl
->>>>>>> toggle_networks
 """
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(

@@ -10,9 +10,9 @@ if __name__ == "__main__":
     sys.path.append(os.path.abspath(
         os.path.dirname(file_dir)))
 
-from utils.loading import *
-from utils.track_utils import *
-from utils.log import logger
+from ..utils.loading import *
+from ..utils.track_utils import *
+from ..utils.log import logger
 import processDL as processDL
 import model as model
 
@@ -42,13 +42,7 @@ if __name__ == "__main__":
     file_name = os.path.basename(file_path)
 
     track_streams = get_track_streams_from_prp(file_path)
-<<<<<<< HEAD
-
-    result = main(track_streams, file_name)
-    print(result)
-=======
     processDL.process_data(track_streams, file_name)
     model.test(file_name)
 
     logger.info(model.train2(file_name))
->>>>>>> toggle_networks
