@@ -1,5 +1,6 @@
 import React, { Component } from "react";
-import { Marker, Layer, Feature } from "react-mapbox-gl";
+import { Layer, Feature } from "react-mapbox-gl";
+import PropTypes from "prop-types";
 
 class Stations extends Component {
 
@@ -21,6 +22,21 @@ class Stations extends Component {
             </Layer>
         );
     }
+}
+
+Stations.propTypes = {
+    /**
+     * the stations of the network to display
+     */
+    stations: PropTypes.objectOf(PropTypes.object).isRequired,
+    /**
+     * the network id, for proper Layer id-ing
+     */
+    network: PropTypes.string.isRequired,
+    /**
+     * the color of the nodes
+     */
+    color: PropTypes.string.isRequired
 }
 
 export default Stations;
