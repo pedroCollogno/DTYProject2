@@ -17,6 +17,7 @@
     "mapbox-gl": "^0.47.0",
     "node-sass": "^4.10.0",
     "npm": "^6.4.1",
+    "prop-types": "^15.6.2",
     "react": "^16.4.1",
     "react-audio": "0.0.1",
     "react-dom": "^16.4.1",
