@@ -294,7 +294,7 @@ def train2(file_name):
 
     np_data = np.array(normalized_distance_matrix)
     # print(np_data)
-    prediction = DBSCAN(eps=0.000000002, min_samples=1,
+    prediction = DBSCAN(eps=0.0000002, min_samples=1,
                         metric="precomputed").fit_predict(np_data)
 
     # If we want to use the tresholds method

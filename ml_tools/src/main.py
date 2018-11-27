@@ -13,6 +13,7 @@ from .deep_learning.model import test, train2
 import json
 import copy
 import logging
+import time
 
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
@@ -21,10 +22,11 @@ from mpl_toolkits.mplot3d import Axes3D
 cycles_per_batch = config['VARS']['cycles_per_batch']
 
 
-def main(*args, debug=False, sender_function=None, is_deep=False):
+def main(*args, debug=False, sender_function=None, is_deep=True):
     """Main function, executes when the script is executed.
 
     :param debug: (optional) default is to False, set to True to enter debug mode (more prints)
+    ;param sender_function: 
     """
 
     if debug:
@@ -86,7 +88,7 @@ def make_emittor_clusters(global_track_streams, all_tracks_data, prev_tracks_dat
 
     if len(raw_tracks) > 1:
         if is_deep:
-            file_name = "prout"
+            file_name = str(time.time())
             process_data(global_track_streams, file_name)
             test(file_name)
             y_pred, ids = train2(file_name)
@@ -97,7 +99,10 @@ def make_emittor_clusters(global_track_streams, all_tracks_data, prev_tracks_dat
 
         i = 0
         for label in y_pred:
-            track_id = get_track_id(raw_tracks[i])
+            if is_deep:
+                track_id = ids[i]
+            else:
+                track_id = get_track_id(raw_tracks[i])
             # Need to convert np.int64 to int for JSON format
             try:
                 if int(label) is None:
