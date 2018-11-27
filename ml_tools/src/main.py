@@ -30,7 +30,7 @@ def main(*args, debug=False, sender_function=None):
     all_tracks_data = {}
     n = len(args[0])
 
-    for i in range(1, n, 50):
+    for i in range(1, n, 30):
         track_streams = []
         for arg in args:
             track_streams.append(arg[:i])
@@ -91,7 +91,7 @@ def make_emittor_clusters(global_track_streams, all_tracks_data, prev_tracks_dat
             if key not in prev_tracks_data.keys() and not debug:
                 sender_function(all_tracks_data[key])
 
-    if debug:
+    if not debug:
         create_new_folder('tracks_json', '.')
         filename = './tracks_json/all_tracks_%s.json' % len(
             global_track_streams)

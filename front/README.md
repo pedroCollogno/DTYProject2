@@ -142,7 +142,6 @@ my-app/
     App.test.js
     index.css
     index.js
-    logo.svg
 ```
 
 For the project to build, **these files must exist with exact filenames**:
