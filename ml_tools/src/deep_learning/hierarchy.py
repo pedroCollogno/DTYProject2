@@ -3,6 +3,7 @@ from keras.layers import LSTM, Dropout, Dense
 import metrics
 from keras.callbacks import TensorBoard, Callback, EarlyStopping
 from time import time
+import numpy as np
 
 
 
@@ -16,6 +17,8 @@ def train_hierarchy():
     model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=[
                   'accuracy', metrics.auc_roc, metrics.f1_score_threshold(), metrics.precision_threshold(), metrics.recall_threshold()])
 
+    terroristNetworks=[]
+    terroristHierarchy=[]
     X=np.array([])
     Y=np.array([])
 
