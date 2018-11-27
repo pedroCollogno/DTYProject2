@@ -14,8 +14,8 @@ class Stations extends Component {
                     "circle-radius": 5
                 }}>
                 {
-                    this.props.stations.map((station, k) =>
-                        <Feature coordinates={[station.coordinates.lng, station.coordinates.lat]} key={100 * station.coordinates.lng + station.coordinates.lat} />
+                    Object.keys(this.props.stations).map((station_id, k) =>
+                        <Feature coordinates={[this.props.stations[station_id].coordinates.lng, this.props.stations[station_id].coordinates.lat]} key={100 * this.props.stations[station_id].coordinates.lng + this.props.stations[station_id].coordinates.lat} />
                     )
                 }
             </Layer>

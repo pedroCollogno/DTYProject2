@@ -2,9 +2,9 @@ import React, { Component } from "react";
 import ReactMapboxGl, { Layer, Marker, Feature, ZoomControl, ScaleControl } from "react-mapbox-gl";
 import colormap from "colormap";
 import Stations from "./Stations.js";
-import stationImage from "./satellite.png";
+import stationImage from "./EW_high.png";
 import Lines from "./Lines.js";
-import { style } from "./style";
+import { countries, global } from "./style";
 import "./MapBox.css";
 
 const Map = ReactMapboxGl({ // Only set in case internet is used, as an optional feature.
@@ -17,46 +17,46 @@ class MapBox extends Component {
         super(props);
         this.state = {
             zoom: 4,
-            stations: this.props.stations,
-            networksLabels: Object.keys(this.props.stations),
+            emittors: this.props.emittors,
+            networksLabels: Object.keys(this.props.emittors),
             colors: colormap({
                 colormap: 'jet',
-                nshades: Math.max(Object.keys(this.props.stations).length, 8),
+                nshades: Math.max(Object.keys(this.props.emittors).length, 8),
                 format: 'hex',
                 alpha: 1
             }),
             style: {
                 online: 'mapbox://styles/mapbox/streets-v9',
-                offline: style
+                offline: countries
             },
             networksToggled: {
             },
             highlights: {
-
             }
         };
-        for (let label of Object.keys(this.props.stations)) {
+        for (let label of Object.keys(this.props.emittors)) {
             this.state.networksToggled[label] = false;
             this.state.highlights[label] = 0;
         }
         this.toggleNetwork = this.toggleNetwork.bind(this);
         this.mouseEnter = this.mouseEnter.bind(this);
         this.mouseExit = this.mouseExit.bind(this);
+        this.switchAll = this.switchAll.bind(this);
 
     }
 
     componentWillReceiveProps(nextProps) {
-        if (nextProps.stations !== this.props.stations) {
+        if (nextProps && nextProps.emittors !== this.props.emittors) {
             let highlights = {};
-            for (let label of Object.keys(nextProps.stations)) {
+            for (let label of Object.keys(nextProps.emittors)) {
                 highlights[label] = 0;
             }
             this.setState({
-                stations: nextProps.stations,
-                networksLabels: Object.keys(nextProps.stations),
+                emittors: nextProps.emittors,
+                networksLabels: Object.keys(nextProps.emittors),
                 colors: colormap({
                     colormap: 'jet',
-                    nshades: Math.max(Object.keys(nextProps.stations).length, 8),
+                    nshades: Math.max(Object.keys(nextProps.emittors).length, 8),
                     format: 'hex',
                     alpha: 1
                 }), // once component received new props and has set its state, render component anew with new state.
@@ -70,14 +70,16 @@ class MapBox extends Component {
         if (keys.length === 0) {
             return [2.33, 48.86]; // centered on Paris
         }
-        return [this.props.stations[keys[0]][0].coordinates.lng, this.props.stations[keys[0]][0].coordinates.lat];
+        let firstEmittor = Object.keys(this.props.emittors[keys[0]])[0];
+        return [this.props.emittors[keys[0]][firstEmittor].coordinates.lng, this.props.emittors[keys[0]][firstEmittor].coordinates.lat];
     }
 
     clusterCenter(network) {
         let x = 0;
         let y = 0;
         let count = 0;
-        for (let station of this.state.stations[network]) {
+        for (let station_id of Object.keys(this.state.emittors[network])) {
+            let station = this.state.emittors[network][station_id];
             count += 1;
             x += station.coordinates.lng;
             y += station.coordinates.lat;
@@ -113,8 +115,21 @@ class MapBox extends Component {
         return "white";
     }
 
+    switchAll() {
+        let newNetworksToggled = {};
+        if (this.props.switch === "Show") {
+            for (let network of Object.keys(this.state.emittors)) {
+                newNetworksToggled[network] = true;
+            }
+        }
+        this.setState({
+            networksToggled: newNetworksToggled
+        });
+        this.props.switchAll(newNetworksToggled);
+    }
+
     render() {
-        let image = new Image(512, 512);
+        let image = new Image(934, 1321);
         image.src = stationImage;
         let images = ["stationImage", image];
         return (
@@ -126,9 +141,15 @@ class MapBox extends Component {
                         width: "100%",
                     }}
                     center={this.center()}>
-                    <Layer id="stations" type="symbol" layout={{
+                    {/* CSS ! */}
+                    <div className="field switch-container" >
+                        <input id="switchAll" type="checkbox" name="switchAll" className="switch is-rtl is-rounded is-outlined is-info" onChange={this.switchAll} />
+                        <label htmlFor="switchAll"><strong>{this.props.switch} all</strong></label>
+                    </div>
+                    {/* CSS ! */}
+                    <Layer id="emittors" type="symbol" layout={{
                         "icon-image": "stationImage",
-                        "icon-size": 0.05
+                        "icon-size": 0.03
                     }} images={images} >
                         {
                             Object.keys(this.props.recStations).map((station, k) =>
@@ -144,7 +165,7 @@ class MapBox extends Component {
                                     {this.state.networksToggled[network] &&
                                         <Lines
                                             clusterCenter={clusterCenter} color={color}
-                                            network={network} stations={this.state.stations[network]} />
+                                            network={network} stations={this.state.emittors[network]} />
                                     }
                                     <Layer
                                         id={"center" + network}
@@ -157,19 +178,19 @@ class MapBox extends Component {
                                         }}>
                                         <Feature coordinates={clusterCenter} onClick={() => this.toggleNetwork(network)}
                                             onMouseEnter={() => {
-                                                if (this.state.stations[network].length > 1) {
+                                                if (this.state.emittors[network].length > 1) {
                                                     this.mouseEnter(network)
                                                 }
                                             }}
                                             onMouseLeave={() => {
-                                                if (this.state.stations[network].length > 1) {
+                                                if (this.state.emittors[network].length > 1) {
                                                     this.mouseExit(network)
                                                 }
                                             }}></Feature>
                                     </Layer>
                                     {this.state.networksToggled[network] &&
                                         <Stations
-                                            stations={this.state.stations[network]} network={network}
+                                            stations={this.state.emittors[network]} network={network}
                                             color={color} />
                                     }
                                 </div>)

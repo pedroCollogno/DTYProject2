@@ -1,9 +1,14 @@
-exports.style = {
+var config = require('../../../config.json');
+console.log(config.PATH.data)
+console.log(location.origin + location.pathname + "mapbox-gl/countries/{z}/{x}/{y}.pbf");
+console.log(config.URLS.BASE.back + config.URLS.PORT.back + "/static" + "/country-vectors/{z}/{x}/{y}.pbf")
+
+exports.countries = {
     "version": 8,
     "sources": {
         "countries": {
             "type": "vector",
-            "tiles": [location.origin + location.pathname + "mapbox-gl/countries/{z}/{x}/{y}.pbf"],
+            "tiles": [location.origin + location.pathname + "mapbox-gl/country-vectors/{z}/{x}/{y}.pbf"],
             "maxzoom": 6
         }
     },
@@ -237,5 +242,29 @@ exports.style = {
             "text-color": "#226688",
             "text-halo-width": 1.5
         }
+    }]
+};
+
+exports.global = {
+    "version": 8,
+    "sources": {
+        "countries": {
+            "type": "raster",
+            "tiles": [location.origin + location.pathname + "mapbox-gl/cholet-tiles/{z}/{x}/{y}.png"],
+            "maxzoom": 15
+        }
+    },
+    "glyphs": location.origin + location.pathname + "mapbox-gl/font/{fontstack}/{range}.pbf",
+    "layers": [{
+        "id": "background",
+        "type": "background",
+        "paint": {
+            "background-color": "#ddeeff"
+        }
+    },
+    {
+        "id": "satellite",
+        "type": "raster",
+        "source": "countries",
     }]
 };

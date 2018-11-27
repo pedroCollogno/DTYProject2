@@ -1,6 +1,8 @@
 import logging
 import os
 
+from .config import config
+
 
 def set_logger_up():
     """ Sets the logger object up, to log messages to console and to .txt file in logs/ folder.
@@ -10,11 +12,11 @@ def set_logger_up():
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
 
-    create_new_folder('logs', '.')
     fh_formatter = logging.Formatter(
         '%(asctime)s - %(levelname)s - %(message)s')
 
-    fh = logging.FileHandler('./logs/logs.txt')
+    logs_file = os.path.join(config['PATH']['logs'], "logs.txt")
+    fh = logging.FileHandler(logs_file)
     fh.setLevel(logging.WARNING)
     fh.setFormatter(fh_formatter)
     logger.addHandler(fh)
