@@ -71,6 +71,7 @@ class App extends Component {
 
   toggleNetwork(network) {
     let networksToggledCopy = JSON.parse(JSON.stringify(this.state.networksToggled));
+    console.log(networksToggledCopy);
     if (networksToggledCopy[network] == undefined) {
       networksToggledCopy[network] = true;
     }
@@ -155,7 +156,6 @@ class App extends Component {
                         }}>
                           {
                             Object.keys(this.state.emittors[key]).map((emittor_id) => {
-                              console.log(this.state.emittors);
                               return (
                                 <tr key={this.state.emittors[key][emittor_id].track_id}>
                                   <td>{this.state.emittors[key][emittor_id].track_id}</td>

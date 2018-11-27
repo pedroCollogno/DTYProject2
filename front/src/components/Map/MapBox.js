@@ -16,39 +16,45 @@ class MapBox extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            zoom: 4,
             emittors: this.props.emittors,
-            networksLabels: Object.keys(this.props.emittors),
-            colors: colormap({
+            // the emittors received from App.js, in from of : {
+            //     network_id : {
+            //         emittor_id : {
+            //             coordinates : {lat : float, lng : float}, ...
+            //         }
+            //     }
+            // }
+            networksLabels: Object.keys(this.props.emittors), // the networks labels
+            colors: colormap({ // a colormap to set a differnet color for each network
                 colormap: 'jet',
-                nshades: Math.max(Object.keys(this.props.emittors).length, 8),
+                nshades: Math.max(Object.keys(this.props.emittors).length, 8), // 8 is the minimum number of colors
                 format: 'hex',
-                alpha: 1
+                alpha: 1 // opacity
             }),
             style: {
-                online: 'mapbox://styles/mapbox/streets-v9',
-                offline: global
+                online: 'mapbox://styles/mapbox/streets-v9', // if "online" is toggled, renders map through the Web (OpenStreet Map)
+                offline: global // else, renders the local version of the map (pre-dowloaded tiles for different levels of zoom)
             },
-            networksToggled: {
+            networksToggled: { // the networks to display (by default, only one "center" is displayed for better visualization)
             },
-            highlights: {
+            highlights: { // the networks that are hovered over
             }
         };
         for (let label of Object.keys(this.props.emittors)) {
-            this.state.highlights[label] = 0;
+            this.state.highlights[label] = 0; // at the beginning, networks are not hovered over (supposedly)
         }
-        this.mouseEnter = this.mouseEnter.bind(this);
+        this.mouseEnter = this.mouseEnter.bind(this); // allows those functions to update the state of the component 
         this.mouseExit = this.mouseExit.bind(this);
 
     }
 
-    componentWillReceiveProps(nextProps) {
-        if (nextProps && nextProps.emittors !== this.props.emittors) {
+    componentWillReceiveProps(nextProps) { // re-renders the map each time it received a new prop (emittor or network toggling)
+        if (nextProps && nextProps !== this.props) { // little check
             let highlights = {};
-            for (let label of Object.keys(nextProps.emittors)) {
+            for (let label of Object.keys(nextProps.emittors)) { // eventual new network, along with all the other ones, is not highlighted
                 highlights[label] = 0;
             }
-            this.setState({
+            this.setState({ // update the state with the new props, thus re-rendering the component
                 emittors: nextProps.emittors,
                 networksLabels: Object.keys(nextProps.emittors),
                 colors: colormap({
@@ -63,16 +69,16 @@ class MapBox extends Component {
         }
     }
 
-    center() {
+    center() { // N.B. : a revoir, super chiant sa race
         let keys = this.state.networksLabels;
         if (keys.length === 0) {
-            return [2.33, 48.86]; // centered on Paris
+            return [2.33, 48.86]; // centered on Paris if no emittor to display
         }
-        let firstEmittor = Object.keys(this.props.emittors[keys[0]])[0];
+        let firstEmittor = Object.keys(this.props.emittors[keys[0]])[0]; // else, centered on the very first emittor received
         return [this.props.emittors[keys[0]][firstEmittor].coordinates.lng, this.props.emittors[keys[0]][firstEmittor].coordinates.lat];
     }
 
-    clusterCenter(network) {
+    clusterCenter(network) { // returns the geometric center of all the points of the network, for simpler rendering
         let x = 0;
         let y = 0;
         let count = 0;
@@ -82,29 +88,28 @@ class MapBox extends Component {
             x += station.coordinates.lng;
             y += station.coordinates.lat;
         }
-        return [x / count, y / count];
+        return [x / count, y / count]; // arithmetic means
     }
 
-    mouseEnter(network) {
+    mouseEnter(network) { // when hovering over a network center, highlights it
         let highlights = JSON.parse(JSON.stringify(this.state.highlights));
         highlights[network] = 2;
         this.setState({ highlights: highlights });
     }
 
-    mouseExit(network) {
+    mouseExit(network) { // when leaving, removing the highlight
         let highlights = JSON.parse(JSON.stringify(this.state.highlights));
         highlights[network] = 0;
         this.setState({ highlights: highlights });
     }
 
-    getColor(network) {
+    getColor(network) { // gets the color of each network (white if null)
         let i = parseInt(network);
         if (this.state.colors[i] != undefined) {
             return this.state.colors[i];
         }
         return "white";
     }
-
 
     render() {
         let image = new Image(934, 1321);
@@ -123,11 +128,11 @@ class MapBox extends Component {
                     <div className={"tile is-vertical"} id="showhide">
                         <label className={"checkbox"}>
                             <input type="checkbox" onClick={() => this.props.switchAll(true)} />
-                            Show all
+                            <strong>  </strong>Show all
                     </label>
                         <label className={"checkbox"}>
                             <input type="checkbox" onClick={() => this.props.switchAll(false)} />
-                            Hide all
+                            <strong>  </strong>Hide all
                     </label>
                     </div>
                     {/* CSS ! */}
@@ -144,9 +149,13 @@ class MapBox extends Component {
                         this.state.networksLabels.map((network, k) => {
                             let clusterCenter = this.clusterCenter(network);
                             let color = this.getColor(network);
+                            let toggled = this.state.networksToggled[network];
+                            toggled = !(toggled == undefined || !toggled);
+                            toggled = !this.props.hideAll && (toggled || this.props.showAll);
+                            console.log("Network : " + network + " Toggeld : " + toggled);
                             return (
                                 <div id={"cluster" + k} key={"cluster" + k}>
-                                    {this.state.networksToggled[network] &&
+                                    {toggled &&
                                         <Lines
                                             clusterCenter={clusterCenter} color={color}
                                             network={network} stations={this.state.emittors[network]} />
@@ -162,17 +171,17 @@ class MapBox extends Component {
                                         }}>
                                         <Feature coordinates={clusterCenter} onClick={() => this.props.toggleNetwork(network)}
                                             onMouseEnter={() => {
-                                                if (this.state.emittors[network].length > 1) {
+                                                if (Object.keys(this.state.emittors[network]).length > 1) {
                                                     this.mouseEnter(network)
                                                 }
                                             }}
                                             onMouseLeave={() => {
-                                                if (this.state.emittors[network].length > 1) {
+                                                if (Object.keys(this.state.emittors[network]).length > 1) {
                                                     this.mouseExit(network)
                                                 }
                                             }}></Feature>
                                     </Layer>
-                                    {this.state.networksToggled[network] &&
+                                    {toggled &&
                                         <Stations
                                             stations={this.state.emittors[network]} network={network}
                                             color={color} />

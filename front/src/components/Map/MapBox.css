@@ -36,3 +36,15 @@
 .mapboxgl-ctrl-bottom-left {
   display: none; }
 
+  #showhide {
+    font-size: 150%;
+    position:absolute;
+    z-index:20;
+    width:fit-content;
+    padding-right : 1%;
+    padding-bottom: 1%;
+    border-radius: 7%;
+    display: flex;
+    background-color : rgba(100,100,100,0.3);
+    
+  }

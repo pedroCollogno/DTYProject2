@@ -51,13 +51,3 @@ body {
   -webkit-user-select: none;
   -o-user-select: none; }
 
-  #showhide {
-    position:absolute;
-    z-index:20;
-    width:fit-content;
-    border:20px;
-    border-radius:3px;
-    display: flex;
-    background-color : rgba(100,100,100,0.3);
-    
-  }
