@@ -19,9 +19,9 @@ class App extends Component {
       emittors: {}, // list of all the detected stations so far
       stations: {},
       connection: "offline",
-      networksToggled: {
-      },
-      switch: "Show"
+      networksToggled: {},
+      showAll: false,
+      hideAll: false
     };
     this.newEmittor = this.newEmittor.bind(this);
     this.getStations = this.getStations.bind(this);
@@ -71,6 +71,7 @@ class App extends Component {
 
   toggleNetwork(network) {
     let networksToggledCopy = JSON.parse(JSON.stringify(this.state.networksToggled));
+    console.log(networksToggledCopy);
     if (networksToggledCopy[network] == undefined) {
       networksToggledCopy[network] = true;
     }
@@ -81,23 +82,23 @@ class App extends Component {
   }
 
   getBorderStyle(network) {
-    if (this.state.networksToggled[network] == undefined || !this.state.networksToggled[network]) {
-      return "none";
+    let toggled = this.state.networksToggled[network];
+    toggled = !(toggled == undefined || !toggled);
+    if (!this.state.hideAll && (toggled || this.state.showAll)) {
+      return "solid";
     }
-    return "solid";
+    return "none";
   }
 
-  switchAll(networksToggled) {
-    if (this.state.switch === "Show") {
+  switchAll(all) {
+    if (all) {
       this.setState({
-        switch: "Hide",
-        networksToggled: networksToggled
+        showAll: !this.state.showAll
       });
     }
     else {
       this.setState({
-        switch: "Show",
-        networksToggled: networksToggled
+        hideAll: !this.state.hideAll
       });
     }
   }
@@ -129,7 +130,8 @@ class App extends Component {
 
         <div className="container">
           <MapBox emittors={this.state.emittors} recStations={this.state.stations} connection={this.state.connection}
-            toggleNetwork={this.toggleNetwork} switchAll={this.switchAll} switch={this.state.switch} />
+            toggleNetwork={this.toggleNetwork} switchAll={this.switchAll}
+            hideAll={this.state.hideAll} showAll={this.state.showAll} networksToggled={this.state.networksToggled} />
 
           <PostHandler getStations={this.getStations} />
           {
@@ -154,7 +156,6 @@ class App extends Component {
                         }}>
                           {
                             Object.keys(this.state.emittors[key]).map((emittor_id) => {
-                              console.log(this.state.emittors);
                               return (
                                 <tr key={this.state.emittors[key][emittor_id].track_id}>
                                   <td>{this.state.emittors[key][emittor_id].track_id}</td>

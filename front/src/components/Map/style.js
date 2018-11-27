@@ -1,7 +1,4 @@
-var config = require('../../../config.json');
-console.log(config.PATH.data)
-console.log(location.origin + location.pathname + "mapbox-gl/countries/{z}/{x}/{y}.pbf");
-console.log(config.URLS.BASE.back + config.URLS.PORT.back + "/static" + "/country-vectors/{z}/{x}/{y}.pbf")
+
 
 exports.countries = {
     "version": 8,

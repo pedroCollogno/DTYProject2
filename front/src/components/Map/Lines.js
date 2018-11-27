@@ -1,7 +1,9 @@
 import React, { Component } from "react";
 import { Feature, Layer } from "react-mapbox-gl";
+import PropTypes from "prop-types";
 
 class Lines extends Component {
+
     render() {
         return (
             <Layer
@@ -19,6 +21,21 @@ class Lines extends Component {
             </Layer>
         );
     }
+}
+
+Lines.propTypes = {
+    /**
+     * the stations of the network to display
+     */
+    stations: PropTypes.objectOf(PropTypes.object).isRequired,
+    /**
+     * the network id, for proper Layer id-ing
+     */
+    network: PropTypes.string.isRequired,
+    /**
+     * the color of the lines
+     */
+    color: PropTypes.string.isRequired
 }
 
 export default Lines;
