@@ -15,7 +15,7 @@ def fake_data_generator(sequence_size,n_clusters, avg_n_emittors_in_clusters):
     for i in range(n_clusters):
         sum=sequence_size
         n=avg_n_emittors_in_clusters+1
-        rnd_array=np.random.multinomial(sum,np.concatenate((np.ones(n-1)/(n+9), np.array([20/(n+19)]))), size=1)[0]
+        rnd_array=np.random.multinomial(sum,np.concatenate((np.ones(n-1)/(n+9), np.array([20/(n+19)]))), size=1)[0]#20 corresponds to the silence time in each sequence
         fake_X=[-1 for j in range(sequence_size)]
         count_visited=0
         for a in range(n):
@@ -26,10 +26,6 @@ def fake_data_generator(sequence_size,n_clusters, avg_n_emittors_in_clusters):
             tracer=0
             while b<rnd_array[a]:
                 if (fake_X[tracer]==-1 and places_in_sequence[b]==count_free and a!=0):
-                    fake_X[tracer]=a
-                    count_free+=1
-                    b+=1
-                elif (fake_X[tracer]==-1 and places_in_sequence[b]==count_free and a==0):
                     fake_X[tracer]=a
                     count_free+=1
                     b+=1

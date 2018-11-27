@@ -38,7 +38,7 @@ def train():
 
     model = Sequential()
     model.add(LSTM(units=128, input_shape=(2, 50)))
-    model.add(Dropout(0.9))
+    model.add(Dropout(0.5))
     model.add(Dense(1, activation="sigmoid"))
 
     my_callbacks = [EarlyStopping(monitor='auc_roc', patience=300, verbose=1, mode='max'),
@@ -50,7 +50,7 @@ def train():
         X,
         Y,
         batch_size=100,
-        epochs=5,
+        epochs=10,
         validation_split=0.2,
         callbacks=my_callbacks,
         shuffle=True
@@ -60,14 +60,19 @@ def train():
     model.save_weights('./weights/my_model_clusters_weights.h5')
 
 def train_real():
+    """
+    We train the model on a certain situation stored in a PRP file,
+    it creates clusters from the PRP file and compares every single emittor with every cluster
+    We store the weights in a file to use them for testing
+    """ 
     real_clusters, ei = create_clusters()
-    real_data, labels =create_cheat_comparison_with_cluster(real_clusters, ei)
+    real_data, labels, step_nb =create_cheat_comparison_with_cluster(real_clusters, ei)
     X = np.array(real_data)
     Y = np.array(labels)
 
     model = Sequential()
     model.add(LSTM(units=128, input_shape=(2, 50)))
-    model.add(Dropout(0.3))
+    model.add(Dropout(0.5))
     model.add(Dense(1, activation="sigmoid"))
 
     my_callbacks = [EarlyStopping(monitor='auc_roc', patience=300, verbose=1, mode='max'),
@@ -89,7 +94,7 @@ def train_real():
     model.save_weights('./weights/my_real_model_clusters_weights.h5')
 
 
-def prediction_processing(predictions,labels, threshold):
+def prediction_processing(predictions,labels, threshold, step_nb):
     """
     Labels the total prediction on all sequences according to threshold
     :param predictions: The predictions for every tuple (emittor, cluster, sequence)
@@ -99,7 +104,7 @@ def prediction_processing(predictions,labels, threshold):
     """
     new_labels=[]
     new_predictions=[]
-    number_sequences=39
+    number_sequences=step_nb//50
     for k in range(len(labels)//number_sequences):
         total_prediction=0
         isLabelTrue=labels[number_sequences*k]
@@ -123,42 +128,34 @@ def test():
 
     """
     Tests our model on unseen data. We need first to pre-process the data
-    Shows the recall, precision for different thresholds on a graph
+    Shows the recall, precision for different thresholds on a graph.
+    We can choose the weights of the training on real data or on fake data generated
     """
     real_clusters, ei = create_clusters()
-    real_data, labels =create_emittor_comparison_with_cluster(real_clusters, ei)
-    print(len (real_data))
-    print(len(labels))
-    print(real_data[0])
-    
+    real_data, labels, step_nb =create_emittor_comparison_with_cluster(real_clusters, ei)
     model = Sequential()
     model.add(LSTM(units=128, input_shape=(2, 50)))
     model.add(Dense(1, activation="sigmoid"))
     model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=[
                   'accuracy', metrics.f1_score_threshold(), metrics.precision_threshold(), metrics.recall_threshold()])
-    model.load_weights('./weights/my_real_model_clusters_weights.h5')
+    model.load_weights('./weights/my_model_clusters_weights.h5')
 
     to_predict=np.array(real_data)
     predictions=model.predict(to_predict)
     predictions=np.array([k[0] for k in predictions])
     labels=np.array(labels)
     thresholdlist=np.arange(50,2000,50)
-    #thresholdlist=np.array([96])
     recall_0_list=[]
     recall_1_list=[]
     precision_0_list=[]
     precision_1_list=[]
     
     for k in thresholdlist:
-        scores, true_predictions, true_labels=prediction_processing(predictions, labels, k)
+        scores, true_predictions, true_labels=prediction_processing(predictions, labels, k, step_nb)
         recall_1_list.append(scores[0])
         recall_0_list.append(scores[1])
         precision_1_list.append(scores[2])
         precision_0_list.append(scores[3])
-    print(recall_0_list)
-    print(recall_1_list)
-    print(precision_0_list)
-    print(precision_1_list)
     fig=plt.figure(0)
     ax=fig.add_subplot(2,1,1)
     plt.plot(thresholdlist,recall_0_list, 'bo',thresholdlist,recall_1_list, 'ro')
@@ -166,21 +163,9 @@ def test():
     ax2=fig.add_subplot(2,1,2)
 
     plt.plot(thresholdlist,precision_0_list, 'bo',thresholdlist,precision_1_list, 'ro')
-    scores, true_predictions, true_labels=prediction_processing(predictions, labels, 80)
-    print(scores)
-    for k in range(len(true_predictions)):
-        if true_labels[k]!=true_predictions[k]:
-            total_prediction=0
-            for i in range(39):
-                print(real_data[39*k+i])
-                total_prediction+=(1/predictions[39*k+i])
-                print(predictions[39*k+i])
-            print(true_labels[k])
-            print(true_predictions[k])
-            break
-    print(total_prediction)
     plt.show()
     
     
 
-test()
+if __name__=='__main__':
+    test()

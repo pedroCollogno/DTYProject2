@@ -254,7 +254,7 @@ def create_emittor_comparison_with_cluster(real_clusters, ei):
                         labels.append(label)
                 else:
                     print("1 emittor cluster comparing with itself")
-    return(real_data, labels)
+    return(real_data, labels, step_nb)
 
 def create_cheat_comparison_with_cluster(real_clusters, ei):
     """
@@ -287,4 +287,4 @@ def create_cheat_comparison_with_cluster(real_clusters, ei):
                         labels.append(label)
                 else:
                     print("1 emittor cluster comparing with itself")
-    return(real_data, labels)
+    return(real_data, labels, step_nb)
