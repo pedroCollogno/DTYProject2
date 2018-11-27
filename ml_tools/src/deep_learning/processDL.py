@@ -290,8 +290,6 @@ def process_data_clusters(track_streams, file_name):
     progress = 0
     pbar = ProgressBar(maxval=(len(preds[0])))
     pbar.start()
-    j = 0
-
     for i in range(len(preds[0])):
         emitter_infos[preds[1][i]] = {
             "network": preds[0][i],
@@ -301,9 +299,6 @@ def process_data_clusters(track_streams, file_name):
         pbar.update(progress)
         pbar.finish()
 
-    for k in emitter_infos:
-        j += 1
-    print(j)
     return (emitter_infos)
 
 
