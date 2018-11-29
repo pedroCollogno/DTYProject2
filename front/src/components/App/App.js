@@ -26,6 +26,7 @@ class App extends Component {
       hideAll: false
     };
     this.newEmittor = this.newEmittor.bind(this); // functions that are allowed to update the state of the component
+    this.newEmittors = this.newEmittors.bind(this);
     this.getStations = this.getStations.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.toggleNetwork = this.toggleNetwork.bind(this);
@@ -81,6 +82,33 @@ class App extends Component {
         }
         this.setState({ emittors: dic });
       }
+    }
+  }
+
+  newEmittors(emittors) {
+    if (emittors) {
+      let stats = JSON.parse(emittors);
+      let dic = JSON.parse(JSON.stringify(this.state.emittors));
+      if (Object.entries(stats)[0][1]["network_id"] != undefined) {
+        for (let key of Object.keys(stats)) {
+          let stat = stats[key];
+          if (stat.coordinates) {
+            let longitude = stat.coordinates.lng;
+            if (longitude < -180) {
+              stat.coordinates.lng = longitude + 360;
+            }
+            if (dic["" + stat.network_id]) {
+              dic["" + stat.network_id][stat.track_id] = stat;
+            }
+            else {
+              dic["" + stat.network_id] = {};
+              dic["" + stat.network_id][stat.track_id] = stat;
+            }
+          }
+        }
+        this.setState({ emittors: dic });
+      }
+
     }
   }
 
@@ -172,7 +200,7 @@ class App extends Component {
         </section>
 
         {/* Handles the HandShaking and sends a "begin" message to the backend Socket */}
-        < SocketHandler handleData={this.newEmittor} />
+        < SocketHandler handleData={this.newEmittors} />
 
         <div className="container">
           {/* Handles the displays on a canvas */}

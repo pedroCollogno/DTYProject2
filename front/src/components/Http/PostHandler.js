@@ -32,13 +32,9 @@ class HttpRequestHandler extends Component {
             if (response.data === "POST ok !") {
                 axios.get("http://localhost:8000/getstations") // GETs the locations of the reception stations...
                     .then((response) => {
-                        axios.get("http://localhost:8000/static/country-vectors/countries/6/32/21.pbf")
-                            .then((res) => {
-                                console.log(res);
-                            })
                         this.props.getStations(response); // ...and update the App.js state !
                         this.setState({ loaded: true }); // Allows the "Start simulation" button to be active 
-                    })
+                    });
             }
         })
     }
@@ -60,7 +56,7 @@ class HttpRequestHandler extends Component {
     }
 
     /**
-     * Triggered when the "Simulation with both techniques" button is pushed. Starts the simulation.
+     * Triggered when the "Simulation with both techniques" button is pushed. Starts the simulation. 
      * @param {*} e 
      */
     onStart(e) {
@@ -73,7 +69,7 @@ class HttpRequestHandler extends Component {
  * @param {*} e 
  */
     onStartML(e) {
-        axios.get("http://localhost:8000/startsimulation")
+        axios.get("http://localhost:8000/startsimulationML")
             .then((res) => console.log("Simulation started !"));
     }
 
@@ -82,7 +78,7 @@ class HttpRequestHandler extends Component {
  * @param {*} e 
  */
     onStartDL(e) {
-        axios.get("http://localhost:8000/startsimulation")
+        axios.get("http://localhost:8000/startsimulationDL")
             .then((res) => console.log("Simulation started !"));
     }
 
@@ -125,6 +121,12 @@ class HttpRequestHandler extends Component {
                 }
             }
         }
+    }
+
+    reset() {
+        this.setState({
+
+        })
     }
 
     render() {
@@ -185,6 +187,9 @@ class HttpRequestHandler extends Component {
                         Simulation with Deep Learning only</button>
                     <button className="button" id="start-sim-button" disabled={!this.state.loaded} onClick={this.onStart}>
                         Simulation with both techniques</button>
+                </div>
+                <div className="tile">
+                    <button onClick={this.reset}>Reset</button>
                 </div>
             </div>
 

@@ -17,12 +17,12 @@ class MapBox extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            emittors: this.props.emittors,
+            emittors: props.emittors,
 
-            networksLabels: Object.keys(this.props.emittors), // the networks labels
+            networksLabels: Object.keys(props.emittors), // the networks labels
             colors: colormap({ // a colormap to set a different color for each network
                 colormap: 'jet',
-                nshades: Math.max(Object.keys(this.props.emittors).length, 8), // 8 is the minimum number of colors
+                nshades: Math.max(Object.keys(props.emittors).length, 8), // 8 is the minimum number of colors
                 format: 'hex',
                 alpha: 1 // opacity
             }),
@@ -35,7 +35,7 @@ class MapBox extends Component {
             highlights: { // the networks that are hovered over
             }
         };
-        for (let label of Object.keys(this.props.emittors)) {
+        for (let label of Object.keys(props.emittors)) {
             this.state.highlights[label] = 0; // at the beginning, networks are not hovered over (supposedly)
         }
         this.mouseEnter = this.mouseEnter.bind(this); // allows those functions to update the state of the component 
@@ -48,6 +48,7 @@ class MapBox extends Component {
      * @param {*} nextProps 
      */
     componentWillReceiveProps(nextProps) {
+        console.log(nextProps);
         if (nextProps && nextProps !== this.props) { // little check, doesn't hurt
             let highlights = {};
             for (let label of Object.keys(nextProps.emittors)) { // eventual new network, along with all the other ones, is not highlighted
@@ -248,7 +249,7 @@ MapBox.propTypes = {
     /**
      * the list of the reception stations
      */
-    recStations: PropTypes.arrayOf(PropTypes.objectOf(PropTypes.object)).isRequired,
+    recStations: PropTypes.objectOf(PropTypes.objectOf(PropTypes.object)).isRequired,
     /**
      * the connection status
      */
