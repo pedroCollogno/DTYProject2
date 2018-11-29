@@ -15,15 +15,17 @@ class App extends Component {
   constructor() {
     super();
     this.state = {
-      station: { network_id: 0, coordinates: { lat: 0, lng: 0 }, track_id: 0 },
-      emittors: {}, // list of all the detected stations so far
-      stations: {},
-      connection: "offline",
-      networksToggled: {},
-      showAll: false,
+      emittors: {}, // list of all the detected stations so far in the form :
+      // { network_id : 
+      //        { track_id : {coordinates: { lat: int, lng: int }, ... }
+      // }
+      stations: {}, // list of the reception stations
+      connection: "offline", // selcects the style of the map (to be fetched from the Web or locally)
+      networksToggled: {}, // the networks toggled : used to highlight them in the list and display them on the map
+      showAll: false, // the state of the checkbuttons of the map (combined with networksToggled)
       hideAll: false
     };
-    this.newEmittor = this.newEmittor.bind(this);
+    this.newEmittor = this.newEmittor.bind(this); // functions that are allowed to update the state of the component
     this.getStations = this.getStations.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.toggleNetwork = this.toggleNetwork.bind(this);
@@ -31,6 +33,11 @@ class App extends Component {
 
   }
 
+
+  /**
+   * Toggles between "online" and "offline" display
+   * @param {*} event 
+   */
   handleChange(event) {
     if (event.target.checked === true) {
       this.setState({ connection: 'online' })
@@ -39,6 +46,11 @@ class App extends Component {
     }
   }
 
+
+  /**
+   * Returns the text to be displayed depending on the connection
+   * i.e. : "Switch to online connection" if the state connection is currently offline
+   */
   getConnection() {
     if (this.state.connection == "online") {
       return "offline";
@@ -46,11 +58,19 @@ class App extends Component {
     return "online";
   }
 
-
+  /**
+   * Adds the emittor coming from the backend to the list of the emittors.
+   * Stores it as {network_id : {track_id : {coordinates : {lat : int, lng : int}, ...}}}
+   * @param {*} emittor 
+   */
   newEmittor(emittor) {
     if (emittor) {
       let stat = JSON.parse(emittor);
       if (stat.coordinates) {
+        let longitude = stat.coordinates.lng;
+        if (longitude < -180) {
+          stat.coordinates.lng = longitude + 360;
+        }
         let dic = JSON.parse(JSON.stringify(this.state.emittors));
         if (dic["" + stat.network_id]) {
           dic["" + stat.network_id][stat.track_id] = stat;
@@ -59,28 +79,48 @@ class App extends Component {
           dic["" + stat.network_id] = {};
           dic["" + stat.network_id][stat.track_id] = stat;
         }
-        this.setState({ emittors: dic, station: stat });
+        this.setState({ emittors: dic });
       }
     }
   }
 
+  /**
+   * Adds the reception stations sent from the backend (all at once) to the state of the component.
+   * Stations are expected to be : {data : {station1 : {coordinates : {lat : int, lng : int}}},
+   *                                       {station2 : {coordinates : {lat : int, lng : int}}}, ...
+   *                                }
+   * @param {*} response 
+   */
   getStations(response) {
     this.setState({ stations: response.data });
     console.log(response.data);
   }
 
+  /**
+   * Updates the state of the component (and thus the rendering) whenever a network is manually toggled
+   * @param {*} network 
+   */
   toggleNetwork(network) {
-    let networksToggledCopy = JSON.parse(JSON.stringify(this.state.networksToggled));
-    console.log(networksToggledCopy);
-    if (networksToggledCopy[network] == undefined) {
-      networksToggledCopy[network] = true;
+    if (network == null) {
+      console.log("Network is null");
     }
     else {
-      networksToggledCopy[network] = !networksToggledCopy[network];
+      let networksToggledCopy = JSON.parse(JSON.stringify(this.state.networksToggled));
+      if (networksToggledCopy[network] == undefined) {
+        networksToggledCopy[network] = true;
+      }
+      else {
+        networksToggledCopy[network] = !networksToggledCopy[network];
+      }
+      this.setState({ networksToggled: networksToggledCopy });
     }
-    this.setState({ networksToggled: networksToggledCopy });
+
   }
 
+  /**
+   * Gets the display mode (highlighted or not) of the given network in the rendered list
+   * @param {*} network 
+   */
   getBorderStyle(network) {
     let toggled = this.state.networksToggled[network];
     toggled = !(toggled == undefined || !toggled);
@@ -90,6 +130,11 @@ class App extends Component {
     return "none";
   }
 
+  /**
+   * Called by pressing the showAll or hideAll buttons. Updates the state accordingly.
+   * The param "all" is a boolean : True if showAll was pressed, False if hideAll was pressed.
+   * @param {*} all 
+   */
   switchAll(all) {
     if (all) {
       this.setState({
@@ -126,13 +171,16 @@ class App extends Component {
           </div>
         </section>
 
+        {/* Handles the HandShaking and sends a "begin" message to the backend Socket */}
         < SocketHandler handleData={this.newEmittor} />
 
         <div className="container">
+          {/* Handles the displays on a canvas */}
           <MapBox emittors={this.state.emittors} recStations={this.state.stations} connection={this.state.connection}
             toggleNetwork={this.toggleNetwork} switchAll={this.switchAll}
             hideAll={this.state.hideAll} showAll={this.state.showAll} networksToggled={this.state.networksToggled} />
 
+          {/* Handles the HTTP requests and their responses from the backend */}
           <PostHandler getStations={this.getStations} />
           {
             (Object.keys(this.state.emittors).length > 0 ?

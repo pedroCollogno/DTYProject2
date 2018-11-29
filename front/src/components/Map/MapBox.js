@@ -84,14 +84,15 @@ class MapBox extends Component {
     clusterCenter(network) {
         let x = 0;
         let y = 0;
-        let count = 0;
-        for (let station_id of Object.keys(this.state.emittors[network])) {
+        let stationLabels = Object.keys(this.state.emittors[network]);
+        let N = stationLabels.length;
+        for (let station_id of stationLabels) {
             let station = this.state.emittors[network][station_id];
-            count += 1;
             x += station.coordinates.lng;
             y += station.coordinates.lat;
         }
-        return [x / count, y / count]; // arithmetic means of the coordinates
+        console.log("Center of network " + network + " is : " + x / N + "," + y / N);
+        return [x / N, y / N]; // arithmetic means of the coordinates
     }
 
     /**
@@ -123,6 +124,7 @@ class MapBox extends Component {
         if (this.state.colors[i] != undefined) {
             return this.state.colors[i];
         }
+        console.log("Color " + network + " is undefined");
         return "white";
     }
 
@@ -140,10 +142,10 @@ class MapBox extends Component {
                         height: "100%",
                         width: "100%"
                     }}
-                    // where the map is centered when rendering /!\ ATTENTION : enlever si trop chiant /!\
-                    center={this.center()}>
+                // where the map is centered when rendering /!\ ATTENTION : enlever si trop chiant /!\
+                // center={this.center()}
+                >
 
-                    {/* CSS ! */}
                     <div className={"tile is-vertical"} id="showhide">
                         {/* The checkboxes to hide/show everything */}
                         <label className={"checkbox"}>
@@ -176,7 +178,6 @@ class MapBox extends Component {
                             // Those last 2 are rendered uniquely when toggled or if showAll is active.
                             let clusterCenter = this.clusterCenter(network);
                             let color = this.getColor(network);
-                            // console.log("Network : " + network + " Color : " + color);
                             let toggled = this.state.networksToggled[network];
                             toggled = !(toggled == undefined || !toggled);
                             toggled = !this.props.hideAll && (toggled || this.props.showAll);
