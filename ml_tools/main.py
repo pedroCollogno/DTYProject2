@@ -13,7 +13,9 @@ if __name__ == "__main__":
 from src import main, threads
 from utils import station_utils
 from utils import loading as load
-from utils.log import logger
+
+import logging
+logger = logging.getLogger('backend')
 
 
 def mock_sender_function(json_obj):

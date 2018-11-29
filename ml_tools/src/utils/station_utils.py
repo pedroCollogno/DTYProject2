@@ -1,7 +1,8 @@
 from .track_utils import get_track_id, add_track_to_dict
 from .gps import coords_from_tracks
 from progressbar import ProgressBar
-from .log import logger
+import logging
+logger = logging.getLogger('backend')
 
 
 def sync_stations(*args):
@@ -44,7 +45,8 @@ def sync_station_streams(station_1_track_stream, station_2_track_stream):
     elif s_1_dates[0] - s_2_dates[0] > min_cycle_duration/2:
         s_2_dates.pop(0)
         station_2_track_stream.pop(0)
-    print("Final dates for sync : %s - %s" % (s_1_dates[0], s_2_dates[0]))
+    logger.info("Final dates for sync : %s - %s" %
+                (s_1_dates[0], s_2_dates[0]))
 
 
 def fuse_all_station_tracks(*args):
@@ -107,31 +109,25 @@ def get_fused_station_tracks(station_1_track_streams, station_2_track_streams, a
                 track_stream.append(track)
 
             for track_2 in track_stream_2:
-                is_in_other = False
                 track_2_id = get_track_id(track_2)
-
-                if track_2_id not in met_track_ids:
-                    met_track_ids.append(track_2_id)
-                    track_stream.append(track_2)
 
                 for track_1 in track_stream:
                     track_1_id = get_track_id(track_1)
 
                     if track_2_id not in all_track_data.keys():
-                        lat, lng = coords_from_tracks(track_1, track_2)
-                        coords = {
-                            'lat': lat,
-                            'lng': lng
-                        }
                         add_track_to_dict(
-                            track_2, all_track_data, coords=coords)
+                            track_2, all_track_data)
 
-                    elif track_1_id == track_2_id:
+                    if track_1_id == track_2_id:
                         lat, lng = coords_from_tracks(track_1, track_2)
                         all_track_data[track_2_id]['coordinates'] = {
                             'lat': lat,
                             'lng': lng
                         }
+
+                if track_2_id not in met_track_ids:
+                    met_track_ids.append(track_2_id)
+                    track_stream.append(track_2)
 
             global_track_streams.append(track_stream)
             progress += 1
@@ -140,18 +136,8 @@ def get_fused_station_tracks(station_1_track_streams, station_2_track_streams, a
         pbar.finish()
 
     except ValueError as e:
-        logger.error("Ran into ValueError : %s \nWhen comparing looking at track %s" % (
+        logger.error("Ran into ValueError : %s \nWhen looking at track %s" % (
             e, track_2_id))
-        logger.warning(
-            "BIIIIIIIIIIIIIIIIIIIIIIIIITEEEEEEEEEEEEEEE")
-
-        logger.warning(track_stream_2)
-        logger.warning(
-            "BIIIIIIIIIIIIIIIIIIIIIIIIITEEEEEEEEEEEEEEE")
-
-        logger.warning(track_stream)
-        logger.warning(
-            "BIIIIIIIIIIIIIIIIIIIIIIIIITEEEEEEEEEEEEEEE")
 
     return(global_track_streams, all_track_data, met_track_ids)
 

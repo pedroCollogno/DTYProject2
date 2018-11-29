@@ -140,8 +140,9 @@ class MapBox extends Component {
                         height: "100%",
                         width: "100%"
                     }}
-                    // where the map is centered when rendering /!\ ATTENTION : enlever si trop chiant /!\
-                    center={this.center()}>
+                // where the map is centered when rendering /!\ ATTENTION : enlever si trop chiant /!\
+                // center={this.center()}
+                >
 
                     {/* CSS ! */}
                     <div className={"tile is-vertical"} id="showhide">

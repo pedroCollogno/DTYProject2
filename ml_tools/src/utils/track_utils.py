@@ -1,4 +1,5 @@
-from .log import logger
+import logging
+logger = logging.getLogger('backend')
 
 
 def get_track_info(track):
@@ -14,7 +15,8 @@ def get_track_info(track):
     info_from_track.append(track.itr_measurement.central_freq_hz)
     info_from_track.append(track.itr_measurement.bandwidth_hz)
     info_from_track.append(track.average_azimut_deg)
-    info_from_track.append(track.begin_date.date_ms)
+    # Rounded begin date to 100ms, to take into account signal propagation
+    info_from_track.append(int(track.begin_date.date_ms/100)*100)
     info_from_track.append(get_track_id(info_from_track))
     return info_from_track
 
@@ -72,16 +74,15 @@ def get_track_id(track):
         freq = track[1]
         track_begin_date = track[4]
     else:
-        track_begin_date = track.begin_date.date_ms
+        track_begin_date = int(track.begin_date.date_ms/100)*100
         freq = track.itr_measurement.central_freq_hz
         em_type = track.itr_measurement.type
 
-    track_begin_date = int(track_begin_date/100)*100
     #freq = int(freq/1000)*1000
 
     track_id = track_begin_date*100**1 + freq * \
         100**2 + em_type*100**3
-
+    track_id = track_id/1000 - 155000000000
     return(track_id)
 
 

@@ -12,9 +12,10 @@ if __name__ == "__main__":
 
 from ..utils.loading import *
 from ..utils.track_utils import *
-from ..utils.log import logger
 import processDL as processDL
 import model as model
+import logging
+logger = logging.getLogger('backend')
 
 
 def main(track_streams, file_name):

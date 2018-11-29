@@ -50,7 +50,6 @@ def startsimulation(request):
         Triggered whenever a user visits localhost:8000/test
         Will be called when lauching the simulation
     """
-    # TODO: use this function in the ML clustering algorithm
     send_emittor_to_front({'json': 'containing data'})
     Group('users').send({
         'text': json.dumps({

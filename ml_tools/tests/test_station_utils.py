@@ -1,7 +1,11 @@
 import unittest
+import logging
 from os.path import join, abspath, dirname
 from src.utils import station_utils, loading
 
+import logging
+logger = logging.getLogger('backend')
+logger.handlers[1].setLevel(logging.ERROR)
 
 test_dir = abspath(dirname(__file__))
 
@@ -14,7 +18,7 @@ class TestStationUtils(unittest.TestCase):
     ]
     track_streams = []
     for path in paths:
-        track_stream = loading.get_track_stream_exs_from_prp(path)
+        track_stream = loading.get_track_streams_from_prp(path)
         track_streams.append(track_stream)
 
     def test_tracks_sync(self):
@@ -25,11 +29,11 @@ class TestStationUtils(unittest.TestCase):
 
         all_dates = []
         for track_stream in self.track_streams:
-            all_dates.append([track_stream[i].data.debut_cycle.date_ms for i in range(
+            all_dates.append([track_stream[i].debut_cycle.date_ms for i in range(
                 len(track_stream))])
 
         min_cycle_durations = [
-            track_stream[0].data.duree_cycle_ms for track_stream in self.track_streams]
+            track_stream[0].duree_cycle_ms for track_stream in self.track_streams]
         min_cycle_duration = min(min_cycle_durations)
 
         for i in range(len(all_dates)):

@@ -27,7 +27,10 @@ if __name__ == "__main__":
 
 from .metrics import *
 from ..utils import config
-from ..utils.log import create_new_folder, logger
+from ..utils.log import create_new_folder
+
+import logging
+logger = logging.getLogger('backend')
 
 PKL_DIR = config['PATH']['pkl']
 PKL2_DIR = config['PATH']['pkl2']

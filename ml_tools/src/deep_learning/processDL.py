@@ -23,11 +23,13 @@ if __name__ == "__main__":
         os.path.dirname(file_dir)))
 
 from ..utils import config
-from ..utils.log import create_new_folder, logger
+from ..utils.log import create_new_folder
 from ..utils.loading import get_track_streams_from_prp
 from ..utils.track_utils import get_track_stream_info, get_track_info, get_track_id, get_track_list_info
 from ..clustering.dbscan import get_dbscan_prediction_min
 
+import logging
+logger = logging.getLogger('backend')
 
 time_step_ms = config['VARS']['time_step_ms']
 PKL_DIR = config['PATH']['pkl']

@@ -2,7 +2,8 @@ import os
 from .gen import TrackstreamEx_pb2 as ts
 
 from progressbar import ProgressBar
-from .log import logger
+import logging
+logger = logging.getLogger('backend')
 
 
 def read_prp(filepath):

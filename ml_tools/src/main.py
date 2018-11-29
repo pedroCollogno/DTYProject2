@@ -3,7 +3,7 @@
 import numpy as np
 import os
 
-from .utils.log import logger, create_new_folder
+from .utils.log import create_new_folder
 from .utils.station_utils import *
 from .utils.track_utils import *
 from .utils.config import config
@@ -20,14 +20,20 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from mpl_toolkits.mplot3d import Axes3D
 
+import logging
+logger = logging.getLogger('backend')
+
 cycles_per_batch = config['VARS']['cycles_per_batch']
+LOGS_DIR = config['PATH']['logs']
 
 
-def main(*args, debug=False, sender_function=None, is_deep=True):
+def main(*args, debug=False, sender_function=None, is_deep=False):
     """Main function, executes when the script is executed.
 
-    :param debug: (optional) default is to False, set to True to enter debug mode (more prints)
-    ;param sender_function: 
+    :param debug: (optional) default is to False, set to True to enter debug mode (more logs)
+    :param sender_function: the function used to send emittors to a frontend.
+        This function is not defined in this package, and can be of any kind.
+    :param is_deep: boolean to know if clustering should be done using deep learning or not (using DBScan clustering)
     """
 
     if debug:
@@ -70,7 +76,11 @@ def make_emittor_clusters(global_track_streams, all_tracks_data, prev_tracks_dat
 
     :param global_track_streams: All track streams to study
     :param all_tracks_data: Data on all tracks from global_track_streams, as a dictionnary
-    :param debug: (optional) default is to False, set to True to enter debug mode (more prints)
+    :param prev_tracks_data: Data from all tracks from previous cycle batch
+    :param debug: (optional) default is to False, set to True to enter debug mode (more logs)
+    :param sender_function: the function used to send emittors to a frontend.
+        This function is not defined in this package, and can be of any kind.
+    :param is_deep: boolean to know if clustering should be done using deep learning or not (using DBScan clustering)
     """
     raw_tracks = []
 
@@ -99,22 +109,20 @@ def make_emittor_clusters(global_track_streams, all_tracks_data, prev_tracks_dat
                 raw_tracks, all_tracks_data)
 
         i = 0
+
+        if len(y_pred) > len(all_tracks_data.keys()):
+            err = "Too many labels : Got %s labels for %s emittors" % (
+                len(y_pred), len(all_tracks_data.keys()))
+            logger.error(err)
+            raise ValueError(err)
+
         for label in y_pred:
             if is_deep:
                 track_id = ids[i]
             else:
                 track_id = get_track_id(raw_tracks[i])
             # Need to convert np.int64 to int for JSON format
-            try:
-                if int(label) is None:
-                    raise ValueError(
-                        "Network label is not defined for track %s" % track_id)
-                all_tracks_data[track_id]['network_id'] = int(label)
-                logger.warning("Label for track %s is %s" %
-                               (track_id, int(label)))
-
-            except (KeyError, ValueError) as err:
-                logger.error("Error on track %s : \n\t%s" % (track_id, err))
+            all_tracks_data[track_id]['network_id'] = int(label)
             i += 1
         logger.info("Found %s networks on the field.\n" % n_cluster)
         logger.info("Sending emittors through socket")
@@ -123,48 +131,17 @@ def make_emittor_clusters(global_track_streams, all_tracks_data, prev_tracks_dat
             # if key not in prev_tracks_data.keys() and not debug:
             sender_function(all_tracks_data[key])
 
-    if debug :
-        create_new_folder('tracks_json', '.')
-        filename = './tracks_json/all_tracks_%s.json' % len(
+    if debug:
+        create_new_folder('tracks_json', LOGS_DIR)
+        name = 'all_tracks_%s.json' % len(
             global_track_streams)
-
+        file_path = os.path.join(LOGS_DIR, 'tracks_json', name)
         logger.debug(
-            "Found all of this data from tracks, writing it to %s" % filename)
+            "Found all of this data from tracks, writing it to %s" % file_path)
         logger.debug("Wrote %s tracks to json file" %
-                        len(all_tracks_data.keys()))
-        with open(filename, 'w') as fp:
+                     len(all_tracks_data.keys()))
+        with open(file_path, 'w') as fp:
             json.dump(all_tracks_data, fp)
-
-    if debug and len(raw_tracks) > 1:
-        plt.ion()
-
-        labels = []
-        corresponding_batches = {}
-        i = 0
-        for label in y_pred:
-            if label not in labels:
-                labels.append(label)
-                corresponding_batches[label] = []
-            corresponding_batches[label].append(raw_tracks[i])
-            i += 1
-
-        fig = plt.figure(1)
-
-        ax = Axes3D(fig)
-
-        colors = cm.rainbow(np.linspace(0, 1, n_cluster))
-        logger.debug("\nResult of DBScan clustering on input data. There are %s inputs and %s clusters.\n" %
-                     (len(raw_tracks), len(labels)))
-        for key in corresponding_batches.keys():
-            logger.debug("Label is %s" % key)
-            for batch in corresponding_batches[key]:
-                logger.debug("\tTrack data: % s" % batch)
-            corresponding_batches[key] = np.array(corresponding_batches[key])
-            ax.plot(corresponding_batches[key][:, 1], corresponding_batches[key][:, 0],
-                    corresponding_batches[key][:, 3], '-o', color=colors[key])
-
-        plt.draw()
-        plt.pause(0.001)
 
 
 """This part runs if you run 'python main.py' in the console"""

@@ -30,4 +30,5 @@ setup(
         'PyGeodesy',
         'protobuf'
     ],  # external packages as dependencies
+    zip_safe=False,
 )

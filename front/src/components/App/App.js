@@ -3,6 +3,7 @@ import './App.css';
 import MapBox from "../Map/MapBox";
 import SocketHandler from "../Socket/SocketHandler";
 import PostHandler from "../Http/PostHandler";
+import colormap from "colormap";
 
 // Set fontAwesome icons up -> Define all icons that will be used in the app.
 import { library } from '@fortawesome/fontawesome-svg-core'
@@ -11,6 +12,46 @@ import { faUpload, faDownload } from '@fortawesome/free-solid-svg-icons'
 library.add(faUpload, faDownload)
 // Setup complete
 
+function deg_to_dms(deg) {
+  let d = Math.floor(deg);
+  let minfloat = (deg - d) * 60;
+  let m = Math.floor(minfloat);
+  let secfloat = (minfloat - m) * 60;
+  let s = Math.round(secfloat);
+  // After rounding, the seconds might become 60. These two
+  // if-tests are not necessary if no rounding is done.
+  if (s == 60) {
+    m++;
+    s = 0;
+  }
+  if (m == 60) {
+    d++;
+    m = 0;
+  }
+  return ("" + d + "°" + m + "'" + s + '"');
+}
+
+function int_to_emittor_type(type) {
+  if (type) {
+    const new_type = parseInt(type)
+
+    switch (new_type) {
+      case 1:
+        return "FF";
+      case 2:
+        return "EVF";
+      case 3:
+        return "BURST";
+      default:
+        return "?";
+    }
+  }
+}
+
+function round_frequency(freq) {
+  let MHz = Math.floor(freq / 10000) / 100
+  return MHz
+}
 class App extends Component {
   constructor() {
     super();
@@ -90,6 +131,16 @@ class App extends Component {
     return "none";
   }
 
+  getBorderColor(network) {
+    let colors = colormap({ // a colormap to set a different color for each network
+      colormap: 'jet',
+      nshades: Math.max(Object.keys(this.state.emittors).length, 8), // 8 is the minimum number of colors
+      format: 'hex',
+      alpha: 1 // opacity
+    })
+    return colors[network]
+  }
+
   switchAll(all) {
     if (all) {
       this.setState({
@@ -128,30 +179,31 @@ class App extends Component {
 
         < SocketHandler handleData={this.newEmittor} />
 
-        <div className="container">
+        <div className="map-table-container">
           <MapBox emittors={this.state.emittors} recStations={this.state.stations} connection={this.state.connection}
             toggleNetwork={this.toggleNetwork} switchAll={this.switchAll}
             hideAll={this.state.hideAll} showAll={this.state.showAll} networksToggled={this.state.networksToggled} />
 
-          <PostHandler getStations={this.getStations} />
           {
-            (Object.keys(this.state.emittors).length > 0 ?
-              <div className="tile is-fullwidth" id="tabletile">
-                <table className='table is-hoverable'>
-                  <thead>
-                    <tr>
-                      <th>Emittor ID</th>
-                      <th colSpan='2'>Coordinates</th>
-                      <th>Frequency</th>
-                      <th>Network</th>
-                    </tr>
-                  </thead>
-                  {
-                    Object.keys(this.state.emittors).map((key) => {
+
+            <div className="test" id="tabletile">
+              <table className='table is-hoverable'>
+                <thead>
+                  <tr>
+                    <th>Emittor ID</th>
+                    <th>Type</th>
+                    <th colSpan='2'>Coordinates</th>
+                    <th>Frequency</th>
+                    <th>Network</th>
+                  </tr>
+                </thead>
+                {
+                  Object.keys(this.state.emittors).map((key) => {
+                    if (this.state.networksToggled[key]) {
                       return (
                         <tbody key={key} style={{
                           borderStyle: this.getBorderStyle(key),
-                          borderColor: "red",
+                          borderColor: this.getBorderColor(key),
                           borderWidth: 5
                         }}>
                           {
@@ -159,9 +211,10 @@ class App extends Component {
                               return (
                                 <tr key={this.state.emittors[key][emittor_id].track_id}>
                                   <td>{this.state.emittors[key][emittor_id].track_id}</td>
-                                  <td>{this.state.emittors[key][emittor_id].coordinates.lat}</td>
-                                  <td>{this.state.emittors[key][emittor_id].coordinates.lng}</td>
-                                  <td>{this.state.emittors[key][emittor_id].frequency}</td>
+                                  <td>{int_to_emittor_type(this.state.emittors[key][emittor_id].emission_type)}</td>
+                                  <td>{deg_to_dms(this.state.emittors[key][emittor_id].coordinates.lat)}</td>
+                                  <td>{deg_to_dms(this.state.emittors[key][emittor_id].coordinates.lng)}</td>
+                                  <td>{round_frequency(this.state.emittors[key][emittor_id].frequency)} MHz</td>
                                   <td>{this.state.emittors[key][emittor_id].network_id + 1}</td>
                                 </tr>
                               )
@@ -170,12 +223,45 @@ class App extends Component {
                           <tr></tr>
                         </tbody>
                       )
-                    })
-                  }
-                </table>
-              </div> : null)
+                    }
+                  })
+                }
+                {
+                  Object.keys(this.state.emittors).map((key) => {
+                    if (!this.state.networksToggled[key]) {
+
+                      return (
+                        <tbody key={key} style={{
+                          borderStyle: this.getBorderStyle(key),
+                          borderColor: this.getBorderColor(key),
+                          borderWidth: 5
+                        }}>
+                          {
+                            Object.keys(this.state.emittors[key]).map((emittor_id) => {
+                              return (
+                                <tr key={this.state.emittors[key][emittor_id].track_id}>
+                                  <td>{this.state.emittors[key][emittor_id].track_id}</td>
+                                  <td>{int_to_emittor_type(this.state.emittors[key][emittor_id].emission_type)}</td>
+                                  <td>{deg_to_dms(this.state.emittors[key][emittor_id].coordinates.lat)}</td>
+                                  <td>{deg_to_dms(this.state.emittors[key][emittor_id].coordinates.lng)}</td>
+                                  <td>{round_frequency(this.state.emittors[key][emittor_id].frequency)} MHz</td>
+                                  <td>{this.state.emittors[key][emittor_id].network_id + 1}</td>
+                                </tr>
+                              )
+                            })
+                          }
+                          <tr></tr>
+                        </tbody>
+                      )
+                    }
+                  })
+                }
+              </table>
+            </div>
           }
         </div>
+        <PostHandler getStations={this.getStations} />
+
       </div >
     );
   }
