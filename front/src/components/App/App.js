@@ -66,12 +66,13 @@ class App extends Component {
       showAll: false, // the state of the checkbuttons of the map (combined with networksToggled)
       hideAll: false
     };
-    this.newEmittor = this.newEmittor.bind(this); // functions that are allowed to update the state of the component
+    // functions that are allowed to update the state of the component
     this.newEmittors = this.newEmittors.bind(this);
     this.getStations = this.getStations.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.toggleNetwork = this.toggleNetwork.bind(this);
     this.switchAll = this.switchAll.bind(this);
+    this.getEmittorsPositions = this.getEmittorsPositions.bind(this);
     this.reset = this.reset.bind(this);
 
   }
@@ -101,32 +102,26 @@ class App extends Component {
     return "online";
   }
 
-  /**
-   * Adds the emittor coming from the backend to the list of the emittors.
-   * Stores it as {network_id : {track_id : {coordinates : {lat : int, lng : int}, ...}}}
-   * @param {*} emittor 
-   */
-  newEmittor(emittor) {
-    if (emittor) {
-      let stat = JSON.parse(emittor);
-      if (stat.coordinates) {
-        let longitude = stat.coordinates.lng;
-        if (longitude < -180) {
-          stat.coordinates.lng = longitude + 360;
-        }
-        let dic = JSON.parse(JSON.stringify(this.state.emittors));
-        if (dic["" + stat.network_id]) {
-          dic["" + stat.network_id][stat.track_id] = stat;
-        }
-        else {
-          dic["" + stat.network_id] = {};
-          dic["" + stat.network_id][stat.track_id] = stat;
-        }
-        this.setState({ emittors: dic });
+  getEmittorsPositions(response) {
+    let dic = {};
+    let data = response.data;
+    let undefinedNetwork = data[Object.keys(data)[0]]["network_id"];
+    for (let track_id of Object.keys(data)) {
+      let emittor = data[track_id];
+      if (emittor.coordinates != null) {
+        dic[track_id] = emittor;
       }
     }
+    let newEmittors = {};
+    newEmittors[undefinedNetwork] = dic;
+    this.setState({ emittors: newEmittors });
   }
 
+  /**
+   * Adds the emittors coming from the backend to the list of the emittors.
+   * Stores them as {network_id : {track_id : {coordinates : {lat : int, lng : int}, ...}}}
+   * @param {*} emittors 
+   */
   newEmittors(emittors) {
     if (emittors) {
       let stats = JSON.parse(emittors);
@@ -352,7 +347,7 @@ class App extends Component {
         </div>
 
         {/* Handles the HTTP requests and their responses from the backend */}
-        <PostHandler getStations={this.getStations} reset={this.reset} />
+        <PostHandler getStations={this.getStations} reset={this.reset} getEmittorsPositions={this.getEmittorsPositions} />
 
       </div >
     );
