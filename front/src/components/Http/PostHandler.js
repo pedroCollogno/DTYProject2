@@ -132,14 +132,18 @@ class HttpRequestHandler extends Component {
     }
 
     reset() {
-        this.setState({
-            files: [],
-            fileNames: {},
-            loaded: false,
-            dropText: "Or drop your .PRP files here !",
-            inputFiles: []
-        });
-        this.props.reset();
+        axios.get("http://localhost:8000/stopsimulation")
+            .then((res) => {
+                console.log("Simulation stopped !");
+                this.setState({
+                    files: [],
+                    fileNames: {},
+                    loaded: false,
+                    dropText: "Or drop your .PRP files here !",
+                    inputFiles: []
+                });
+                this.props.reset();
+            });
     }
 
     render() {

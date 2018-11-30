@@ -126,6 +126,9 @@ class App extends Component {
     if (emittors) {
       let stats = JSON.parse(emittors);
       let dic = JSON.parse(JSON.stringify(this.state.emittors));
+      if (dic["-1000"] != undefined) {
+        delete dic["-1000"];
+      }
       if (Object.entries(stats)[0][1]["network_id"] != undefined) {
         for (let key of Object.keys(stats)) {
           let stat = stats[key];

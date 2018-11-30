@@ -197,9 +197,8 @@ class MapBox extends Component {
                                             clusterCenter={clusterCenter} color={color}
                                             network={network} stations={this.state.emittors[network]} />
                                     }
-                                    {network != "-1000" &&
+                                    {network != "-1000" && // always rendering when simulation has started
                                         <Layer
-                                            // always rendering
                                             id={"center" + network}
                                             type="circle"
                                             onClick={() => { this.props.toggleNetwork(network) }}
