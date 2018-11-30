@@ -9,14 +9,16 @@ import shutil
 import sys
 import os
 import tkinter as tk
+import matplotlib
+matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 from tkinter import filedialog
 from sklearn.cluster import DBSCAN
 from progressbar import ProgressBar
-import matplotlib
-matplotlib.use("TkAgg")
+
+
 
 
 if __name__ == "__main__":
@@ -271,11 +273,10 @@ def input_confirmation():
         return False
 
 
-def process_data_clusters(track_streams, file_name):
+def process_data_clusters(track_streams):
     """ Process the data from the prp file into a dataframe that can be used in the deep learning models.
 
     :param track_streams: track stream to process
-    :param file_name: file name of the pkl file in /pkl where data will be saved
     """
     preds = predict_all_ids(track_streams)
     test_ids = set(preds[1])

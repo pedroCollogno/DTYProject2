@@ -4,30 +4,67 @@ import metrics
 from keras.callbacks import TensorBoard, Callback, EarlyStopping
 from time import time
 import numpy as np
+from fake_terrorist_hierarchy import create_fake_sequences  
+import os
+import sys
+import tkinter as tk
+from tkinter import filedialog
+
+if __name__ == "__main__":
+    # If launching this file as a file, enlarge the scope to see all of the src folder of ml_tools package
+    file_dir = os.path.abspath(os.path.dirname(__file__))
+    sys.path.append(os.path.abspath(
+        os.path.dirname(file_dir)))
+from utils import config
+from utils.loading import get_track_streams_from_prp
+from processDL import process_data_clusters
+WEIGHTS_DIR=config['PATH']['weights']
 
 
 
 def train_hierarchy():
     model=Sequential()
-    model.add(LSTM(units=128, input_shape=(50,2)))
+    model.add(LSTM(units=128, input_shape=(1, 1000)))
     model.add(Dropout(0.5))
-    model.add(Dense(1, activation="sigmoid"))
-    my_callbacks = [EarlyStopping(monitor='auc_roc', patience=300, verbose=1, mode='max'),
+    model.add(Dense(3, activation="softmax"))
+    my_callbacks = [
                     TensorBoard(log_dir="logs/{}".format(time()))]
-    model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=[
-                  'accuracy', metrics.auc_roc, metrics.f1_score_threshold(), metrics.precision_threshold(), metrics.recall_threshold()])
+    model.compile(loss='sparse_categorical_crossentropy', optimizer='rmsprop', metrics=[
+                  'accuracy', metrics.f1_score_threshold(), metrics.precision_threshold(), metrics.recall_threshold()])
 
-    terroristNetworks=[]
-    terroristHierarchy=[]
-    X=np.array([])
-    Y=np.array([])
+    data, labels=create_fake_sequences(1000,1000)
+    X=np.array(data)
+    Y=np.array(labels)
+    print(X.shape)
 
     model.fit(
             X,
             Y,
-            batch_size=100,
+            batch_size=1000,
             epochs=5,
             callbacks=my_callbacks,
-            shuffle=True
-
+            shuffle=True,
+            validation_split=0.2
     )
+    model.save_weights(WEIGHTS_DIR+'/my_hierarchy.h5')
+
+def test_hierarchy():
+    model=Sequential()
+    model.add(LSTM(units=128, input_shape=(1, 1000)))
+    model.add(Dense(3, activation="softmax"))
+    model.compile(loss='sparse_categorical_crossentropy', optimizer='rmsprop', metrics=[
+                  'accuracy', metrics.f1_score_threshold(), metrics.precision_threshold(), metrics.recall_threshold()])
+    model.load_weights(WEIGHTS_DIR+'/my_hierarchy.h5')
+    root = tk.Tk()
+    root.withdraw()
+    file_path = filedialog.askopenfilename()
+    root.update()
+    track_streams = get_track_streams_from_prp(file_path)
+    emittor_infos= process_data_clusters(track_streams)
+    to_predict=[]
+    for k in emittor_infos:
+        print("emittor %s in cluster %s" %(k, emittor_infos[k]['network']))
+        print(model.predict(np.array(([[emittor_infos[k]['steps'][:1000]]]))))
+
+#print(test_hierarchy())
+print(test_hierarchy())
