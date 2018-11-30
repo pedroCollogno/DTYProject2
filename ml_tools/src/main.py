@@ -127,9 +127,11 @@ def make_emittor_clusters(global_track_streams, all_tracks_data, prev_tracks_dat
         logger.info("Found %s networks on the field.\n" % n_cluster)
         logger.info("Sending emittors through socket")
 
-        for key in all_tracks_data.keys():
+        # for key in all_tracks_data.keys():
             # if key not in prev_tracks_data.keys() and not debug:
-            sender_function(all_tracks_data[key])
+
+            # sender_function(all_tracks_data[key])
+        sender_function(all_tracks_data)
 
     if debug:
         create_new_folder('tracks_json', LOGS_DIR)

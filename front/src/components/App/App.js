@@ -67,10 +67,12 @@ class App extends Component {
       hideAll: false
     };
     this.newEmittor = this.newEmittor.bind(this); // functions that are allowed to update the state of the component
+    this.newEmittors = this.newEmittors.bind(this);
     this.getStations = this.getStations.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.toggleNetwork = this.toggleNetwork.bind(this);
     this.switchAll = this.switchAll.bind(this);
+    this.reset = this.reset.bind(this);
 
   }
 
@@ -122,6 +124,33 @@ class App extends Component {
         }
         this.setState({ emittors: dic });
       }
+    }
+  }
+
+  newEmittors(emittors) {
+    if (emittors) {
+      let stats = JSON.parse(emittors);
+      let dic = JSON.parse(JSON.stringify(this.state.emittors));
+      if (Object.entries(stats)[0][1]["network_id"] != undefined) {
+        for (let key of Object.keys(stats)) {
+          let stat = stats[key];
+          if (stat.coordinates) {
+            let longitude = stat.coordinates.lng;
+            if (longitude < -180) {
+              stat.coordinates.lng = longitude + 360;
+            }
+            if (dic["" + stat.network_id]) {
+              dic["" + stat.network_id][stat.track_id] = stat;
+            }
+            else {
+              dic["" + stat.network_id] = {};
+              dic["" + stat.network_id][stat.track_id] = stat;
+            }
+          }
+        }
+        this.setState({ emittors: dic });
+      }
+
     }
   }
 
@@ -199,6 +228,21 @@ class App extends Component {
     }
   }
 
+  reset() {
+    console.log("Reset");
+    this.setState({
+      emittors: {}, // list of all the detected stations so far in the form :
+      // { network_id : 
+      //        { track_id : {coordinates: { lat: int, lng: int }, ... }
+      // }
+      stations: {}, // list of the reception stations
+      connection: "offline", // selcects the style of the map (to be fetched from the Web or locally)
+      networksToggled: {}, // the networks toggled : used to highlight them in the list and display them on the map
+      showAll: false, // the state of the checkbuttons of the map (combined with networksToggled)
+      hideAll: false
+    });
+  }
+
   render() {
     return (
       <div className="App">
@@ -223,7 +267,7 @@ class App extends Component {
         </section>
 
         {/* Handles the HandShaking and sends a "begin" message to the backend Socket */}
-        < SocketHandler handleData={this.newEmittor} />
+        < SocketHandler handleData={this.newEmittors} />
 
         <div className="map-table-container">
           {/* Handles the displays on a canvas */}
@@ -308,7 +352,7 @@ class App extends Component {
         </div>
 
         {/* Handles the HTTP requests and their responses from the backend */}
-        <PostHandler getStations={this.getStations} />
+        <PostHandler getStations={this.getStations} reset={this.reset} />
 
       </div >
     );

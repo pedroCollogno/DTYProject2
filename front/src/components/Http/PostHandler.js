@@ -13,12 +13,14 @@ class HttpRequestHandler extends Component {
             files: [], // Contains all the uploaded files
             fileNames: {}, // Contains all the uploaded files names (useful to avoid posting the same file twice)
             loaded: false, // Did the posting of the files go well ?
-            dropText: "Or drop your .PRP files here !" // Text to display in the drop zone
+            dropText: "Or drop your .PRP files here !", // Text to display in the drop zone
+            inputFiles: []
         };
         this.onFormSubmit = this.onFormSubmit.bind(this); // functions allowed to update the state of the component
         this.onChange = this.onChange.bind(this);
         this.fileUpload = this.fileUpload.bind(this);
         this.onDrop = this.onDrop.bind(this);
+        this.reset = this.reset.bind(this);
     }
 
     /**
@@ -32,13 +34,9 @@ class HttpRequestHandler extends Component {
             if (response.data === "POST ok !") {
                 axios.get("http://localhost:8000/getstations") // GETs the locations of the reception stations...
                     .then((response) => {
-                        axios.get("http://localhost:8000/static/country-vectors/countries/6/32/21.pbf")
-                            .then((res) => {
-                                console.log(res);
-                            })
                         this.props.getStations(response); // ...and update the App.js state !
                         this.setState({ loaded: true }); // Allows the "Start simulation" button to be active 
-                    })
+                    });
             }
         })
     }
@@ -60,7 +58,7 @@ class HttpRequestHandler extends Component {
     }
 
     /**
-     * Triggered when the "Simulation with both techniques" button is pushed. Starts the simulation.
+     * Triggered when the "Simulation with both techniques" button is pushed. Starts the simulation. 
      * @param {*} e 
      */
     onStart(e) {
@@ -73,7 +71,7 @@ class HttpRequestHandler extends Component {
  * @param {*} e 
  */
     onStartML(e) {
-        axios.get("http://localhost:8000/startsimulation")
+        axios.get("http://localhost:8000/startsimulationML")
             .then((res) => console.log("Simulation started !"));
     }
 
@@ -82,7 +80,7 @@ class HttpRequestHandler extends Component {
  * @param {*} e 
  */
     onStartDL(e) {
-        axios.get("http://localhost:8000/startsimulation")
+        axios.get("http://localhost:8000/startsimulationDL")
             .then((res) => console.log("Simulation started !"));
     }
 
@@ -127,6 +125,17 @@ class HttpRequestHandler extends Component {
         }
     }
 
+    reset() {
+        this.setState({
+            files: [],
+            fileNames: {},
+            loaded: false,
+            dropText: "Or drop your .PRP files here !",
+            inputFiles: []
+        });
+        this.props.reset();
+    }
+
     render() {
         return (
             <div>
@@ -140,7 +149,8 @@ class HttpRequestHandler extends Component {
                                     <div className="file has-name is-boxed is-centered is-fullwidth" >
 
                                         <label className="file-label" >
-                                            <input type="file" className="file-input" multiple onChange={this.onChange} />
+                                            <input type="file" className="file-input" multiple
+                                                onChange={this.onChange} value={this.state.inputFiles} />
                                             <span className="file-cta">
                                                 <span className="file-icon">
                                                     <FontAwesomeIcon icon='download' />
@@ -185,6 +195,9 @@ class HttpRequestHandler extends Component {
                         Simulation with Deep Learning only</button>
                     <button className="button" id="start-sim-button" disabled={!this.state.loaded} onClick={this.onStart}>
                         Simulation with both techniques</button>
+                </div>
+                <div className="tile">
+                    <button onClick={this.reset}>Reset</button>
                 </div>
             </div>
 
