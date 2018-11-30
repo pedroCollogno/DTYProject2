@@ -25,6 +25,12 @@ logger = logging.getLogger('backend')
 
 cycles_per_batch = config['VARS']['cycles_per_batch']
 LOGS_DIR = config['PATH']['logs']
+running = True
+
+
+def stop():
+    running = False
+    logger.warning("Running has been set to : %s" % running)
 
 
 def main(*args, debug=False, sender_function=None, is_deep=False):
@@ -35,37 +41,36 @@ def main(*args, debug=False, sender_function=None, is_deep=False):
         This function is not defined in this package, and can be of any kind.
     :param is_deep: boolean to know if clustering should be done using deep learning or not (using DBScan clustering)
     """
+    if running :
+        if debug:
+            logger.handlers[1].setLevel(logging.DEBUG)
+        if sender_function is None:
+            raise ValueError("No sender function, cannot interact with backend.")
 
-    if debug:
-        logger.handlers[1].setLevel(logging.DEBUG)
-    if sender_function is None:
-        raise ValueError("No sender function, cannot interact with backend.")
+        all_tracks_data = {}
+        n = len(args[0])
 
-    all_tracks_data = {}
-    n = len(args[0])
+        j = cycles_per_batch
+        k = 1
+        if is_deep:
+            k = n-1
+            j = 1
+        i = k
+        while i < n and running:
+            track_streams = []
+            for arg in args:
+                track_streams.append(arg[:i])
+            logger.warning("Running is : %s" % running)
+            logger.info(
+                "\nMerging info from all stations... Reading %s sensor cycles... Last cycle is cycle n.%s" % (len(track_streams[0]), i))
+            prev_tracks_data = copy.deepcopy(all_tracks_data)
 
-    j = cycles_per_batch
-    k = 1
-    if is_deep:
-        k = n-1
-        j = 1
-
-    for i in range(k, n, j):
-
-        track_streams = []
-        for arg in args:
-            track_streams.append(arg[:i])
-
-        logger.info(
-            "\nMerging info from all stations... Reading %s sensor cycles... Last cycle is cycle n.%s" % (len(track_streams[0]), i))
-        prev_tracks_data = copy.deepcopy(all_tracks_data)
-
-        global_track_streams, all_tracks_data = fuse_all_station_tracks(
-            *track_streams)
-        logger.debug("Merge done !")
-        make_emittor_clusters(global_track_streams,
-                              all_tracks_data, prev_tracks_data, debug=debug, sender_function=sender_function, is_deep=is_deep)
-
+            global_track_streams, all_tracks_data = fuse_all_station_tracks(
+                *track_streams)
+            logger.debug("Merge done !")
+            make_emittor_clusters(global_track_streams,
+                                all_tracks_data, prev_tracks_data, debug=debug, sender_function=sender_function, is_deep=is_deep)
+            i += j
 
 def make_emittor_clusters(global_track_streams, all_tracks_data, prev_tracks_data, debug=False, sender_function=None, is_deep=False):
     """ Makes the whole job of clustering emittors together from tracks
@@ -97,7 +102,7 @@ def make_emittor_clusters(global_track_streams, all_tracks_data, prev_tracks_dat
     logger.info("All_data_tracks has a total of %s emittors registered." %
                 len(all_tracks_data.keys()))
 
-    if len(raw_tracks) > 1:
+    if len(raw_tracks) > 1 and running:
         if is_deep:
             file_name = str(time.time())
             process_data(global_track_streams, file_name)

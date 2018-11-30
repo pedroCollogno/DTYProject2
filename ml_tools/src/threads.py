@@ -1,6 +1,6 @@
 import threading
 
-from .main import main
+from .main import main, stop
 
 
 class DataProcessThread(threading.Thread):
@@ -32,3 +32,9 @@ class DataProcessThread(threading.Thread):
              sender_function=self.sender_function)
         self.__dict__.clear()
         print('Finished !')
+
+    def stop_thread(self):
+        print("Stop")
+        stop()
+        print("Stopped")
+        self.join()

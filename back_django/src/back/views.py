@@ -10,7 +10,8 @@ import os
 from ml_tools.threads import DataProcessThread
 from ml_tools.utils import station_utils
 from ml_tools.utils import loading as load
-
+import logging
+logger = logging.getLogger('backend')
 
 def user_list(request):
     """
@@ -64,7 +65,7 @@ def initiate_emittors_positions(request):
     return(HttpResponse(json.dumps(json_obj), content_type="application/json"))
 
 
-def startsimulation(request):
+def start_simulation(request):
     """
         Triggered whenever a user visits localhost:8000/test
         Will be called when lauching the simulation
@@ -84,11 +85,17 @@ def startsimulation(request):
                 track_streams.append(track_stream)
     station_utils.sync_stations(*track_streams)
 
+    global t
     t = DataProcessThread(*track_streams, debug=False)
     t.set_sender_function(send_emittor_to_front)
     t.start()
     return render(request, 'back/user_list.html')
 
+@csrf_exempt  
+def stop_simulation(request):
+    logger.warning("AAAAAH")
+    if t is not None:
+        t.stop_thread()
 
 @csrf_exempt  # makes a security exception for this function to be triggered
 def upload(request):
