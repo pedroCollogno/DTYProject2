@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd /Users/piaverous/Documents/DTY/Projet_Thales/thales-project/
+cd /Users/pierre/Documents/DTY/thales/
 
 cd ml_tools
 source py36_ml_env/bin/activate

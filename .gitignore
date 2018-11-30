@@ -16,5 +16,7 @@
 #data
 prod/
 data/
-
+.vscode/
 config.json
+
+*dump.rdb
