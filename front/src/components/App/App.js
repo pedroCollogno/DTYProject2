@@ -31,6 +31,7 @@ class App extends Component {
     this.handleChange = this.handleChange.bind(this);
     this.toggleNetwork = this.toggleNetwork.bind(this);
     this.switchAll = this.switchAll.bind(this);
+    this.reset = this.reset.bind(this);
 
   }
 
@@ -176,6 +177,21 @@ class App extends Component {
     }
   }
 
+  reset() {
+    console.log("Reset");
+    this.setState({
+      emittors: {}, // list of all the detected stations so far in the form :
+      // { network_id : 
+      //        { track_id : {coordinates: { lat: int, lng: int }, ... }
+      // }
+      stations: {}, // list of the reception stations
+      connection: "offline", // selcects the style of the map (to be fetched from the Web or locally)
+      networksToggled: {}, // the networks toggled : used to highlight them in the list and display them on the map
+      showAll: false, // the state of the checkbuttons of the map (combined with networksToggled)
+      hideAll: false
+    });
+  }
+
   render() {
     return (
       <div className="App">
@@ -209,7 +225,7 @@ class App extends Component {
             hideAll={this.state.hideAll} showAll={this.state.showAll} networksToggled={this.state.networksToggled} />
 
           {/* Handles the HTTP requests and their responses from the backend */}
-          <PostHandler getStations={this.getStations} />
+          <PostHandler getStations={this.getStations} reset={this.reset} />
           {
             (Object.keys(this.state.emittors).length > 0 ?
               <div className="tile is-fullwidth" id="tabletile">

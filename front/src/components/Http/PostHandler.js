@@ -13,12 +13,14 @@ class HttpRequestHandler extends Component {
             files: [], // Contains all the uploaded files
             fileNames: {}, // Contains all the uploaded files names (useful to avoid posting the same file twice)
             loaded: false, // Did the posting of the files go well ?
-            dropText: "Or drop your .PRP files here !" // Text to display in the drop zone
+            dropText: "Or drop your .PRP files here !", // Text to display in the drop zone
+            inputFiles: []
         };
         this.onFormSubmit = this.onFormSubmit.bind(this); // functions allowed to update the state of the component
         this.onChange = this.onChange.bind(this);
         this.fileUpload = this.fileUpload.bind(this);
         this.onDrop = this.onDrop.bind(this);
+        this.reset = this.reset.bind(this);
     }
 
     /**
@@ -125,8 +127,13 @@ class HttpRequestHandler extends Component {
 
     reset() {
         this.setState({
-
-        })
+            files: [],
+            fileNames: {},
+            loaded: false,
+            dropText: "Or drop your .PRP files here !",
+            inputFiles: []
+        });
+        this.props.reset();
     }
 
     render() {
@@ -142,7 +149,8 @@ class HttpRequestHandler extends Component {
                                     <div className="file has-name is-boxed is-centered is-fullwidth" >
 
                                         <label className="file-label" >
-                                            <input type="file" className="file-input" multiple onChange={this.onChange} />
+                                            <input type="file" className="file-input" multiple
+                                                onChange={this.onChange} value={this.state.inputFiles} />
                                             <span className="file-cta">
                                                 <span className="file-icon">
                                                     <FontAwesomeIcon icon='download' />
