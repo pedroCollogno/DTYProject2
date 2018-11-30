@@ -29,16 +29,22 @@ class HttpRequestHandler extends Component {
      */
     onFormSubmit(e) {
         e.preventDefault() // Stops form submit
-        this.fileUpload(this.state.files).then((response) => {
-            console.log(response.data); // Should be "POST ok !"
-            if (response.data === "POST ok !") {
+        this.fileUpload(this.state.files).then((res1) => {
+            console.log(res1.data); // Should be "POST ok !"
+            if (res1.data === "POST ok !") {
                 axios.get("http://localhost:8000/getstations") // GETs the locations of the reception stations...
-                    .then((response) => {
-                        this.props.getStations(response); // ...and update the App.js state !
-                        this.setState({ loaded: true }); // Allows the "Start simulation" button to be active 
+                    .then((res2) => {
+                        this.props.getStations(res2); // ...and update the App.js state !
+                        axios.get("http://localhost:8000/emittorspositions")
+                            .then((res3) => {
+                                if (res3.data) {
+                                    this.props.getEmittorsPositions(res3);
+                                    this.setState({ loaded: true }); // Allows the "Start simulation" button to be active 
+                                }
+                            });
                     });
             }
-        })
+        });
     }
 
     /**

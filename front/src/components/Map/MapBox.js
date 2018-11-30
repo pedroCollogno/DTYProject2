@@ -122,6 +122,10 @@ class MapBox extends Component {
      */
     getColor(network) {
         let i = parseInt(network);
+        if (i < 0) {
+            console.log("Unidentified network");
+            return "grey";
+        }
         if (this.state.colors[i] != undefined) {
             return this.state.colors[i];
         }
@@ -182,40 +186,43 @@ class MapBox extends Component {
                             let toggled = this.state.networksToggled[network];
                             toggled = !(toggled == undefined || !toggled);
                             toggled = !this.props.hideAll && (toggled || this.props.showAll);
+                            let lines = toggled && (network != "-1000");
                             // toggled is True iff it's defined, not manually de-toggled (= False) and hideAll is not active
                             // or simply if showAll is active
 
                             return (
                                 <div id={"cluster" + k} key={"cluster" + k}>
-                                    {toggled && // conditionnal rendering
+                                    {lines &&// conditionnal rendering
                                         <Lines
                                             clusterCenter={clusterCenter} color={color}
                                             network={network} stations={this.state.emittors[network]} />
                                     }
-                                    <Layer
-                                        // always rendering
-                                        id={"center" + network}
-                                        type="circle"
-                                        onClick={() => { this.props.toggleNetwork(network) }}
-                                        paint={{
-                                            "circle-color": color,
-                                            "circle-radius": 6,
-                                            "circle-stroke-width": this.state.highlights["" + network]
-                                        }}>
-                                        <Feature coordinates={clusterCenter} onClick={() => this.props.toggleNetwork(network)}
-                                            onMouseEnter={() => {
-                                                if (Object.keys(this.state.emittors[network]).length > 1) {
-                                                    // if there is only one emittor in the network, the center is actually the node
-                                                    this.mouseEnter(network);
-                                                }
-                                            }}
-                                            onMouseLeave={() => {
-                                                if (Object.keys(this.state.emittors[network]).length > 1) {
-                                                    // same here
-                                                    this.mouseExit(network);
-                                                }
-                                            }}></Feature>
-                                    </Layer>
+                                    {network != "-1000" &&
+                                        <Layer
+                                            // always rendering
+                                            id={"center" + network}
+                                            type="circle"
+                                            onClick={() => { this.props.toggleNetwork(network) }}
+                                            paint={{
+                                                "circle-color": color,
+                                                "circle-radius": 6,
+                                                "circle-stroke-width": this.state.highlights["" + network]
+                                            }}>
+                                            <Feature coordinates={clusterCenter} onClick={() => this.props.toggleNetwork(network)}
+                                                onMouseEnter={() => {
+                                                    if (Object.keys(this.state.emittors[network]).length > 1) {
+                                                        // if there is only one emittor in the network, the center is actually the node
+                                                        this.mouseEnter(network);
+                                                    }
+                                                }}
+                                                onMouseLeave={() => {
+                                                    if (Object.keys(this.state.emittors[network]).length > 1) {
+                                                        // same here
+                                                        this.mouseExit(network);
+                                                    }
+                                                }}></Feature>
+                                        </Layer>
+                                    }
                                     {toggled && // conditionnal rendering
                                         <Stations
                                             stations={this.state.emittors[network]} network={network}
