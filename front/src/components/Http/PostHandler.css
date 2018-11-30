@@ -5,15 +5,32 @@ button {
   margin-top: 5px;
   width: 100%; }
 
+.tile {
+  flex-basis: auto; }
+  .tile.is-parent {
+    padding: 0; }
+  .tile.is-child {
+    padding: 1em; }
+  .tile.is-ancestor {
+    margin: 0; }
+    .tile.is-ancestor:last-child {
+      margin-bottom: 0; }
+  .tile#upload-tile {
+    width: 53%;
+    flex-grow: 0; }
+
 article.tile {
-  width: 100%;
-  height: 100%;
   background-color: rgba(255, 255, 128, 0);
   color: #eeeeee; }
 
-form {
-  padding-left: 2%;
-  padding-right: 2%; }
+.right-buttons {
+  height: 100%; }
+  .right-buttons button {
+    height: 100%; }
 
 #start-sim-button {
   width: 96%; }
+
+#upload-button {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0; }

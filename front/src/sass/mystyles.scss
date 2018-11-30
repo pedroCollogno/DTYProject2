@@ -16,7 +16,7 @@ $danger: $orange;
 $family-primary: $family-serif;
 
 // 4. Setup your Custom Colors
-$linkedin: #0077b5;
+$linkedin: rgba(0, 204, 170, 0.747);
 $linkedin-invert: findColorInvert($linkedin);
 $twitter: #55acee;
 $twitter-invert: findColorInvert($twitter);
@@ -30,7 +30,7 @@ $addColors: (
     $twitter,
     $twitter-invert,
   ),
-  'linkedin': (
+  'blue': (
     $linkedin,
     $linkedin-invert,
   ),
@@ -41,12 +41,16 @@ $addColors: (
   'grey': (
     $grey, 
     $grey-invert,
-  )
+  ),  
 );
 $colors: map-merge($colors, $addColors);
 
 body{
   background: linear-gradient(to right, #010205, #130E3F);
+  height: 100%;
+}
+html {
+  height: 100%;
 }
 
 // 6. Import the rest of Bulma
