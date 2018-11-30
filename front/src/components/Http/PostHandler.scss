@@ -5,21 +5,44 @@ p {
 }
 button {
     margin-top: 5px;
-    width: 100%;
+    width: 100%; 
+}
+.tile {
+    flex-basis: auto;
+    &.is-parent {
+       padding: 0;
+    }
+    &.is-child{
+        padding: 1em;
+    }
+    &.is-ancestor {
+        margin: 0;
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+    &#upload-tile {
+        width: $map-width;
+        flex-grow: 0;
+    }
 }
 
 article.tile {
-    width: 100%;
-    height: 100%;
     background-color: rgba(255, 255, 128, 0);
     color: $grey;
 }
 
-form {
-    padding-left: 2%;
-    padding-right: 2%;
+.right-buttons {
+    height: 100%;
+    button {
+        height: 100%;
+    }
 }
-
 #start-sim-button {
     width: 96%;
+}
+
+#upload-button {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;   
 }

@@ -7,9 +7,9 @@ import colormap from "colormap";
 
 // Set fontAwesome icons up -> Define all icons that will be used in the app.
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faUpload, faDownload } from '@fortawesome/free-solid-svg-icons'
+import { faUpload, faDownload, faUndo } from '@fortawesome/free-solid-svg-icons'
 
-library.add(faUpload, faDownload)
+library.add(faUpload, faDownload, faUndo)
 // Setup complete
 
 function deg_to_dms(deg) {
@@ -31,6 +31,10 @@ function deg_to_dms(deg) {
   return ("" + d + "°" + m + "'" + s + '"');
 }
 
+/**
+ * Gives you the emittor type as a string from an integer input
+ * @param {int} type 
+ */
 function int_to_emittor_type(type) {
   if (type) {
     const new_type = parseInt(type)
@@ -48,6 +52,10 @@ function int_to_emittor_type(type) {
   }
 }
 
+/**
+ * Rounds the given frequency to MHz
+ * @param {float} freq 
+ */
 function round_frequency(freq) {
   let MHz = Math.floor(freq / 10000) / 100
   return MHz
@@ -244,7 +252,7 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <section className="hero is-primary is-bold" style={{ textAlign: 'left' }}>
+        <section className="hero is-primary is-bold is-small" style={{ textAlign: 'left' }}>
           <div className="hero-body">
             <div className="container header">
               <div className="titles">
@@ -255,7 +263,6 @@ class App extends Component {
                   AI demonstrator
                 </h2>
               </div>
-
               <div className="field switch-container">
                 <input id="switchRoundedOutlinedInfo" type="checkbox" name="switchRoundedOutlinedInfo" className="switch is-rtl is-rounded is-outlined is-info" onChange={this.handleChange} />
                 <label htmlFor="switchRoundedOutlinedInfo"><strong>Switch to {this.getConnection()} map</strong></label>
@@ -272,13 +279,11 @@ class App extends Component {
           <MapBox emittors={this.state.emittors} recStations={this.state.stations} connection={this.state.connection}
             toggleNetwork={this.toggleNetwork} switchAll={this.switchAll}
             hideAll={this.state.hideAll} showAll={this.state.showAll} networksToggled={this.state.networksToggled} />
-
           {
             <div className="test" id="tabletile">
               <table className='table is-hoverable'>
                 <thead>
                   <tr>
-                    <th>Emittor ID</th>
                     <th>Type</th>
                     <th colSpan='2'>Coordinates</th>
                     <th>Frequency</th>
@@ -298,7 +303,6 @@ class App extends Component {
                             Object.keys(this.state.emittors[key]).map((emittor_id) => {
                               return (
                                 <tr key={this.state.emittors[key][emittor_id].track_id}>
-                                  <td>{this.state.emittors[key][emittor_id].track_id}</td>
                                   <td>{int_to_emittor_type(this.state.emittors[key][emittor_id].emission_type)}</td>
                                   <td>{deg_to_dms(this.state.emittors[key][emittor_id].coordinates.lat)}</td>
                                   <td>{deg_to_dms(this.state.emittors[key][emittor_id].coordinates.lng)}</td>
@@ -317,7 +321,6 @@ class App extends Component {
                 {
                   Object.keys(this.state.emittors).map((key) => {
                     if (!this.state.networksToggled[key]) {
-
                       return (
                         <tbody key={key} style={{
                           borderStyle: this.getBorderStyle(key),
@@ -328,7 +331,6 @@ class App extends Component {
                             Object.keys(this.state.emittors[key]).map((emittor_id) => {
                               return (
                                 <tr key={this.state.emittors[key][emittor_id].track_id}>
-                                  <td>{this.state.emittors[key][emittor_id].track_id}</td>
                                   <td>{int_to_emittor_type(this.state.emittors[key][emittor_id].emission_type)}</td>
                                   <td>{deg_to_dms(this.state.emittors[key][emittor_id].coordinates.lat)}</td>
                                   <td>{deg_to_dms(this.state.emittors[key][emittor_id].coordinates.lng)}</td>

@@ -150,49 +150,57 @@ class HttpRequestHandler extends Component {
         return (
             <div>
                 <form onSubmit={this.onFormSubmit}>
-
                     <div className="tile is-ancestor is-vertical">
                         <div className="tile">
-
-                            <div className="tile is-parent" >
-                                <article className="tile is-child notification">
+                            <div className="tile is-parent" id="upload-tile">
+                                <article className="tile is-child">
                                     <div className="file has-name is-boxed is-centered is-fullwidth" >
-
                                         <label className="file-label" >
                                             <input type="file" className="file-input" multiple
                                                 onChange={this.onChange} value={this.state.inputFiles} />
-                                            <span className="file-cta">
-                                                <span className="file-icon">
+                                            <span className="button is-grey" id="upload-button">
+                                                <span className="icon">
                                                     <FontAwesomeIcon icon='download' />
                                                 </span>
-                                                <span className="file-label">Upload your .PRP files…</span>
+                                                <span>Upload your .PRP files…</span>
                                             </span>
                                             <span className="file-name has-text-white-ter" >
                                                 {this.state.files.toString()}
                                             </span>
                                         </label>
                                     </div>
-
                                 </article>
-                            </div>
-                            <div className="tile is-parent">
-                                <article className="tile is-child notification">
+                                <article className="tile is-child">
                                     {/* Handles the drag&drop area */}
                                     <DropZone handleDrop={this.onDrop} text={this.state.dropText} />
                                 </article>
                             </div>
+                            <div className="tile is-parent">
+                                <article className="tile is-child">
+                                    <div className="file has-name is-boxed is-centered is-fullwidth right-buttons">
+                                        <label className="file-label" >
+                                            <button type="submit" className="button is-blue" >
+                                                <span className="file-icon">
+                                                    <FontAwesomeIcon icon='upload' />
+                                                </span>
+                                                <span>Upload</span>
+                                            </button>
+                                        </label>
+                                    </div>
+                                </article>
+                                <article className="tile is-child">
+                                    <div className="file has-name is-boxed is-centered is-fullwidth right-buttons" >
+                                        <label className="file-label" >
+                                            <button className="button is-danger" onClick={this.reset}>
+                                                <span className="file-icon">
+                                                    <FontAwesomeIcon icon='undo' />
+                                                </span>
+                                                <span>Reset</span>
+                                            </button>
 
-                        </div>
-                        <div className="tile is-parent">
-                            <div className="tile is-child">
-                                <div className="field has-addons">
-                                    <button type="submit" className="button is-grey" >
-                                        <span className="file-icon">
-                                            <FontAwesomeIcon icon='upload' />
-                                        </span>
-                                        <span>Upload</span>
-                                    </button>
-                                </div>
+                                        </label>
+                                    </div>
+                                </article>
                             </div>
                         </div>
                     </div>
@@ -207,10 +215,8 @@ class HttpRequestHandler extends Component {
                         Simulation with both techniques</button>
                 </div>
                 <div className="tile">
-                    <button onClick={this.reset}>Reset</button>
                 </div>
             </div>
-
         )
     }
 }
