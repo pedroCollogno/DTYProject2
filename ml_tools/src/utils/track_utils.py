@@ -195,7 +195,7 @@ def add_track_to_dict(track, track_dict, coords=None):
         'coordinates': coords,
         'frequency': freq,
         'emission_type': em_type,
-        'network_id': None,
+        'network_id': -1000,
         'track': track_info
     }
     track_dict[track_id] = track_data

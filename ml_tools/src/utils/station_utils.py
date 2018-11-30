@@ -167,3 +167,21 @@ def get_station_coordinates(*args):
                 break
         i += 1
     return(station_coords)
+
+
+def initiate_emittors_positions(*args):
+    """ Returns the coordinates of all emittors at the very end of the simulation from the .prp files
+
+    :return: a dict containing all emittors from a simulation
+    """
+    n = len(args[0])
+
+    track_streams = []
+    for arg in args:
+        track_streams.append(arg)
+
+    global_track_streams, all_tracks_data = fuse_all_station_tracks(
+        *track_streams)
+    logger.debug("Merge done !")
+
+    return(all_tracks_data)

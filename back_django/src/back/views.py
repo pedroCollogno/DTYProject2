@@ -34,11 +34,30 @@ def send_stations_positions(request):
         To call to send station locations to frontend in the form of a JSON
     """
     track_streams = []
-    for path in paths:
-        if path is not None:
-            track_stream = load.get_track_streams_from_prp(path)
-            track_streams.append(track_stream)
+    if paths is not None:
+        for path in paths:
+            if path is not None:
+                track_stream = load.get_track_streams_from_prp(path)
+                track_streams.append(track_stream)
     json_obj = station_utils.get_station_coordinates(*track_streams)
+    Group('users').send({
+        'text': json.dumps(json_obj)
+    })
+    return(HttpResponse(json.dumps(json_obj), content_type="application/json"))
+
+
+def initiate_emittors_positions(request):
+    """
+        To call to send station locations to frontend in the form of a JSON
+    """
+    track_streams = []
+    if paths is not None:
+        for path in paths:
+            if path is not None:
+                track_stream = load.get_track_streams_from_prp(path)
+                track_streams.append(track_stream)
+    station_utils.sync_stations(*track_streams)
+    json_obj = station_utils.initiate_emittors_positions(*track_streams)
     Group('users').send({
         'text': json.dumps(json_obj)
     })
@@ -58,10 +77,11 @@ def startsimulation(request):
     })
 
     track_streams = []
-    for path in paths:
-        if path is not None:
-            track_stream = load.get_track_streams_from_prp(path)
-            track_streams.append(track_stream)
+    if paths is not None:
+        for path in paths:
+            if path is not None:
+                track_stream = load.get_track_streams_from_prp(path)
+                track_streams.append(track_stream)
     station_utils.sync_stations(*track_streams)
 
     t = DataProcessThread(*track_streams, debug=False)
