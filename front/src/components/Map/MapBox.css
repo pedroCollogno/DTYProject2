@@ -34,3 +34,10 @@
 
 .mapboxgl-ctrl-bottom-left {
   display: none; }
+
+#showhide {
+  width: fit-content;
+  display: flex;
+  flex-direction: column;
+  padding: 0.5em;
+  font-size: 1.2em; }

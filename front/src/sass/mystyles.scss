@@ -16,27 +16,15 @@ $danger: $orange;
 $family-primary: $family-serif;
 
 // 4. Setup your Custom Colors
-$linkedin: rgba(0, 204, 170, 0.747);
-$linkedin-invert: findColorInvert($linkedin);
-$twitter: #55acee;
-$twitter-invert: findColorInvert($twitter);
-$github: #333;
-$github-invert: findColorInvert($github);
+$blue: rgba(0, 204, 170, 0.747);
+$blue-invert: findColorInvert($blue);
 
 // 5. Add new color variables to the color map.
 @import '../../node_modules/bulma/sass/utilities/derived-variables';
 $addColors: (
-  'twitter': (
-    $twitter,
-    $twitter-invert,
-  ),
   'blue': (
-    $linkedin,
-    $linkedin-invert,
-  ),
-  'github': (
-    $github,
-    $github-invert,
+    $blue,
+    $blue-invert,
   ),
   'grey': (
     $grey, 
@@ -56,4 +44,5 @@ html {
 // 6. Import the rest of Bulma
 @import '../../node_modules/bulma/bulma';
 @import '../../node_modules/bulma-extensions/bulma-switch/dist/css/bulma-switch.sass';
+@import '../../node_modules/bulma-extensions/bulma-checkradio/dist/css/bulma-checkradio.sass';
 

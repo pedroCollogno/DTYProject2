@@ -73,18 +73,18 @@ class HttpRequestHandler extends Component {
     }
 
     /**
- * Triggered when the "Simulation with Clustering" only button is pushed. Starts the simulation.
- * @param {*} e 
- */
+     * Triggered when the "Simulation with Clustering" only button is pushed. Starts the simulation.
+     * @param {*} e 
+     */
     onStartML(e) {
         axios.get("http://localhost:8000/startsimulationML")
             .then((res) => console.log("Simulation started !"));
     }
 
     /**
- * Triggered when the "Simulation with Deep Learning only" button is pushed. Starts the simulation.
- * @param {*} e 
- */
+     * Triggered when the "Simulation with Deep Learning only" button is pushed. Starts the simulation.
+     * @param {*} e 
+     */
     onStartDL(e) {
         axios.get("http://localhost:8000/startsimulationDL")
             .then((res) => console.log("Simulation started !"));
@@ -131,6 +131,9 @@ class HttpRequestHandler extends Component {
         }
     }
 
+    /**
+     * Resets the environment. (stops backends processing of data)
+     */
     reset() {
         axios.get("http://localhost:8000/stopsimulation")
             .then((res) => {
@@ -191,7 +194,7 @@ class HttpRequestHandler extends Component {
                                 <article className="tile is-child">
                                     <div className="file has-name is-boxed is-centered is-fullwidth right-buttons" >
                                         <label className="file-label" >
-                                            <button className="button is-danger" onClick={this.reset}>
+                                            <button type="button" className="button is-danger" onClick={this.reset}>
                                                 <span className="file-icon">
                                                     <FontAwesomeIcon icon='undo' />
                                                 </span>

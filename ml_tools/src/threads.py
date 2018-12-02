@@ -1,6 +1,9 @@
 import threading
 
-from .main import main, stop
+from .main import EWHandler
+
+import logging
+logger = logging.getLogger('backend')
 
 
 class DataProcessThread(threading.Thread):
@@ -8,15 +11,20 @@ class DataProcessThread(threading.Thread):
         This thread processes the Data from track streams set as inputs using ML/DL algorithms
     """
 
-    def __init__(self, *args, debug=False):
+    def __init__(self, debug=False):
         """ Initiates the Thread
 
-        :param *args: an unpacked list of all TrackStream objects to analyse
         :param debug: (optional) a kwarg to set the debug mode
         """
-        self.track_streams = args
         self.debug = debug
+        self.handler = EWHandler()
         threading.Thread.__init__(self)
+
+    def set_track_streams(self, *args):
+        """
+        :param *args: an unpacked list of all TrackStream objects to analyse
+        """
+        self.track_streams = args
 
     def set_sender_function(self, sender_function):
         """ Sets the function used by the backend to send data to the frontend
@@ -28,13 +36,13 @@ class DataProcessThread(threading.Thread):
     def run(self):
         """ Runs the given thread. 
         """
-        main(*self.track_streams, debug=self.debug,
-             sender_function=self.sender_function)
+        self.handler.main(*self.track_streams, debug=self.debug,
+                          sender_function=self.sender_function)
         self.__dict__.clear()
-        print('Finished !')
+        logger.warning('EWHandler Finished !')
 
     def stop_thread(self):
-        print("Stop")
-        stop()
-        print("Stopped")
-        self.join()
+        logger.warning("EWHandler got stop order.")
+        self.handler.stop()
+        logger.warning("EWHandler stopped.")
+        return True

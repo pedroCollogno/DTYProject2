@@ -25,27 +25,43 @@ logger = logging.getLogger('backend')
 
 cycles_per_batch = config['VARS']['cycles_per_batch']
 LOGS_DIR = config['PATH']['logs']
-running = True
 
 
-def stop():
-    running = False
-    logger.warning("Running has been set to : %s" % running)
-
-
-def main(*args, debug=False, sender_function=None, is_deep=False):
-    """Main function, executes when the script is executed.
-
-    :param debug: (optional) default is to False, set to True to enter debug mode (more logs)
-    :param sender_function: the function used to send emittors to a frontend.
-        This function is not defined in this package, and can be of any kind.
-    :param is_deep: boolean to know if clustering should be done using deep learning or not (using DBScan clustering)
+class EWHandler:
     """
-    if running :
+    Handler class, used to process data coming from Electronic Warfare.
+    """
+
+    def __init__(self):
+        """
+        Initiate the EWHandler object
+        """
+        self.running = False
+
+    def stop(self):
+        """
+        Stops the current instance of this object, ie. stops sending emittors and clustering them.
+        """
+        if self.running:
+            self.running = False
+            logger.warning("Running has been set to : %s" % self.running)
+        else:
+            logger.warning("Running was already set to : %s" % self.running)
+
+    def main(self, *args, debug=False, sender_function=None, is_deep=False):
+        """Main function.
+
+        :param debug: (optional) default is to False, set to True to enter debug mode (more logs)
+        :param sender_function: the function used to send emittors to a frontend.
+            This function is not defined in this package, and can be of any kind.
+        :param is_deep: boolean to know if clustering should be done using deep learning or not (using DBScan clustering)
+        """
+        self.running = True
         if debug:
             logger.handlers[1].setLevel(logging.DEBUG)
         if sender_function is None:
-            raise ValueError("No sender function, cannot interact with backend.")
+            raise ValueError(
+                "No sender function, cannot interact with backend.")
 
         all_tracks_data = {}
         n = len(args[0])
@@ -56,11 +72,11 @@ def main(*args, debug=False, sender_function=None, is_deep=False):
             k = n-1
             j = 1
         i = k
-        while i < n and running:
+        while i < n and self.running:
             track_streams = []
             for arg in args:
                 track_streams.append(arg[:i])
-            logger.warning("Running is : %s" % running)
+            logger.warning("Running is : %s" % self.running)
             logger.info(
                 "\nMerging info from all stations... Reading %s sensor cycles... Last cycle is cycle n.%s" % (len(track_streams[0]), i))
             prev_tracks_data = copy.deepcopy(all_tracks_data)
@@ -68,87 +84,88 @@ def main(*args, debug=False, sender_function=None, is_deep=False):
             global_track_streams, all_tracks_data = fuse_all_station_tracks(
                 *track_streams)
             logger.debug("Merge done !")
-            make_emittor_clusters(global_track_streams,
-                                all_tracks_data, prev_tracks_data, debug=debug, sender_function=sender_function, is_deep=is_deep)
+            self.make_emittor_clusters(global_track_streams,
+                                       all_tracks_data, prev_tracks_data, debug=debug, sender_function=sender_function, is_deep=is_deep)
             i += j
 
-def make_emittor_clusters(global_track_streams, all_tracks_data, prev_tracks_data, debug=False, sender_function=None, is_deep=False):
-    """ Makes the whole job of clustering emittors together from tracks
+    def make_emittor_clusters(self, global_track_streams, all_tracks_data, prev_tracks_data, debug=False, sender_function=None, is_deep=False):
+        """ Makes the whole job of clustering emittors together from tracks
 
-        Clusters emittors into networks using DBSCAN clustering algorithm. Updates the
-        cluster id info in the all_tracks_data parameter. Sends information for each emittor
-        directly to the Django backend.
+            Clusters emittors into networks using DBSCAN clustering algorithm. Updates the
+            cluster id info in the all_tracks_data parameter. Sends information for each emittor
+            directly to the Django backend.
 
-    :param global_track_streams: All track streams to study
-    :param all_tracks_data: Data on all tracks from global_track_streams, as a dictionnary
-    :param prev_tracks_data: Data from all tracks from previous cycle batch
-    :param debug: (optional) default is to False, set to True to enter debug mode (more logs)
-    :param sender_function: the function used to send emittors to a frontend.
-        This function is not defined in this package, and can be of any kind.
-    :param is_deep: boolean to know if clustering should be done using deep learning or not (using DBScan clustering)
-    """
-    raw_tracks = []
+        :param global_track_streams: All track streams to study
+        :param all_tracks_data: Data on all tracks from global_track_streams, as a dictionnary
+        :param prev_tracks_data: Data from all tracks from previous cycle batch
+        :param debug: (optional) default is to False, set to True to enter debug mode (more logs)
+        :param sender_function: the function used to send emittors to a frontend.
+            This function is not defined in this package, and can be of any kind.
+        :param is_deep: boolean to know if clustering should be done using deep learning or not (using DBScan clustering)
+        """
+        raw_tracks = []
 
-    if sender_function is None:
-        raise ValueError("No sender function, cannot interact with backend.")
+        if sender_function is None:
+            raise ValueError(
+                "No sender function, cannot interact with backend.")
 
-    logger.info("Taking track info out of %s track streams..." %
-                len(global_track_streams))
-    for tracks in global_track_streams:
-        raw_tracks = get_track_list_info(tracks, raw_tracks)
-    logger.debug("Done !")
-    logger.info("After merge of all station info, found a total of %s emittors." %
-                len(raw_tracks))
-    logger.info("All_data_tracks has a total of %s emittors registered." %
-                len(all_tracks_data.keys()))
+        logger.info("Taking track info out of %s track streams..." %
+                    len(global_track_streams))
+        for tracks in global_track_streams:
+            raw_tracks = get_track_list_info(tracks, raw_tracks)
+        logger.debug("Done !")
+        logger.info("After merge of all station info, found a total of %s emittors." %
+                    len(raw_tracks))
+        logger.info("All_data_tracks has a total of %s emittors registered." %
+                    len(all_tracks_data.keys()))
 
-    if len(raw_tracks) > 1 and running:
-        if is_deep:
-            file_name = str(time.time())
-            process_data(global_track_streams, file_name)
-            test(file_name)
-            y_pred, ids = train2(file_name)
-            n_cluster = len(set(y_pred))
-        else:
-            y_pred, ids, n_cluster = get_dbscan_prediction(
-                raw_tracks, all_tracks_data)
-
-        i = 0
-
-        if len(y_pred) > len(all_tracks_data.keys()):
-            err = "Too many labels : Got %s labels for %s emittors" % (
-                len(y_pred), len(all_tracks_data.keys()))
-            logger.error(err)
-            raise ValueError(err)
-
-        for label in y_pred:
+        if len(raw_tracks) > 1 and self.running:
             if is_deep:
-                track_id = ids[i]
+                file_name = str(time.time())
+                process_data(global_track_streams, file_name)
+                test(file_name)
+                y_pred, ids = train2(file_name)
+                n_cluster = len(set(y_pred))
             else:
-                track_id = get_track_id(raw_tracks[i])
-            # Need to convert np.int64 to int for JSON format
-            all_tracks_data[track_id]['network_id'] = int(label)
-            i += 1
-        logger.info("Found %s networks on the field.\n" % n_cluster)
-        logger.info("Sending emittors through socket")
+                y_pred, ids, n_cluster = get_dbscan_prediction(
+                    raw_tracks, all_tracks_data)
 
-        # for key in all_tracks_data.keys():
+            i = 0
+
+            if len(y_pred) > len(all_tracks_data.keys()):
+                err = "Too many labels : Got %s labels for %s emittors" % (
+                    len(y_pred), len(all_tracks_data.keys()))
+                logger.error(err)
+                raise ValueError(err)
+
+            for label in y_pred:
+                if is_deep:
+                    track_id = ids[i]
+                else:
+                    track_id = get_track_id(raw_tracks[i])
+                # Need to convert np.int64 to int for JSON format
+                all_tracks_data[track_id]['network_id'] = int(label)
+                i += 1
+            logger.info("Found %s networks on the field.\n" % n_cluster)
+            logger.info("Sending emittors through socket")
+
+            # for key in all_tracks_data.keys():
             # if key not in prev_tracks_data.keys() and not debug:
 
             # sender_function(all_tracks_data[key])
-        sender_function(all_tracks_data)
+            sender_function(all_tracks_data)
 
-    if debug:
-        create_new_folder('tracks_json', LOGS_DIR)
-        name = 'all_tracks_%s.json' % len(
-            global_track_streams)
-        file_path = os.path.join(LOGS_DIR, 'tracks_json', name)
-        logger.debug(
-            "Found all of this data from tracks, writing it to %s" % file_path)
-        logger.debug("Wrote %s tracks to json file" %
-                     len(all_tracks_data.keys()))
-        with open(file_path, 'w') as fp:
-            json.dump(all_tracks_data, fp)
+        if debug:
+            create_new_folder('tracks_json', LOGS_DIR)
+            name = 'all_tracks_%s.json' % len(
+                global_track_streams)
+            file_path = os.path.join(LOGS_DIR, 'tracks_json', name)
+            logger.debug(
+                "Found all of this data from tracks, writing it to %s" % file_path)
+            logger.debug("Wrote %s tracks to json file" %
+                         len(all_tracks_data.keys()))
+            with open(file_path, 'w') as fp:
+                json.dump(all_tracks_data, fp)
 
 
 """This part runs if you run 'python main.py' in the console"""

@@ -151,18 +151,21 @@ class MapBox extends Component {
                 // center={this.center()}
                 >
 
-                    <div className={"tile is-vertical"} id="showhide">
+                    <div id="showhide">
                         {/* The checkboxes to hide/show everything */}
-                        <label className={"checkbox"}>
-                            <input type="checkbox" onClick={() => this.props.switchAll(true)} />
-                            <strong>  </strong>Show all
-                    </label>
-                        <label className={"checkbox"}>
-                            <input type="checkbox" onClick={() => this.props.switchAll(false)} />
-                            <strong>  </strong>Hide all
-                    </label>
+                        <div className="field">
+                            <input className="is-checkradio is-block" type="checkbox" id="show_checkbox" name="show_checkbox" onClick={() => this.props.switchAll(true)} />
+                            <label htmlFor="show_checkbox">
+                                <span> </span>- Show all
+                            </label>
+                        </div>
+                        <div className="field">
+                            <input className="is-checkradio is-block" type="checkbox" id="hide_checkbox" name="hide_checkbox" onClick={() => this.props.switchAll(false)} />
+                            <label htmlFor="hide_checkbox">
+                                <span> </span>- Hide all
+                            </label>
+                        </div>
                     </div>
-                    {/* CSS ! */}
 
                     <Layer id="recStations" type="symbol" layout={{
                         "icon-image": "stationImage",
