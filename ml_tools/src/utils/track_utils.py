@@ -177,7 +177,7 @@ def same_emittor(track_1, track_2):
     return bool_response, track_id
 
 
-def add_track_to_dict(track, track_dict, coords=None):
+def add_track_to_dict(track, track_dict, coords=None, prev_tracks_data={}):
     """ Adds a track to a dictionnary of tracks in the right format
 
     :param track: the track to add to the dict
@@ -189,7 +189,12 @@ def add_track_to_dict(track, track_dict, coords=None):
     bandwidth = track.itr_measurement.bandwidth_hz
     em_type = track.itr_measurement.type
     track_info = get_track_info(track)
-    duration = track.cumulated_activity_us
+
+    if track_id in prev_tracks_data.keys():
+        if 'duration' in prev_tracks_data[track_id].keys():
+            duration = prev_tracks_data[track_id]['duration']
+    else:
+        duration = track.cumulated_activity_us
 
     track_data = {
         'track_id': track_id,
@@ -197,7 +202,8 @@ def add_track_to_dict(track, track_dict, coords=None):
         'frequency': freq,
         'emission_type': em_type,
         'network_id': -1000,
-        'duration': duration,
-        'track': track_info
+        'track': track_info,
+        'talking': False,
+        'duration': duration
     }
     track_dict[track_id] = track_data
