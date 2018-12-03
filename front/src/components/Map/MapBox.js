@@ -93,7 +93,6 @@ class MapBox extends Component {
             x += station.coordinates.lng;
             y += station.coordinates.lat;
         }
-        console.log("Center of network " + network + " is : " + x / N + "," + y / N);
         return [x / N, y / N]; // arithmetic means of the coordinates
     }
 

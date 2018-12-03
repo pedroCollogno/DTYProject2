@@ -1,5 +1,6 @@
 import os
 import json
+import shutil
 import logging
 logger = logging.getLogger('backend')
 
@@ -61,8 +62,7 @@ def initiate_emittors_positions(request):
 
 def start_simulation(request):
     """
-        Triggered whenever a user visits localhost:8000/test
-        Will be called when lauching the simulation
+        Called when lauching the simulation
     """
     send_emittor_to_front({'json': 'containing data'})
     Group('users').send({
@@ -79,8 +79,50 @@ def start_simulation(request):
     return render(request, 'back/user_list.html')
 
 
-@csrf_exempt
+def start_simulation_ml(request):
+    """
+        Called when lauching the simulation using only db_scan algorithm for clustering
+    """
+    send_emittor_to_front({'json': 'containing data'})
+    Group('users').send({
+        'text': json.dumps({
+            'simulation': 'start using only DB_SCAN clustering'
+        })
+    })
+
+    track_streams = manager.get_track_streams()
+
+    manager.set_deep(False)
+    manager.get_thread().set_track_streams(*track_streams)
+    manager.get_thread().set_sender_function(send_emittor_to_front)
+    manager.get_thread().start()
+    return render(request, 'back/user_list.html')
+
+
+def start_simulation_dl(request):
+    """
+        Called when lauching the simulation using only deep learning for clustering
+    """
+    send_emittor_to_front({'json': 'containing data'})
+    Group('users').send({
+        'text': json.dumps({
+            'simulation': 'start using only Deep Learning for clustering'
+        })
+    })
+
+    track_streams = manager.get_track_streams()
+
+    manager.set_deep(True)
+    manager.get_thread().set_track_streams(*track_streams)
+    manager.get_thread().set_sender_function(send_emittor_to_front)
+    manager.get_thread().start()
+    return render(request, 'back/user_list.html')
+
+
 def stop_simulation(request):
+    """
+        Called when stopping the simulation
+    """
     res = manager.get_thread().stop_thread()
     manager.clear_paths()
     manager.reset_thread()
@@ -88,6 +130,26 @@ def stop_simulation(request):
     if res:
         return (HttpResponse('Stopped thread !', status=200))
     return (HttpResponse('Could not stop...', status=500))
+
+
+def pause_simulation(request):
+    """
+        Called when pausing the simulation
+    """
+    res = manager.get_thread().pause()
+    if res:
+        return (HttpResponse('Paused thread !', status=200))
+    return (HttpResponse('Could not pause...', status=500))
+
+
+def play_simulation(request):
+    """
+        Called when restarting the simulation after a pause
+    """
+    res = manager.get_thread().play()
+    if res:
+        return (HttpResponse('Restarting thread !', status=200))
+    return (HttpResponse('Could not pause...', status=500))
 
 
 @csrf_exempt  # makes a security exception for this function to be triggered
@@ -99,6 +161,13 @@ def upload(request):
     if(request.method == 'POST'):
         form = FileForm(request.POST, request.FILES)
         if form.is_valid():
+
+            n_scenarios = 0
+            for _, _, filenames in os.walk("scenarios/"):
+                n_scenarios = len(filenames)
+            if n_scenarios > 15:
+                shutil.rmtree("scenarios/")
+
             fs = FileSystemStorage("scenarios/")
             manager.clear_paths()
             for key in request.FILES.keys():

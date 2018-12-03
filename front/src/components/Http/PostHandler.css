@@ -34,3 +34,13 @@ article.tile {
 #upload-button {
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0; }
+
+.control-section {
+  display: flex;
+  align-items: center;
+  margin-left: 1em;
+  margin-right: 1em;
+  background-color: #6f6f6f;
+  border-radius: 5px; }
+  .control-section a, .control-section progress {
+    margin: 2px; }
