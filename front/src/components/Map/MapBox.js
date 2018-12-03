@@ -5,6 +5,7 @@ import Stations from "./Stations.js";
 import stationImage from "./EW_high.png";
 import triangle from "./dashed-circle.png";
 import Lines from "./Lines.js";
+import PotentialLines from "./PotentialLines.js";
 import { global } from "./style";
 import PropTypes from "prop-types";
 import "./MapBox.css";
@@ -134,6 +135,7 @@ class MapBox extends Component {
     }
 
     render() {
+        console.log(this.state);
         let statImage = new Image(934, 1321); // image for the stations
         statImage.src = stationImage;
         let triImage = new Image(256, 256);
@@ -188,7 +190,8 @@ class MapBox extends Component {
                             // Those last 2 are rendered uniquely when toggled or if showAll is active.
                             let clusterCenter = this.clusterCenter(network);
                             let color = this.getColor(network);
-                            let emittorsNumber = Object.keys(this.state.emittors[network]).length;
+                            let emittors = this.state.emittors[network];
+                            let emittorsNumber = Object.keys(emittors).length;
                             let toggled = this.state.networksToggled[network];
                             toggled = !(toggled == undefined || !toggled);
                             toggled = !this.props.hideAll && (toggled || this.props.showAll);
@@ -196,13 +199,20 @@ class MapBox extends Component {
                             // toggled is True iff it's defined, not manually de-toggled (= False) and hideAll is not active
                             // or simply if showAll is active. Single emittors are always displayed. 
                             let lines = toggled && (network != "-1000");
-
+                            let potentialLinks = [];
+                            Object.keys(emittors).map((track_id, keyy) => {
+                                if (emittors[track_id]["possible_network"] != undefined) {
+                                    potentialLinks.push([[emittors[track_id]["coordinates"]["lng"], emittors[track_id]["coordinates"]["lat"]],
+                                    this.clusterCenter(emittors[track_id]["possible_network"])]);
+                                }
+                            });
+                            let showPotential = (toggled && potentialLinks.length != 0);
                             return (
                                 <div id={"cluster" + k} key={"cluster" + k}>
                                     {lines &&// conditionnal rendering
                                         <Lines
                                             clusterCenter={clusterCenter} color={color}
-                                            network={network} stations={this.state.emittors[network]} />
+                                            network={network} stations={emittors} />
                                     }
                                     {network != "-1000" && emittorsNumber > 1 && // always rendering when simulation has started
                                         <Layer
@@ -214,13 +224,14 @@ class MapBox extends Component {
                                                 "text-field": "" + emittorsNumber,
                                                 "text-size": 15,
                                                 "icon-image": "triImage",
-                                                "icon-size": 0.1,
-                                                "text-font": ["Open Sans Bold"],
+                                                "icon-size": 0.08,
+                                                "icon-allow-overlap": true,
+                                                "text-font": ["Open Sans Regular"],
                                                 "text-allow-overlap": true
                                             }} paint={{
                                                 "text-color": this.getColor(network),
                                                 "text-halo-color": "black",
-                                                "text-halo-width": 1 + this.state.highlights["" + network],
+                                                "text-halo-width": 0.1 + this.state.highlights["" + network],
                                             }}
                                             images={triImages}
                                         >
@@ -232,8 +243,13 @@ class MapBox extends Component {
                                     }
                                     {toggled && // conditionnal rendering
                                         <Stations
-                                            stations={this.state.emittors[network]} network={network}
+                                            stations={emittors} network={network}
                                             color={color} />
+                                    }
+                                    {showPotential &&
+                                        <PotentialLines
+                                            links={potentialLinks}
+                                            network={network} />
                                     }
                                 </div>)
                         })
@@ -282,8 +298,8 @@ MapBox.propTypes = {
     hideAll: PropTypes.bool.isRequired,
     /**
      * the function to toggle showAll (if called with True) or hideAll (if called with False)
-     * @param : {Boolean} all Whether to change showAll of hideAll
-     */
+* @param : {Boolean} all Whether to change showAll of hideAll
+    */
     switchAll: PropTypes.func.isRequired,
     /**
      * the networks toggled/de-toggled manually by the user so far
