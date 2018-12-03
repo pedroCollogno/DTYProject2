@@ -41,7 +41,28 @@ class DataProcessThread(threading.Thread):
         self.__dict__.clear()
 
     def stop_thread(self):
-        logger.warning("EWHandler got stop order.")
-        self.handler.stop()
-        logger.warning("EWHandler stopped.")
-        return True
+        try:
+            logger.warning("EWHandler got stop order.")
+            self.handler.stop()
+            logger.warning("EWHandler stopped.")
+            return True
+        except Exception:
+            return False
+
+    def pause(self):
+        try:
+            logger.warning("EWHandler got pause order.")
+            self.handler.pause()
+            logger.warning("EWHandler paused.")
+            return True
+        except Exception:
+            return False
+
+    def play(self):
+        try:
+            logger.warning("EWHandler got play order.")
+            self.handler.play()
+            logger.warning("EWHandler restarting.")
+            return True
+        except Exception:
+            return False

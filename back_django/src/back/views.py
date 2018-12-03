@@ -61,8 +61,7 @@ def initiate_emittors_positions(request):
 
 def start_simulation(request):
     """
-        Triggered whenever a user visits localhost:8000/test
-        Will be called when lauching the simulation
+        Called when lauching the simulation
     """
     send_emittor_to_front({'json': 'containing data'})
     Group('users').send({
@@ -79,8 +78,10 @@ def start_simulation(request):
     return render(request, 'back/user_list.html')
 
 
-@csrf_exempt
 def stop_simulation(request):
+    """
+        Called when stopping the simulation
+    """
     res = manager.get_thread().stop_thread()
     manager.clear_paths()
     manager.reset_thread()
@@ -88,6 +89,26 @@ def stop_simulation(request):
     if res:
         return (HttpResponse('Stopped thread !', status=200))
     return (HttpResponse('Could not stop...', status=500))
+
+
+def pause_simulation(request):
+    """
+        Called when pausing the simulation
+    """
+    res = manager.get_thread().pause()
+    if res:
+        return (HttpResponse('Paused thread !', status=200))
+    return (HttpResponse('Could not pause...', status=500))
+
+
+def play_simulation(request):
+    """
+        Called when restarting the simulation after a pause
+    """
+    res = manager.get_thread().play()
+    if res:
+        return (HttpResponse('Restarting thread !', status=200))
+    return (HttpResponse('Could not pause...', status=500))
 
 
 @csrf_exempt  # makes a security exception for this function to be triggered

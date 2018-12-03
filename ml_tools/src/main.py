@@ -51,6 +51,12 @@ class EWHandler:
         """
         self.paused = True
 
+    def play(self):
+        """
+        Restarts the current instance of this object after a pause.
+        """
+        self.paused = False
+
     def main(self, *args, debug=False, sender_function=None, is_deep=False):
         """Main function.
 
@@ -77,6 +83,9 @@ class EWHandler:
             j = 1
         i = k
         while i < n and self.running:
+            while self.paused:
+                time.sleep(0.5)
+
             track_streams = []
             for arg in args:
                 track_streams.append(arg[:i])

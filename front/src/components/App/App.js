@@ -7,9 +7,9 @@ import colormap from "colormap";
 
 // Set fontAwesome icons up -> Define all icons that will be used in the app.
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faUpload, faDownload, faUndo } from '@fortawesome/free-solid-svg-icons'
+import { faUpload, faDownload, faUndo, faPlay, faPause } from '@fortawesome/free-solid-svg-icons'
 
-library.add(faUpload, faDownload, faUndo)
+library.add(faUpload, faDownload, faUndo, faPlay, faPause)
 // Setup complete
 
 function deg_to_dms(deg) {

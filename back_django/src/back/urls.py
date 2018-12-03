@@ -1,5 +1,5 @@
 from django.conf.urls import url
-from .views import user_list, start_simulation, stop_simulation, upload, send_stations_positions, initiate_emittors_positions
+from .views import user_list, start_simulation, stop_simulation, upload, send_stations_positions, initiate_emittors_positions, pause_simulation, play_simulation
 
 
 """Routes for the websocket:
@@ -13,6 +13,8 @@ urlpatterns = [
     url(r'^startsimulationML$', start_simulation, name="startsimulationML"),
     url(r'^startsimulationDL$', start_simulation, name="startsimulationDL"),
     url(r'^stopsimulation$', stop_simulation, name="stopsimulation"),
+    url(r'^pausesimulation$', pause_simulation, name="pausesimulation"),
+    url(r'^playsimulation$', play_simulation, name="playsimulation"),
     url(r'^getstations$', send_stations_positions, name="get_stations"),
     url(r'^emittorspositions$', initiate_emittors_positions,
         name="emittors_positions"),

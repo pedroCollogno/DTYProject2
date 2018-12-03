@@ -149,6 +149,20 @@ class HttpRequestHandler extends Component {
             });
     }
 
+    play() {
+        axios.get("http://localhost:8000/playsimulation")
+            .then((res) => {
+                console.log("Simulation restarting after pause !");
+            });
+    }
+
+    pause() {
+        axios.get("http://localhost:8000/pausesimulation")
+            .then((res) => {
+                console.log("Simulation paused !");
+            });
+    }
+
     render() {
         return (
             <div>
@@ -208,6 +222,19 @@ class HttpRequestHandler extends Component {
                         </div>
                     </div>
                 </form>
+                <section className="control-section">
+                    <a class="button item" onClick={this.play}>
+                        <span class="icon is-small">
+                            <FontAwesomeIcon icon='play' />
+                        </span>
+                    </a>
+                    <a class="button item" onClick={this.pause}>
+                        <span class="icon is-small">
+                            <FontAwesomeIcon icon='pause' />
+                        </span>
+                    </a>
+                    <progress class="progress is-medium is-blue item" id="progressbar" value="45" max="100"></progress>
+                </section>
                 {/* "Start simulation" button, active if the posting of the files went ok */}
                 <div className="tile">
                     <button className="button" id="start-sim-ml-button" disabled={!this.state.loaded} onClick={this.onStartML}>
@@ -216,8 +243,6 @@ class HttpRequestHandler extends Component {
                         Simulation with Deep Learning only</button>
                     <button className="button" id="start-sim-button" disabled={!this.state.loaded} onClick={this.onStart}>
                         Simulation with both techniques</button>
-                </div>
-                <div className="tile">
                 </div>
             </div>
         )
