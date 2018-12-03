@@ -3,6 +3,7 @@ import ReactMapboxGl, { Layer, Feature, ZoomControl, ScaleControl } from "react-
 import colormap from "colormap";
 import Stations from "./Stations.js";
 import stationImage from "./EW_high.png";
+import triangle from "./triangle.png"
 import Lines from "./Lines.js";
 import { global } from "./style";
 import PropTypes from "prop-types";
@@ -121,22 +122,25 @@ class MapBox extends Component {
      * @param {*} network 
      */
     getColor(network) {
-        let i = parseInt(network);
-        if (i < 0) {
+        let networkNumber = parseInt(network);
+        if (networkNumber < 0) {
             console.log("Unidentified network");
             return "grey";
         }
-        if (this.state.colors[i] != undefined) {
-            return this.state.colors[i];
+        if (this.state.colors[networkNumber] != undefined) {
+            return this.state.colors[networkNumber];
         }
         console.log("Color " + network + " is undefined");
         return "white";
     }
 
     render() {
-        let image = new Image(934, 1321); // image for the stations
-        image.src = stationImage;
-        let images = ["stationImage", image]; // sets it as a source for the map
+        let statImage = new Image(934, 1321); // image for the stations
+        statImage.src = stationImage;
+        let images = ["stationImage", statImage]; // sets it as a source for the map
+        let triImage = new Image(256, 256);
+        triImage.src = triangle;
+        let triImages = ["triImage", triImage];
         return (
             <div className="map-container">
                 {/* the map contains everything (because it implements the actual HTML canvas) */}
@@ -166,7 +170,6 @@ class MapBox extends Component {
                             </label>
                         </div>
                     </div>
-
                     <Layer id="recStations" type="symbol" layout={{
                         "icon-image": "stationImage",
                         "icon-size": 0.03
@@ -203,13 +206,17 @@ class MapBox extends Component {
                                     {network != "-1000" && // always rendering when simulation has started
                                         <Layer
                                             id={"center" + network}
-                                            type="circle"
+                                            type="symbol"
                                             onClick={() => { this.props.toggleNetwork(network) }}
-                                            paint={{
-                                                "circle-color": color,
-                                                "circle-radius": 6,
-                                                "circle-stroke-width": this.state.highlights["" + network]
-                                            }}>
+                                            layout={{
+                                                "text-field": "" + Object.keys(this.state.emittors[network]).length(),
+                                                "text-size": 20,
+                                                "text-font": ["Open Sans Bold"]
+                                            }} paint={{
+                                                "text-color": this.getColor(network),
+                                                "text-halo-color": "black",
+                                                "text-halo-width": this.state.highlights["" + network],
+                                            }} images={triImages}>
                                             <Feature coordinates={clusterCenter} onClick={() => this.props.toggleNetwork(network)}
                                                 onMouseEnter={() => {
                                                     if (Object.keys(this.state.emittors[network]).length > 1) {
