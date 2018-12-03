@@ -16,8 +16,8 @@ def fake_terrorist_network( n_emittors_per_cluster, full_sequence_size):
     else:
         talk_small_chef=random.randint(20, 20*(small_chefs+1))
         talk_shit_units=100-talk_small_chef
-    mat_of_network=[]
-    mat_of_talk_times=[]
+    mat_of_network=[-1]
+    mat_of_talk_times=[silence_time]
     if big_chef!=0:
         mat_of_network.append(1)
         mat_of_talk_times.append(talk_big_chef)
@@ -38,7 +38,7 @@ def create_fake_sequences(n_clusters, full_sequence_size):
     list_of_labels=[]
     for k in range(n_clusters):
         network,talk_distribution=fake_terrorist_network(10,full_sequence_size)
-        for emittor in network:
+        for emittor in network[1:]:
             emittor_emission=[int(i==emittor) for i in talk_distribution]
             list_of_data.append([emittor_emission])
             if emittor==1:

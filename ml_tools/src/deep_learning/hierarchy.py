@@ -32,7 +32,7 @@ def train_hierarchy():
     model.compile(loss='sparse_categorical_crossentropy', optimizer='rmsprop', metrics=[
                   'accuracy', metrics.f1_score_threshold(), metrics.precision_threshold(), metrics.recall_threshold()])
 
-    data, labels=create_fake_sequences(1000,1000)
+    data, labels=create_fake_sequences(10000,1000)
     X=np.array(data)
     Y=np.array(labels)
     print(X.shape)
@@ -64,7 +64,17 @@ def test_hierarchy():
     to_predict=[]
     for k in emittor_infos:
         print("emittor %s in cluster %s" %(k, emittor_infos[k]['network']))
-        print(model.predict(np.array(([[emittor_infos[k]['steps'][:1000]]]))))
-
+        prediction=model.predict(np.array(([[emittor_infos[k]['steps'][:1000]]])))
+        most_likely=prediction.argmax()
+        print(prediction)
+        print(most_likely)
+        if (most_likely==0):
+            print("big chef")
+        elif (most_likely==1):
+            print("small chef")
+            print((emittor_infos[k]['steps'][:1000]).count(1)/1000.0)
+        else:
+            print("shit unit")
+            print((emittor_infos[k]['steps'][:1000]).count(1)/1000.0)
 #print(test_hierarchy())
-print(test_hierarchy())
+print(test_hierarchy()) 
