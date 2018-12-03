@@ -10,7 +10,8 @@ class Dashboard extends Component {
       super(props);
       
       this.state = {
-        modalState: false
+        modalState: false,
+        numberNetworks : 0
       };
       
       this.toggleModal = this.toggleModal.bind(this);
@@ -28,94 +29,79 @@ class Dashboard extends Component {
 
     getEmittorList() {
         var networks = this.props.emittors;
-        var test = []
         var networksIndex = Object.keys(networks).map((network, i) => (
             i
         ))
         var networksLength = []
-        var networksIds = []
-        var networksTypes = []
+
+        var emittersNetworksIds = []
+        var emittersNetworksTypes = []
+        var emittersDurations = []
+        var emittersIds = []
         Object.keys(networks).forEach(element => {
             networksLength.push( Object.keys(networks[element]).length)
-
-            // for (var key in networks[element]) {
-            //   if (networks[element].hasOwnProperty(key)) continue;
-            //     console.log("coucou")
-            //     var emittor = networks[element][key]
-            //     for (var prop in emittor) {
-            //       if (!emittor.hasOwnProperty(prop)) continue;
-            //       console.log(prop);
-
-            //   }
-            // }
             
             Object.keys(networks[element]).forEach(i => {
-              networksTypes.push(networks[element][i]['emission_type']);
-              networksIds.push(networks[element][i]['network_id'])
-              
+              emittersNetworksTypes.push(networks[element][i]['emission_type']);
+              emittersNetworksIds.push(networks[element][i]['network_id']);
+              emittersDurations.push(networks[element][i]['duration']);
+              emittersIds.push(networks[element][i]['track_id'])
             })
         });
-        // Object.keys(networks).map((network, i) => (
-        //     if (networks[i]) {
-        //         Object.keys(networks[i]).map((emittor, j) =>
-        //         console.log(j)
-        //     )
-        //     }
-            
-        // ))
-        
-        
-        //console.log(networksLength)
 
+        //this.setState({numberNetworks: networksLength})
 
+        var dataEmittors = {}
 
+        for (var i in emittersNetworksIds) {
+          !(emittersNetworksIds[i] in dataEmittors) && (dataEmittors[emittersNetworksIds[i]] = {
+            'durations': [],
+            'ids': []
+          });
+          dataEmittors[emittersNetworksIds[i]]['durations'].push(emittersDurations[i]);
+          dataEmittors[emittersNetworksIds[i]]['ids'].push(emittersIds[i]);
+        }
+
+        console.log('test', dataEmittors)
         console.log('networks', networks)
         var data = {
             labels : networksIndex,
             datasets: [{
-                label: "My First dataset",
+                label: "Networks ammount of emittors",
                 backgroundColor: 'rgb(255, 99, 132)',
                 borderColor: 'rgb(255, 99, 132)',
                 data: networksLength,
-                }]
+                }],
+                options : {
+                  scales: {
+                      yAxes: [{
+                          display: true,
+                          ticks: {
+                              beginAtZero: true   // minimum value will be 0.
+                          }
+                      }]
+                  }
+              }
         }
 
+        var labels2 = dataEmittors[0] || {'ids':[]}
+        var values2 = dataEmittors[0] || {'durations': []}
+
         var data2 = {
-          labels : networksIds,
+          labels : labels2['ids'],
           datasets: [{
               label: "My First dataset",
               backgroundColor: 'rgb(255, 99, 132)',
               borderColor: 'rgb(255, 99, 132)',
-              data: networksTypes,
+              data: values2['durations'],
               }]
+
       }
 
         return(
             <div>
-                            < Bar data={data} />
-                            < Bar data={data2}/>
-        {networks && Object.keys(networks)?
-            <ul>
-            {Object.keys(networks).map((network, i) => (
-              <li className="network" key={i}>
-
-                  {networks[i] && Object.keys(networks[i])?
-                  <div>
-                  <span className="index">
-                      Network: {i} 
-                  </span>
-                  {Object.keys(networks[i]).map((emittor, j) => (
-                      <li className="emittor" key={j}>
-                          <span className="index">Emittor: {j}</span>
-                      </li>
-                  ))}
-                  </div>
-                  :null}
-              </li>
-              ))}
-            </ul>
-            :null}
-
+              < Bar data={data}/>
+              < Bar data={data2}/>
             </div>)
 
     }
@@ -136,6 +122,7 @@ class Dashboard extends Component {
               title="Dashboard"
             >
               <p>
+              
               {this.getEmittorList()}
               
               </p>
