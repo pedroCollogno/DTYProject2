@@ -33,12 +33,9 @@ $addColors: (
 );
 $colors: map-merge($colors, $addColors);
 
-body{
+body, html{
   background: linear-gradient(to right, #010205, #130E3F);
-  height: 100%;
-}
-html {
-  height: 100%;
+  height: 100vh;
 }
 
 // 6. Import the rest of Bulma
