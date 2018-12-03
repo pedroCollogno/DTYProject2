@@ -3,7 +3,7 @@ import ReactMapboxGl, { Layer, Feature, ZoomControl, ScaleControl } from "react-
 import colormap from "colormap";
 import Stations from "./Stations.js";
 import stationImage from "./EW_high.png";
-import triangle from "./triangle.png"
+import triangle from "./dashed-circle.png";
 import Lines from "./Lines.js";
 import { global } from "./style";
 import PropTypes from "prop-types";
@@ -136,9 +136,9 @@ class MapBox extends Component {
     render() {
         let statImage = new Image(934, 1321); // image for the stations
         statImage.src = stationImage;
-        let images = ["stationImage", statImage]; // sets it as a source for the map
         let triImage = new Image(256, 256);
         triImage.src = triangle;
+        let images = ["stationImage", statImage]; // sets it as a source for the map
         let triImages = ["triImage", triImage];
         return (
             <div className="map-container">
@@ -169,7 +169,7 @@ class MapBox extends Component {
                             </label>
                         </div>
                     </div>
-                    <Layer id="recStations" type="symbol" layout={{
+                    <Layer id="recStations" key="recStations" type="symbol" layout={{
                         "icon-image": "stationImage",
                         "icon-size": 0.03
                     }} images={images} >
@@ -188,12 +188,14 @@ class MapBox extends Component {
                             // Those last 2 are rendered uniquely when toggled or if showAll is active.
                             let clusterCenter = this.clusterCenter(network);
                             let color = this.getColor(network);
+                            let emittorsNumber = Object.keys(this.state.emittors[network]).length;
                             let toggled = this.state.networksToggled[network];
                             toggled = !(toggled == undefined || !toggled);
                             toggled = !this.props.hideAll && (toggled || this.props.showAll);
-                            let lines = toggled && (network != "-1000");
+                            toggled = (emittorsNumber == 1) || toggled;
                             // toggled is True iff it's defined, not manually de-toggled (= False) and hideAll is not active
-                            // or simply if showAll is active
+                            // or simply if showAll is active. Single emittors are always displayed. 
+                            let lines = toggled && (network != "-1000");
 
                             return (
                                 <div id={"cluster" + k} key={"cluster" + k}>
@@ -202,33 +204,30 @@ class MapBox extends Component {
                                             clusterCenter={clusterCenter} color={color}
                                             network={network} stations={this.state.emittors[network]} />
                                     }
-                                    {network != "-1000" && // always rendering when simulation has started
+                                    {network != "-1000" && emittorsNumber > 1 && // always rendering when simulation has started
                                         <Layer
                                             id={"center" + network}
+                                            key={"center" + network}
                                             type="symbol"
                                             onClick={() => { this.props.toggleNetwork(network) }}
                                             layout={{
-                                                "text-field": "" + Object.keys(this.state.emittors[network]).length(),
-                                                "text-size": 20,
-                                                "text-font": ["Open Sans Bold"]
+                                                "text-field": "" + emittorsNumber,
+                                                "text-size": 15,
+                                                "icon-image": "triImage",
+                                                "icon-size": 0.1,
+                                                "text-font": ["Open Sans Bold"],
+                                                "text-allow-overlap": true
                                             }} paint={{
                                                 "text-color": this.getColor(network),
                                                 "text-halo-color": "black",
-                                                "text-halo-width": this.state.highlights["" + network],
-                                            }} images={triImages}>
+                                                "text-halo-width": 1 + this.state.highlights["" + network],
+                                            }}
+                                            images={triImages}
+                                        >
                                             <Feature coordinates={clusterCenter} onClick={() => this.props.toggleNetwork(network)}
-                                                onMouseEnter={() => {
-                                                    if (Object.keys(this.state.emittors[network]).length > 1) {
-                                                        // if there is only one emittor in the network, the center is actually the node
-                                                        this.mouseEnter(network);
-                                                    }
-                                                }}
-                                                onMouseLeave={() => {
-                                                    if (Object.keys(this.state.emittors[network]).length > 1) {
-                                                        // same here
-                                                        this.mouseExit(network);
-                                                    }
-                                                }}></Feature>
+                                                onMouseEnter={() => this.mouseEnter(network)}
+                                                onMouseLeave={() => this.mouseExit(network)}
+                                            ></Feature>
                                         </Layer>
                                     }
                                     {toggled && // conditionnal rendering
