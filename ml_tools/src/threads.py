@@ -1,7 +1,6 @@
-import threading
-
 from .main import EWHandler
 
+import threading
 import logging
 logger = logging.getLogger('backend')
 
@@ -38,8 +37,8 @@ class DataProcessThread(threading.Thread):
         """
         self.handler.main(*self.track_streams, debug=self.debug,
                           sender_function=self.sender_function)
-        self.__dict__.clear()
         logger.warning('EWHandler Finished !')
+        self.__dict__.clear()
 
     def stop_thread(self):
         logger.warning("EWHandler got stop order.")

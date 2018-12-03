@@ -42,11 +42,7 @@ class EWHandler:
         """
         Stops the current instance of this object, ie. stops sending emittors and clustering them.
         """
-        if self.running:
-            self.running = False
-            logger.warning("Running has been set to : %s" % self.running)
-        else:
-            logger.warning("Running was already set to : %s" % self.running)
+        self.running = False
 
     def main(self, *args, debug=False, sender_function=None, is_deep=False):
         """Main function.
@@ -76,7 +72,6 @@ class EWHandler:
             track_streams = []
             for arg in args:
                 track_streams.append(arg[:i])
-            logger.warning("Running is : %s" % self.running)
             logger.info(
                 "\nMerging info from all stations... Reading %s sensor cycles... Last cycle is cycle n.%s" % (len(track_streams[0]), i))
             prev_tracks_data = copy.deepcopy(all_tracks_data)
@@ -87,6 +82,7 @@ class EWHandler:
             self.make_emittor_clusters(global_track_streams,
                                        all_tracks_data, prev_tracks_data, debug=debug, sender_function=sender_function, is_deep=is_deep)
             i += j
+            time.sleep(0.5)
 
     def make_emittor_clusters(self, global_track_streams, all_tracks_data, prev_tracks_data, debug=False, sender_function=None, is_deep=False):
         """ Makes the whole job of clustering emittors together from tracks
