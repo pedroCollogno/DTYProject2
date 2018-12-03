@@ -154,13 +154,13 @@ class MapBox extends Component {
                     <div id="showhide">
                         {/* The checkboxes to hide/show everything */}
                         <div className="field">
-                            <input className="is-checkradio is-block" type="checkbox" id="show_checkbox" name="show_checkbox" onClick={() => this.props.switchAll(true)} />
+                            <input className="is-checkradio is-block" type="checkbox" id="show_checkbox" name="show_checkbox" checked={this.props.showVal} onChange={this.props.changeShowVal} onClick={() => this.props.switchAll(true)} />
                             <label htmlFor="show_checkbox">
                                 <span> </span>- Show all
                             </label>
                         </div>
                         <div className="field">
-                            <input className="is-checkradio is-block" type="checkbox" id="hide_checkbox" name="hide_checkbox" onClick={() => this.props.switchAll(false)} />
+                            <input className="is-checkradio is-block" type="checkbox" id="hide_checkbox" name="hide_checkbox" checked={this.props.hideVal} onChange={this.props.changeHideVal} onClick={() => this.props.switchAll(false)} />
                             <label htmlFor="hide_checkbox">
                                 <span> </span>- Hide all
                             </label>
