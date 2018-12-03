@@ -78,7 +78,7 @@ class HttpRequestHandler extends Component {
      */
     onStartML(e) {
         axios.get("http://localhost:8000/startsimulationML")
-            .then((res) => console.log("Simulation started !"));
+            .then((res) => console.log("Simulation started using only DB_SCAN for clustering !"));
     }
 
     /**
@@ -87,7 +87,7 @@ class HttpRequestHandler extends Component {
      */
     onStartDL(e) {
         axios.get("http://localhost:8000/startsimulationDL")
-            .then((res) => console.log("Simulation started !"));
+            .then((res) => console.log("Simulation started using only Deep Learning for clustering !"));
     }
 
     /**
@@ -164,7 +164,6 @@ class HttpRequestHandler extends Component {
     }
 
     render() {
-        console.log(this.props)
         return (
             <div>
                 <form onSubmit={this.onFormSubmit}>
@@ -224,17 +223,17 @@ class HttpRequestHandler extends Component {
                     </div>
                 </form>
                 <section className="control-section">
-                    <a class="button item" onClick={this.play}>
-                        <span class="icon is-small">
+                    <a className="button item" onClick={this.play}>
+                        <span className="icon is-small">
                             <FontAwesomeIcon icon='play' />
                         </span>
                     </a>
-                    <a class="button item" onClick={this.pause}>
-                        <span class="icon is-small">
+                    <a className="button item" onClick={this.pause}>
+                        <span className="icon is-small">
                             <FontAwesomeIcon icon='pause' />
                         </span>
                     </a>
-                    <progress class="progress is-medium is-blue item" id="progressbar" value={this.props.progress} max={this.props.total_duration}></progress>
+                    <progress className="progress is-medium is-blue item" id="progressbar" value={this.props.progress} max={this.props.total_duration}></progress>
                 </section>
                 {/* "Start simulation" button, active if the posting of the files went ok */}
                 <div className="tile">

@@ -19,6 +19,7 @@ import time
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from mpl_toolkits.mplot3d import Axes3D
+from keras import backend as K
 
 import logging
 logger = logging.getLogger('backend')
@@ -59,16 +60,18 @@ class EWHandler:
         """
         self.paused = False
 
-    def main(self, *args, debug=False, sender_function=None, is_deep=False):
+    def main(self, *args, debug=False, sender_function=None, use_deep=False, mix=False):
         """Main function.
 
         :param debug: (optional) default is to False, set to True to enter debug mode (more logs)
         :param sender_function: the function used to send emittors to a frontend.
             This function is not defined in this package, and can be of any kind.
-        :param is_deep: boolean to know if clustering should be done using deep learning or not (using DBScan clustering)
+        :param use_deep: boolean to know if clustering should be done using deep learning or not (using DBScan clustering)
+        :param mix: boolean to know if clustering should use a complementary mix of DB_Scan and Deep Learning methods
         """
         self.running = True
         self.paused = False
+
         if debug:
             logger.handlers[1].setLevel(logging.DEBUG)
         if sender_function is None:
@@ -80,8 +83,8 @@ class EWHandler:
 
         j = cycles_per_batch
         k = 1
-        if is_deep:
-            k = n-1
+        if use_deep:
+            k = self.total_duration-1
             j = 1
         self.progress = k
         while self.progress < self.total_duration and self.running:
@@ -99,11 +102,12 @@ class EWHandler:
                 *track_streams)
             logger.debug("Merge done !")
             self.make_emittor_clusters(global_track_streams,
-                                       all_tracks_data, prev_tracks_data, debug=debug, sender_function=sender_function, is_deep=is_deep)
+                                       all_tracks_data, prev_tracks_data, debug=debug, sender_function=sender_function, use_deep=use_deep, mix=mix)
             self.progress += j
             time.sleep(0.5)
+        K.clear_session()
 
-    def make_emittor_clusters(self, global_track_streams, all_tracks_data, prev_tracks_data, debug=False, sender_function=None, is_deep=False):
+    def make_emittor_clusters(self, global_track_streams, all_tracks_data, prev_tracks_data, debug=False, sender_function=None, use_deep=False, mix=False):
         """ Makes the whole job of clustering emittors together from tracks
 
             Clusters emittors into networks using DBSCAN clustering algorithm. Updates the
@@ -116,7 +120,8 @@ class EWHandler:
         :param debug: (optional) default is to False, set to True to enter debug mode (more logs)
         :param sender_function: the function used to send emittors to a frontend.
             This function is not defined in this package, and can be of any kind.
-        :param is_deep: boolean to know if clustering should be done using deep learning or not (using DBScan clustering)
+        :param use_deep: boolean to know if clustering should be done using deep learning or not (using DBScan clustering)
+        :param mix: boolean to know if clustering should use a complementary mix of DB_Scan and Deep Learning methods
         """
         raw_tracks = []
 
@@ -135,7 +140,7 @@ class EWHandler:
                     len(all_tracks_data.keys()))
 
         if len(raw_tracks) > 1 and self.running:
-            if is_deep:
+            if use_deep:
                 file_name = str(time.time())
                 process_data(global_track_streams, file_name)
                 test(file_name)
@@ -154,7 +159,7 @@ class EWHandler:
                 raise ValueError(err)
 
             for label in y_pred:
-                if is_deep:
+                if use_deep:
                     track_id = ids[i]
                 else:
                     track_id = get_track_id(raw_tracks[i])
