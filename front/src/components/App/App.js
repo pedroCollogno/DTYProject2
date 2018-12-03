@@ -74,7 +74,9 @@ class App extends Component {
       showAll: false, // the state of the checkbuttons of the map (combined with networksToggled)
       hideAll: false,
       hideVal: false,
-      showVal: false
+      showVal: false,
+      total_duration: 0,
+      progress: 0
     };
     // functions that are allowed to update the state of the component
     this.newEmittors = this.newEmittors.bind(this);
@@ -86,7 +88,6 @@ class App extends Component {
     this.reset = this.reset.bind(this);
     this.changeShowVal = this.changeShowVal.bind(this);
     this.changeHideVal = this.changeHideVal.bind(this);
-
   }
 
 
@@ -136,29 +137,41 @@ class App extends Component {
    */
   newEmittors(emittors) {
     if (emittors) {
-      let stats = JSON.parse(emittors);
+      let emitts = JSON.parse(emittors);
       let dic = JSON.parse(JSON.stringify(this.state.emittors));
+      let total_duration = 0;
+      let progress = 0;
       if (dic["-1000"] != undefined) {
         delete dic["-1000"];
       }
-      if (Object.entries(stats)[0][1]["network_id"] != undefined) {
-        for (let key of Object.keys(stats)) {
-          let stat = stats[key];
-          if (stat.coordinates) {
-            let longitude = stat.coordinates.lng;
+      if (Object.entries(emitts)[0][1]["network_id"] != undefined) {
+        for (let key of Object.keys(emitts)) {
+          let emit = emitts[key];
+          if (emit.coordinates) {
+            let longitude = emit.coordinates.lng;
             if (longitude < -180) {
-              stat.coordinates.lng = longitude + 360;
+              emit.coordinates.lng = longitude + 360;
             }
-            if (dic["" + stat.network_id]) {
-              dic["" + stat.network_id][stat.track_id] = stat;
+            if (dic["" + emit.network_id]) {
+              dic["" + emit.network_id][emit.track_id] = emit;
             }
             else {
-              dic["" + stat.network_id] = {};
-              dic["" + stat.network_id][stat.track_id] = stat;
+              dic["" + emit.network_id] = {};
+              dic["" + emit.network_id][emit.track_id] = emit;
+            }
+
+            if (this.state.total_duration === 0) {
+              total_duration = emit.total_duration;
+            } else {
+              total_duration = this.state.total_duration;
+            }
+
+            if (progress == 0) {
+              progress = emit.progress;
             }
           }
         }
-        this.setState({ emittors: dic });
+        this.setState({ emittors: dic, progress: progress, total_duration: total_duration });
       }
 
     }
@@ -210,6 +223,10 @@ class App extends Component {
     return "none";
   }
 
+  /**
+   * Gets the display color of the given network in the rendered list
+   * @param {*} network 
+   */
   getBorderColor(network) {
     let colors = colormap({ // a colormap to set a different color for each network
       colormap: 'jet',
@@ -251,7 +268,9 @@ class App extends Component {
       showAll: false, // the state of the checkbuttons of the map (combined with networksToggled)
       hideAll: false,
       hideVal: false,
-      showVal: false
+      showVal: false,
+      total_duration: 0,
+      progress: 0
     });
   }
 
@@ -367,7 +386,7 @@ class App extends Component {
         </div>
 
         {/* Handles the HTTP requests and their responses from the backend */}
-        <PostHandler getStations={this.getStations} reset={this.reset} getEmittorsPositions={this.getEmittorsPositions} />
+        <PostHandler getStations={this.getStations} reset={this.reset} getEmittorsPositions={this.getEmittorsPositions} total_duration={this.state.total_duration} progress={this.state.progress} />
 
       </div >
     );

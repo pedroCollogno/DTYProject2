@@ -164,6 +164,7 @@ class HttpRequestHandler extends Component {
     }
 
     render() {
+        console.log(this.props)
         return (
             <div>
                 <form onSubmit={this.onFormSubmit}>
@@ -233,7 +234,7 @@ class HttpRequestHandler extends Component {
                             <FontAwesomeIcon icon='pause' />
                         </span>
                     </a>
-                    <progress class="progress is-medium is-blue item" id="progressbar" value="45" max="100"></progress>
+                    <progress class="progress is-medium is-blue item" id="progressbar" value={this.props.progress} max={this.props.total_duration}></progress>
                 </section>
                 {/* "Start simulation" button, active if the posting of the files went ok */}
                 <div className="tile">

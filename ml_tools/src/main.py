@@ -38,6 +38,8 @@ class EWHandler:
         """
         self.running = False
         self.paused = False
+        self.total_duration = 0
+        self.progress = 0
 
     def stop(self):
         """
@@ -74,23 +76,23 @@ class EWHandler:
                 "No sender function, cannot interact with backend.")
 
         all_tracks_data = {}
-        n = len(args[0])
+        self.total_duration = len(args[0])
 
         j = cycles_per_batch
         k = 1
         if is_deep:
             k = n-1
             j = 1
-        i = k
-        while i < n and self.running:
+        self.progress = k
+        while self.progress < self.total_duration and self.running:
             while self.paused:
                 time.sleep(0.5)
 
             track_streams = []
             for arg in args:
-                track_streams.append(arg[:i])
+                track_streams.append(arg[:self.progress])
             logger.info(
-                "\nMerging info from all stations... Reading %s sensor cycles... Last cycle is cycle n.%s" % (len(track_streams[0]), i))
+                "\nMerging info from all stations... Reading %s sensor cycles... Last cycle is cycle n.%s" % (len(track_streams[0]), self.progress))
             prev_tracks_data = copy.deepcopy(all_tracks_data)
 
             global_track_streams, all_tracks_data = fuse_all_station_tracks(
@@ -98,7 +100,7 @@ class EWHandler:
             logger.debug("Merge done !")
             self.make_emittor_clusters(global_track_streams,
                                        all_tracks_data, prev_tracks_data, debug=debug, sender_function=sender_function, is_deep=is_deep)
-            i += j
+            self.progress += j
             time.sleep(0.5)
 
     def make_emittor_clusters(self, global_track_streams, all_tracks_data, prev_tracks_data, debug=False, sender_function=None, is_deep=False):
@@ -158,6 +160,8 @@ class EWHandler:
                     track_id = get_track_id(raw_tracks[i])
                 # Need to convert np.int64 to int for JSON format
                 all_tracks_data[track_id]['network_id'] = int(label)
+                all_tracks_data[track_id]['total_duration'] = self.total_duration
+                all_tracks_data[track_id]['progress'] = self.progress
                 i += 1
             logger.info("Found %s networks on the field.\n" % n_cluster)
             logger.info("Sending emittors through socket")
