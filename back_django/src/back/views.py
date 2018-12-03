@@ -67,12 +67,14 @@ def start_simulation(request):
     send_emittor_to_front({'json': 'containing data'})
     Group('users').send({
         'text': json.dumps({
-            'newelement': 'coucou'
+            'simulation': 'start using DB_SCAN, corrected by Deep Learning for clustering'
         })
     })
 
     track_streams = manager.get_track_streams()
 
+    manager.set_deep(False)
+    manager.set_mix(True)
     manager.get_thread().set_track_streams(*track_streams)
     manager.get_thread().set_sender_function(send_emittor_to_front)
     manager.get_thread().start()
@@ -93,6 +95,7 @@ def start_simulation_ml(request):
     track_streams = manager.get_track_streams()
 
     manager.set_deep(False)
+    manager.set_mix(False)
     manager.get_thread().set_track_streams(*track_streams)
     manager.get_thread().set_sender_function(send_emittor_to_front)
     manager.get_thread().start()
@@ -113,6 +116,7 @@ def start_simulation_dl(request):
     track_streams = manager.get_track_streams()
 
     manager.set_deep(True)
+    manager.set_mix(False)
     manager.get_thread().set_track_streams(*track_streams)
     manager.get_thread().set_sender_function(send_emittor_to_front)
     manager.get_thread().start()

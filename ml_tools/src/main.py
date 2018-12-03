@@ -8,8 +8,9 @@ from .utils.station_utils import *
 from .utils.track_utils import *
 from .utils.config import config
 from .clustering.dbscan import *
-from .deep_learning.processDL import process_data
+from .deep_learning.processDL import process_data, create_clusters
 from .deep_learning.model import test, train2
+from .deep_learning.model_clusters import ModelHandler
 
 import json
 import copy
@@ -41,6 +42,7 @@ class EWHandler:
         self.paused = False
         self.total_duration = 0
         self.progress = 0
+        self.model_handler = None
 
     def stop(self):
         """
@@ -83,9 +85,13 @@ class EWHandler:
 
         j = cycles_per_batch
         k = 1
-        if use_deep:
+        if use_deep and not mix:
             k = self.total_duration-1
             j = 1
+        elif mix:
+            j = 100
+            self.model_handler = ModelHandler()
+
         self.progress = k
         while self.progress < self.total_duration and self.running:
             while self.paused:
@@ -100,7 +106,9 @@ class EWHandler:
 
             global_track_streams, all_tracks_data = fuse_all_station_tracks(
                 *track_streams)
+
             logger.debug("Merge done !")
+
             self.make_emittor_clusters(global_track_streams,
                                        all_tracks_data, prev_tracks_data, debug=debug, sender_function=sender_function, use_deep=use_deep, mix=mix)
             self.progress += j
@@ -140,12 +148,25 @@ class EWHandler:
                     len(all_tracks_data.keys()))
 
         if len(raw_tracks) > 1 and self.running:
-            if use_deep:
+            if use_deep and not mix:
                 file_name = str(time.time())
                 process_data(global_track_streams, file_name)
                 test(file_name)
                 y_pred, ids = train2(file_name)
                 n_cluster = len(set(y_pred))
+            elif mix:
+                y_pred, ids, n_cluster = get_dbscan_prediction(
+                    raw_tracks, all_tracks_data)
+                clusters, ei = create_clusters(
+                    global_track_streams, y_pred=y_pred, ids=ids)
+
+                for cluster_id in clusters:
+                    for emittor_id in ei:
+                        emittor_in_cluster = self.model_handler.are_in_same_cluster(
+                            emittor_id, cluster_id, ei, clusters)
+                        logger.info("Emittor %s is in cluster %s : %s" % (
+                            emittor_id, cluster_id, emittor_in_cluster))
+
             else:
                 y_pred, ids, n_cluster = get_dbscan_prediction(
                     raw_tracks, all_tracks_data)

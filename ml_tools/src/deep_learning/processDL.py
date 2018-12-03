@@ -78,15 +78,13 @@ def get_track_info_with_alternates(track):
 def predict_all_ids(track_streams):
     """ Uses DBSCAN to label all the networks
 
-    :param station_1_track_stream: track stream for first station
+    :param track_streams: track stream for stations
     :return: a list of all the predictions and all the ids
     """
     raw_tracks = []
-    stations_data = []
     for track_stream in track_streams:
         raw_tracks = get_track_list_info(track_stream, raw_tracks)
     y_pred, ids = get_dbscan_prediction_min(raw_tracks)
-    stations_data.append([y_pred, ids])
     return [y_pred, ids]
 
 
@@ -234,19 +232,15 @@ def process_data(track_streams, file_name):
     pbar2.finish()
 
 
-def create_clusters():
-    """
-    Creates an object indexed by cluster id from the object indexed by emittor_id. Lets the user choose the PRP to process
+def create_clusters(track_streams, y_pred=None, ids=None):
+    """ Creates an object indexed by cluster id from the object indexed by emittor_id. Lets the user choose the PRP to process
 
+    :param track_streams: the track streams to build into clusters
     :return: Object indexed by cluster_id containing list of emittor_id and object indexed by emittor_id containing steps
-
     """
-    root = tk.Tk()
-    root.withdraw()
-    file_path = filedialog.askopenfilename()
-    root.update()
-    track_streams = get_track_streams_from_prp(file_path)
-    ei = process_data_clusters(track_streams, file_path)
+
+
+    ei = process_data_clusters(track_streams, preds=[y_pred, ids])
 
     i = 0
     for k in ei:
@@ -274,22 +268,25 @@ def input_confirmation():
         return False
 
 
-def process_data_clusters(track_streams, file_name):
-    """ Process the data from the prp file into a dataframe that can be used in the deep learning models.
+def process_data_clusters(track_streams, preds=None):
+    """ Creates a dictionnary of emittors containing their network and the list of sampled emissions
 
     :param track_streams: track stream to process
-    :param file_name: file name of the pkl file in /pkl where data will be saved
+    :return: dictionnary of emittors containing their network and the list of sampled emissions
     """
-    preds = predict_all_ids(track_streams)
+    if preds is None:
+        preds = predict_all_ids(track_streams)
+
     test_ids = set(preds[1])
-    #print("Number of emitters :", len(test_ids), len(preds[1]))
+    
+    logger.debug("Number of emitters :", len(test_ids), len(preds[1]))
 
     temporal_data = get_start_and_end(track_streams)
     start_date_ms = temporal_data[0]
     sequence_size = temporal_data[2]
 
     emitter_infos = {}
-    logger.info('Getting the steps from all the tracks')
+    logger.info('Getting the steps from all the tracks.')
     progress = 0
     pbar = ProgressBar(maxval=(len(preds[0])))
     pbar.start()
@@ -341,8 +338,8 @@ def create_emittor_comparison_with_cluster(real_clusters, ei):
 
 
 def create_cheat_comparison_with_cluster(real_clusters, ei):
-    """
-    Uses the clusters from simulator data to build comparison between emittor and clusters for every possible tuple
+    """ Uses the clusters from simulator data to build comparison between emittor and clusters for every possible tuple
+
     :param real_clusters: The clusters containing the emittor ids
     :param ei: The emittor infos, the vluster it belongs to and the steps of emissions
     :return: List of emissions of emittor and cluster and if the emittor belongs to the cluster
@@ -355,6 +352,7 @@ def create_cheat_comparison_with_cluster(real_clusters, ei):
             step_nb = len(ei[emittor]['steps']) - \
                 (len(ei[emittor]['steps']) % 50)
             print(step_nb)
+
             for cluster_secondary in real_clusters:
                 cluster_secondary_cumulated = [0 for k in range(step_nb)]
                 label = True
@@ -362,9 +360,11 @@ def create_cheat_comparison_with_cluster(real_clusters, ei):
                     if emittor != emittor_secondary:
                         cluster_secondary_cumulated = [int(
                             cluster_secondary_cumulated[k] or ei[emittor_secondary]['steps'][k]) for k in range(step_nb)]
+
                         for k in range(step_nb):
                             if ei[emittor]['steps'][k]+ei[emittor_secondary]['steps'][k] == 2:
                                 label = False
+
                 if not (len(real_clusters[cluster]) == 1 and cluster_secondary == cluster):
                     for sequence_iterator in range(step_nb//50):
                         real_data.append([ei[emittor]['steps'][sequence_iterator*50:(sequence_iterator+1)*50],
@@ -434,8 +434,9 @@ if __name__ == '__main__':
     root.withdraw()
     file_path = filedialog.askopenfilename()
     root.update()
+    track_streams = get_track_streams_from_prp(file_path)
 
-    create_clusters()
+    create_clusters(track_streams)
 
     # checkPkl(sys.argv[1])
     main(file_path, args.name)
