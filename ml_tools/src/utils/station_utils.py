@@ -178,7 +178,8 @@ def initiate_emittors_positions(*args):
 
     track_streams = []
     for arg in args:
-        track_streams.append(arg)
+        track_stream = [t for t in arg[0::5]]
+        track_streams.append(track_stream)
 
     global_track_streams, all_tracks_data = fuse_all_station_tracks(
         *track_streams)
