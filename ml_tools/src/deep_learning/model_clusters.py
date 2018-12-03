@@ -149,10 +149,10 @@ def one_prediction(predictions, step_nb, threshold):
     total_prediction = 0
     for i in range(number_sequences):
         total_prediction += (1/predictions[i])
-    if total_prediction > threshold:
+    """if total_prediction > threshold:
         total_prediction = False
     else:
-        total_prediction = True
+        total_prediction = True"""
     return(total_prediction)
 
 

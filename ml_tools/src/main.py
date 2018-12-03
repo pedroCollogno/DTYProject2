@@ -160,12 +160,18 @@ class EWHandler:
                 clusters, ei = create_clusters(
                     global_track_streams, y_pred=y_pred, ids=ids)
 
-                for cluster_id in clusters:
-                    for emittor_id in ei:
+                for emittor_id in ei:
+                    possible_scores = {}
+                    for cluster_id in clusters:
                         emittor_in_cluster = self.model_handler.are_in_same_cluster(
                             emittor_id, cluster_id, ei, clusters)
-                        logger.info("Emittor %s is in cluster %s : %s" % (
-                            emittor_id, cluster_id, emittor_in_cluster))
+                        possible_scores[cluster_id] = emittor_in_cluster
+
+                    min_score_cluster = min(
+                        possible_scores, key=possible_scores.get)
+                    all_tracks_data[emittor_id]['possible_network'] = min_score_cluster
+                    logger.warning("Emittor %s is pretty close to cluster %s !" % (
+                        emittor_id, min_score_cluster))
 
             else:
                 y_pred, ids, n_cluster = get_dbscan_prediction(
