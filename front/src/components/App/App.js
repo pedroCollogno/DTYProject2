@@ -72,7 +72,9 @@ class App extends Component {
       connection: "offline", // selcects the style of the map (to be fetched from the Web or locally)
       networksToggled: {}, // the networks toggled : used to highlight them in the list and display them on the map
       showAll: false, // the state of the checkbuttons of the map (combined with networksToggled)
-      hideAll: false
+      hideAll: false,
+      hideVal: false,
+      showVal: false
     };
     // functions that are allowed to update the state of the component
     this.newEmittors = this.newEmittors.bind(this);
@@ -82,6 +84,8 @@ class App extends Component {
     this.switchAll = this.switchAll.bind(this);
     this.getEmittorsPositions = this.getEmittorsPositions.bind(this);
     this.reset = this.reset.bind(this);
+    this.changeShowVal = this.changeShowVal.bind(this);
+    this.changeHideVal = this.changeHideVal.bind(this);
 
   }
 
@@ -245,8 +249,18 @@ class App extends Component {
       connection: "offline", // selcects the style of the map (to be fetched from the Web or locally)
       networksToggled: {}, // the networks toggled : used to highlight them in the list and display them on the map
       showAll: false, // the state of the checkbuttons of the map (combined with networksToggled)
-      hideAll: false
+      hideAll: false,
+      hideVal: false,
+      showVal: false
     });
+  }
+
+  changeShowVal() {
+    this.setState({ showVal: !this.state.showVal });
+  }
+
+  changeHideVal() {
+    this.setState({ hideVal: !this.state.hideVal });
   }
 
   render() {
@@ -278,7 +292,8 @@ class App extends Component {
           {/* Handles the displays on a canvas */}
           <MapBox emittors={this.state.emittors} recStations={this.state.stations} connection={this.state.connection}
             toggleNetwork={this.toggleNetwork} switchAll={this.switchAll}
-            hideAll={this.state.hideAll} showAll={this.state.showAll} networksToggled={this.state.networksToggled} />
+            hideAll={this.state.hideAll} showAll={this.state.showAll} networksToggled={this.state.networksToggled}
+            changeHideVal={this.changeHideVal} changeShowVal={this.changeShowVal} hideVal={this.state.hideVal} showVal={this.state.showVal} />
           {
             <div className="test" id="tabletile">
               <table className='table is-hoverable'>
