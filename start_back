@@ -1,9 +1,10 @@
 #!/bin/bash
 
-cd /Users/pierre/Documents/DTY/thales/
+cd /home/arthur/Documents/thales-project/
 
 cd back_django
 cd ../ml_tools
-python3 setup.py install > /dev/null
+source activate py36
+python setup.py install > /dev/null
 cd ../back_django
-python3 src/manage.py runserver
+python src/manage.py runserver

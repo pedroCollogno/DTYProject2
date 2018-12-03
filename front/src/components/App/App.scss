@@ -40,6 +40,10 @@ body {
   align-items: baseline;
 }
 
+.switch-container {
+  display: flex;
+}
+
 .switch-container, .switch {
   user-select: none;
   -moz-user-select: none;
