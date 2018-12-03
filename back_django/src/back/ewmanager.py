@@ -11,6 +11,8 @@ class EWManager:
         self.paths = []
         self.thread = DataProcessThread(debug=False)
         self.track_streams = []
+        self.use_deep = False
+        self.mix = False
 
     def add_path(self, path):
         """ Adds a path to the paths attribute
@@ -42,7 +44,8 @@ class EWManager:
         """ 
         Used to reset the current manager's thread. Called after a simulation is stopped.
         """
-        self.thread = DataProcessThread(debug=False)
+        self.thread = DataProcessThread(
+            debug=False, use_deep=self.use_deep, mix=self.mix)
 
     def add_track_stream(self, track_stream):
         """ Adds a track_stream to the track_streams attribute
@@ -62,3 +65,19 @@ class EWManager:
         :returns: a python list of track_streams
         """
         return self.track_streams
+
+    def set_deep(self, deep):
+        """ Changes the value of the use_deep attribute
+
+        :param deep: A boolean, True if simulation should use deep learning, False if not
+        """
+        self.use_deep = deep
+        self.thread.set_deep(deep)
+
+    def set_mix(self, mix):
+        """ Changes the value of the mix attribute
+
+        :param mix: A boolean, True if simulation should mix the use deep learning and db_scan clustering, False if not
+        """
+        self.mix = mix
+        self.thread.set_mix(mix)

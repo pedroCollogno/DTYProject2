@@ -8,9 +8,9 @@ import Dashboard from '../Modal/Dashboard'
 
 // Set fontAwesome icons up -> Define all icons that will be used in the app.
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faUpload, faDownload, faUndo } from '@fortawesome/free-solid-svg-icons'
+import { faUpload, faDownload, faUndo, faPlay, faPause } from '@fortawesome/free-solid-svg-icons'
 
-library.add(faUpload, faDownload, faUndo)
+library.add(faUpload, faDownload, faUndo, faPlay, faPause)
 // Setup complete
 
 function deg_to_dms(deg) {
@@ -73,7 +73,11 @@ class App extends Component {
       connection: "offline", // selcects the style of the map (to be fetched from the Web or locally)
       networksToggled: {}, // the networks toggled : used to highlight them in the list and display them on the map
       showAll: false, // the state of the checkbuttons of the map (combined with networksToggled)
-      hideAll: false
+      hideAll: false,
+      hideVal: false,
+      showVal: false,
+      total_duration: 0,
+      progress: 0
     };
     // functions that are allowed to update the state of the component
     this.newEmittors = this.newEmittors.bind(this);
@@ -83,7 +87,8 @@ class App extends Component {
     this.switchAll = this.switchAll.bind(this);
     this.getEmittorsPositions = this.getEmittorsPositions.bind(this);
     this.reset = this.reset.bind(this);
-
+    this.changeShowVal = this.changeShowVal.bind(this);
+    this.changeHideVal = this.changeHideVal.bind(this);
   }
 
 
@@ -133,29 +138,41 @@ class App extends Component {
    */
   newEmittors(emittors) {
     if (emittors) {
-      let stats = JSON.parse(emittors);
+      let emitts = JSON.parse(emittors);
       let dic = JSON.parse(JSON.stringify(this.state.emittors));
+      let total_duration = 0;
+      let progress = 0;
       if (dic["-1000"] != undefined) {
         delete dic["-1000"];
       }
-      if (Object.entries(stats)[0][1]["network_id"] != undefined) {
-        for (let key of Object.keys(stats)) {
-          let stat = stats[key];
-          if (stat.coordinates) {
-            let longitude = stat.coordinates.lng;
+      if (Object.entries(emitts)[0][1]["network_id"] != undefined) {
+        for (let key of Object.keys(emitts)) {
+          let emit = emitts[key];
+          if (emit.coordinates) {
+            let longitude = emit.coordinates.lng;
             if (longitude < -180) {
-              stat.coordinates.lng = longitude + 360;
+              emit.coordinates.lng = longitude + 360;
             }
-            if (dic["" + stat.network_id]) {
-              dic["" + stat.network_id][stat.track_id] = stat;
+            if (dic["" + emit.network_id]) {
+              dic["" + emit.network_id][emit.track_id] = emit;
             }
             else {
-              dic["" + stat.network_id] = {};
-              dic["" + stat.network_id][stat.track_id] = stat;
+              dic["" + emit.network_id] = {};
+              dic["" + emit.network_id][emit.track_id] = emit;
+            }
+
+            if (this.state.total_duration === 0) {
+              total_duration = emit.total_duration;
+            } else {
+              total_duration = this.state.total_duration;
+            }
+
+            if (progress == 0) {
+              progress = emit.progress;
             }
           }
         }
-        this.setState({ emittors: dic });
+        this.setState({ emittors: dic, progress: progress, total_duration: total_duration });
       }
 
     }
@@ -207,6 +224,10 @@ class App extends Component {
     return "none";
   }
 
+  /**
+   * Gets the display color of the given network in the rendered list
+   * @param {*} network 
+   */
   getBorderColor(network) {
     let colors = colormap({ // a colormap to set a different color for each network
       colormap: 'jet',
@@ -246,8 +267,20 @@ class App extends Component {
       connection: "offline", // selcects the style of the map (to be fetched from the Web or locally)
       networksToggled: {}, // the networks toggled : used to highlight them in the list and display them on the map
       showAll: false, // the state of the checkbuttons of the map (combined with networksToggled)
-      hideAll: false
+      hideAll: false,
+      hideVal: false,
+      showVal: false,
+      total_duration: 0,
+      progress: 0
     });
+  }
+
+  changeShowVal() {
+    this.setState({ showVal: !this.state.showVal });
+  }
+
+  changeHideVal() {
+    this.setState({ hideVal: !this.state.hideVal });
   }
 
   render() {
@@ -281,7 +314,8 @@ class App extends Component {
           {/* Handles the displays on a canvas */}
           <MapBox emittors={this.state.emittors} recStations={this.state.stations} connection={this.state.connection}
             toggleNetwork={this.toggleNetwork} switchAll={this.switchAll}
-            hideAll={this.state.hideAll} showAll={this.state.showAll} networksToggled={this.state.networksToggled} />
+            hideAll={this.state.hideAll} showAll={this.state.showAll} networksToggled={this.state.networksToggled}
+            changeHideVal={this.changeHideVal} changeShowVal={this.changeShowVal} hideVal={this.state.hideVal} showVal={this.state.showVal} />
           {
             <div className="test" id="tabletile">
               <table className='table is-hoverable'>
@@ -355,7 +389,7 @@ class App extends Component {
         </div>
 
         {/* Handles the HTTP requests and their responses from the backend */}
-        <PostHandler getStations={this.getStations} reset={this.reset} getEmittorsPositions={this.getEmittorsPositions} />
+        <PostHandler getStations={this.getStations} reset={this.reset} getEmittorsPositions={this.getEmittorsPositions} total_duration={this.state.total_duration} progress={this.state.progress} />
 
       </div >
     );

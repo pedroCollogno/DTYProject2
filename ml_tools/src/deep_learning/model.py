@@ -1,7 +1,8 @@
 from keras.models import Sequential, load_model
 from keras.layers import LSTM, Dense, Dropout, Embedding
 from keras.callbacks import TensorBoard, Callback, EarlyStopping
-from keras.optimizers import Adam
+from keras.optimizers import Adam, RMSprop, Adadelta
+from keras.layers import Bidirectional
 
 import sklearn.metrics as skmetrics
 from sklearn.cluster import DBSCAN
@@ -109,6 +110,7 @@ def train():
     model = Sequential()
     model.add(LSTM(units=128, input_shape=(None, 2)))
     #model.add(LSTM(units = 128, input_shape=(None , 2)))
+    #model.add(Dense(2, activation='relu'))
     model.add(Dense(1, activation="sigmoid"))
 
     callback_dir = os.path.join(LOG_DIR, time())
@@ -118,12 +120,12 @@ def train():
     model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=[
                   'accuracy', auc_roc, f1_score_threshold(), precision_threshold(), recall_threshold()])
 
-    model.summary()
+    # model.summary()
 
     model.fit(
         X,
         Y,
-        batch_size=16,
+        batch_size=50,
         epochs=100,
         validation_split=0.2,
         callbacks=my_callbacks,
@@ -166,6 +168,7 @@ def test(file_name):
 
     model = Sequential()
     model.add(LSTM(units=128, input_shape=(None, 2)))
+    #model.add(Dense(2, activation='relu'))
     model.add(Dense(1, activation="sigmoid"))
     model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=[
                   'accuracy', f1_score_threshold(), precision_threshold(), recall_threshold()])
@@ -245,6 +248,7 @@ def train2(file_name):
     # Optional : Balances the 0 and 1
 
     nb_ones = np.count_nonzero(Y == 1)
+    print(np.where(Y == 0)[0])
     zeros_index = np.where(Y == 0)[0]
     df = df.drop(df.index[zeros_index[nb_ones:]])
 

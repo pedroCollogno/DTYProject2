@@ -46,3 +46,16 @@ article.tile {
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;   
 }
+
+.control-section {
+    display: flex;
+    align-items: center;
+    margin-left: 1em;
+    margin-right: 1em;
+    a, progress{
+        margin: 2px;
+    }
+    background-color: darken($grey, 50);
+    border-radius: 5px;
+
+}

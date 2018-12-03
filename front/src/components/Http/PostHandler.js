@@ -78,7 +78,7 @@ class HttpRequestHandler extends Component {
      */
     onStartML(e) {
         axios.get("http://localhost:8000/startsimulationML")
-            .then((res) => console.log("Simulation started !"));
+            .then((res) => console.log("Simulation started using only DB_SCAN for clustering !"));
     }
 
     /**
@@ -87,7 +87,7 @@ class HttpRequestHandler extends Component {
      */
     onStartDL(e) {
         axios.get("http://localhost:8000/startsimulationDL")
-            .then((res) => console.log("Simulation started !"));
+            .then((res) => console.log("Simulation started using only Deep Learning for clustering !"));
     }
 
     /**
@@ -146,6 +146,20 @@ class HttpRequestHandler extends Component {
                     inputFiles: []
                 });
                 this.props.reset();
+            });
+    }
+
+    play() {
+        axios.get("http://localhost:8000/playsimulation")
+            .then((res) => {
+                console.log("Simulation restarting after pause !");
+            });
+    }
+
+    pause() {
+        axios.get("http://localhost:8000/pausesimulation")
+            .then((res) => {
+                console.log("Simulation paused !");
             });
     }
 
@@ -208,6 +222,19 @@ class HttpRequestHandler extends Component {
                         </div>
                     </div>
                 </form>
+                <section className="control-section">
+                    <a className="button item" onClick={this.play}>
+                        <span className="icon is-small">
+                            <FontAwesomeIcon icon='play' />
+                        </span>
+                    </a>
+                    <a className="button item" onClick={this.pause}>
+                        <span className="icon is-small">
+                            <FontAwesomeIcon icon='pause' />
+                        </span>
+                    </a>
+                    <progress className="progress is-medium is-blue item" id="progressbar" value={this.props.progress} max={this.props.total_duration}></progress>
+                </section>
                 {/* "Start simulation" button, active if the posting of the files went ok */}
                 <div className="tile">
                     <button className="button" id="start-sim-ml-button" disabled={!this.state.loaded} onClick={this.onStartML}>
@@ -216,8 +243,6 @@ class HttpRequestHandler extends Component {
                         Simulation with Deep Learning only</button>
                     <button className="button" id="start-sim-button" disabled={!this.state.loaded} onClick={this.onStart}>
                         Simulation with both techniques</button>
-                </div>
-                <div className="tile">
                 </div>
             </div>
         )
