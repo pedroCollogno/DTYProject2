@@ -32,7 +32,7 @@ def train_hierarchy():
     model.compile(loss='sparse_categorical_crossentropy', optimizer='rmsprop', metrics=[
                   'accuracy', metrics.f1_score_threshold(), metrics.precision_threshold(), metrics.recall_threshold()])
 
-    data, labels=create_fake_sequences(10000,1000)
+    data, labels=create_fake_sequences(10000,1000,40)
     X=np.array(data)
     Y=np.array(labels)
     print(X.shape)
@@ -62,19 +62,30 @@ def test_hierarchy():
     track_streams = get_track_streams_from_prp(file_path)
     emittor_infos= process_data_clusters(track_streams)
     to_predict=[]
+    total=0
+    dicto={}
     for k in emittor_infos:
         print("emittor %s in cluster %s" %(k, emittor_infos[k]['network']))
-        prediction=model.predict(np.array(([[emittor_infos[k]['steps'][:1000]]])))
+        prediction=model.predict(np.array(([[emittor_infos[k]['steps'][-1000:]]])))
         most_likely=prediction.argmax()
+        try:
+            dicto[emittor_infos[k]['network']].append(most_likely)
+        except Exception:
+            dicto[emittor_infos[k]['network']]=[most_likely]
         print(prediction)
         print(most_likely)
+        if emittor_infos[k]['network']==1:
+            total+=(emittor_infos[k]['steps'][-1000:]).count(1)/1000.0
         if (most_likely==0):
             print("big chef")
+            print((emittor_infos[k]['steps'][-1000:]).count(1)/1000.0)
         elif (most_likely==1):
             print("small chef")
-            print((emittor_infos[k]['steps'][:1000]).count(1)/1000.0)
+            print((emittor_infos[k]['steps'][-1000:]).count(1)/1000.0)
         else:
             print("shit unit")
-            print((emittor_infos[k]['steps'][:1000]).count(1)/1000.0)
+            print((emittor_infos[k]['steps'][-1000:]).count(1)/1000.0)
+    print(total)
+    print(dicto)
 #print(test_hierarchy())
 print(test_hierarchy()) 

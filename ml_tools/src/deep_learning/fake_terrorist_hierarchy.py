@@ -1,16 +1,15 @@
 import random
 import numpy as np
-def fake_terrorist_network( n_emittors_per_cluster, full_sequence_size):
-    silence_time=20
+def fake_terrorist_network( n_emittors_per_cluster, full_sequence_size, silence_time):
     big_chef=random.randint(0,1)
     small_chefs=random.randint(0,3)
     shit_units=n_emittors_per_cluster-big_chef-small_chefs
     if big_chef==1:
-        talk_big_chef=random.randint(30,60)
+        talk_big_chef=random.randint(20,60)
         if talk_big_chef>50:
-            talk_small_chef=random.randint(15,30)
+            talk_small_chef=random.randint(15,20)
         else:
-            talk_small_chef=random.randint(20,40)
+            talk_small_chef=random.randint(20,25)
         talk_shit_units=100-talk_big_chef-talk_small_chef
     
     else:
@@ -33,11 +32,11 @@ def fake_terrorist_network( n_emittors_per_cluster, full_sequence_size):
         talk_ditribution.append(talking)
     return(mat_of_network,talk_ditribution)
 
-def create_fake_sequences(n_clusters, full_sequence_size):
+def create_fake_sequences(n_clusters, full_sequence_size, silence_time):
     list_of_data=[]
     list_of_labels=[]
     for k in range(n_clusters):
-        network,talk_distribution=fake_terrorist_network(10,full_sequence_size)
+        network,talk_distribution=fake_terrorist_network(10,full_sequence_size, silence_time)
         for emittor in network[1:]:
             emittor_emission=[int(i==emittor) for i in talk_distribution]
             list_of_data.append([emittor_emission])
