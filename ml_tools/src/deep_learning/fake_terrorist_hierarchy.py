@@ -1,6 +1,12 @@
 import random
 import numpy as np
 def fake_terrorist_network( n_emittors_per_cluster, full_sequence_size, silence_time):
+    """Creates a network cluster of enemy emittors and their emissions
+    :param n_emittors_per_cluster: Number of emittors in the network to be created
+    :param full_sequence_size: The size of the talking sequence for this network
+    :param silence_time: The time percentage during which the network remains silent
+    :return: The network structure and the speaking times
+    """
     big_chef=random.randint(0,1)
     small_chefs=random.randint(0,3)
     shit_units=n_emittors_per_cluster-big_chef-small_chefs
@@ -33,6 +39,12 @@ def fake_terrorist_network( n_emittors_per_cluster, full_sequence_size, silence_
     return(mat_of_network,talk_ditribution)
 
 def create_fake_sequences(n_clusters, full_sequence_size, silence_time):
+    """Creates several enemy networks and labels the emissions in the hierarchy
+    :param n_clusters: The amount of clusters to be created
+    :param full_sequence_size: The duration of a network speaking sequence
+    :param silence_time: The time percentage during which a network remains silent
+    :return: A list of emissions and their importance in the hierarchy
+    """
     list_of_data=[]
     list_of_labels=[]
     for k in range(n_clusters):

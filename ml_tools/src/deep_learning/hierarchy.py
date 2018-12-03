@@ -23,6 +23,8 @@ WEIGHTS_DIR=config['PATH']['weights']
 
 
 def train_hierarchy():
+    """ Trains and saves the weights of the model on generated data
+    """
     model=Sequential()
     model.add(LSTM(units=128, input_shape=(1, 1000)))
     model.add(Dropout(0.5))
@@ -49,6 +51,9 @@ def train_hierarchy():
     model.save_weights(WEIGHTS_DIR+'/my_hierarchy.h5')
 
 def test_hierarchy():
+    """
+    Tests the model on a PRP file
+    """
     model=Sequential()
     model.add(LSTM(units=128, input_shape=(1, 1000)))
     model.add(Dense(3, activation="softmax"))
