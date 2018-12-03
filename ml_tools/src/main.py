@@ -37,12 +37,19 @@ class EWHandler:
         Initiate the EWHandler object
         """
         self.running = False
+        self.paused = False
 
     def stop(self):
         """
         Stops the current instance of this object, ie. stops sending emittors and clustering them.
         """
         self.running = False
+
+    def pause(self):
+        """
+        Pauses the current instance of this object, ie. stops sending emittors and clustering them.
+        """
+        self.paused = True
 
     def main(self, *args, debug=False, sender_function=None, is_deep=False):
         """Main function.
@@ -53,6 +60,7 @@ class EWHandler:
         :param is_deep: boolean to know if clustering should be done using deep learning or not (using DBScan clustering)
         """
         self.running = True
+        self.paused = False
         if debug:
             logger.handlers[1].setLevel(logging.DEBUG)
         if sender_function is None:

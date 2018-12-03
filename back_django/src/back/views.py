@@ -84,6 +84,7 @@ def stop_simulation(request):
     res = manager.get_thread().stop_thread()
     manager.clear_paths()
     manager.reset_thread()
+    manager.clear_track_streams()
     if res:
         return (HttpResponse('Stopped thread !', status=200))
     return (HttpResponse('Could not stop...', status=500))
