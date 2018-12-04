@@ -11,7 +11,7 @@ class PotentialLines extends Component {
                 key={"potential_lines" + this.props.network}
                 paint={{
                     "line-color": "grey",
-                    "line-dasharray": [10, 5]
+                    "line-dasharray": [5, 5]
                 }}>
                 {
                     this.props.links.map((link, keyy) =>

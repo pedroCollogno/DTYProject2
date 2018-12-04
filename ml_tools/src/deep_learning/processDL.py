@@ -239,7 +239,6 @@ def create_clusters(track_streams, y_pred=None, ids=None):
     :return: Object indexed by cluster_id containing list of emittor_id and object indexed by emittor_id containing steps
     """
 
-
     ei = process_data_clusters(track_streams, preds=[y_pred, ids])
 
     i = 0
@@ -247,10 +246,11 @@ def create_clusters(track_streams, y_pred=None, ids=None):
         if ei[k]['network'] >= i:
             i = ei[k]['network']
     clusters = {}
-    for k in range(i+1):
-        clusters[k] = []
     for k in ei:
+        if ei[k]['network'] not in clusters.keys():
+            clusters[ei[k]['network']] = []
         clusters[ei[k]['network']].append(k)
+
     return(clusters, ei)
 
 
@@ -278,7 +278,6 @@ def process_data_clusters(track_streams, preds=None):
         preds = predict_all_ids(track_streams)
 
     test_ids = set(preds[1])
-    
     logger.debug("Number of emitters :", len(test_ids), len(preds[1]))
 
     temporal_data = get_start_and_end(track_streams)
@@ -291,10 +290,12 @@ def process_data_clusters(track_streams, preds=None):
     pbar = ProgressBar(maxval=(len(preds[0])))
     pbar.start()
     for i in range(len(preds[0])):
-        emitter_infos[preds[1][i]] = {
-            "network": preds[0][i],
-            "steps": get_steps_track(track_streams, preds[1][i], sequence_size, start_date_ms)
-        }
+        track = get_last_track_by_id(track_streams, preds[1][i])
+        if track[0] != 3:  # Only work with track if it's not a BURST type.
+            emitter_infos[preds[1][i]] = {
+                "network": preds[0][i],
+                "steps": get_steps_track(track_streams, preds[1][i], sequence_size, start_date_ms)
+            }
         progress += 1
         pbar.update(progress)
         pbar.finish()
