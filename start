@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd /Users/pierre/Documents/DTY/thales/
+cd /home/arthur/Documents/thales-project/
 
 open ./start_back 
 open ./start_front

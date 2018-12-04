@@ -1,0 +1,15 @@
+@import '../../sass/mixins/variables';
+
+p {
+    color: black;
+}
+
+.modal {
+  opacity: 1;
+  transition: opacity 300ms ease-in-out
+}
+
+.modal-card {
+    width: 95%;
+}
+  

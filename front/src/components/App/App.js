@@ -4,6 +4,7 @@ import MapBox from "../Map/MapBox";
 import SocketHandler from "../Socket/SocketHandler";
 import PostHandler from "../Http/PostHandler";
 import colormap from "colormap";
+import Dashboard from '../Modal/Dashboard'
 
 // Set fontAwesome icons up -> Define all icons that will be used in the app.
 import { library } from '@fortawesome/fontawesome-svg-core'
@@ -295,6 +296,8 @@ class App extends Component {
               <div className="field switch-container">
                 <input id="switchRoundedOutlinedInfo" type="checkbox" name="switchRoundedOutlinedInfo" className="switch is-rtl is-rounded is-outlined is-info" onChange={this.handleChange} />
                 <label htmlFor="switchRoundedOutlinedInfo"><strong>Switch to {this.getConnection()} map</strong></label>
+                <Dashboard emittors = {this.state.emittors}
+                />
               </div>
             </div>
           </div>
