@@ -167,13 +167,13 @@ class MapBox extends Component {
                         <div className="field">
                             <input className="is-checkradio is-block" type="checkbox" id="show_checkbox" name="show_checkbox" checked={this.props.showVal} onChange={this.props.changeShowVal} onClick={() => this.props.switchAll(true)} />
                             <label htmlFor="show_checkbox">
-                                <span> </span>- Show all
+                                <span> </span>Show all
                             </label>
                         </div>
                         <div className="field">
                             <input className="is-checkradio is-block" type="checkbox" id="hide_checkbox" name="hide_checkbox" checked={this.props.hideVal} onChange={this.props.changeHideVal} onClick={() => this.props.switchAll(false)} />
                             <label htmlFor="hide_checkbox">
-                                <span> </span>- Hide all
+                                <span> </span>Hide all
                             </label>
                         </div>
                     </div>
@@ -243,11 +243,7 @@ class MapBox extends Component {
                                             <Feature coordinates={clusterCenter} onClick={() => this.props.toggleNetwork(network)}
                                                 onMouseEnter={() => this.mouseEnter(network)}
                                                 onMouseLeave={() => this.mouseExit(network)}
-<<<<<<< HEAD
-                                                key={"feature_center" + network}
-=======
                                                 key={"featurecenter" + network}
->>>>>>> a52d4779b46567de269e86248be9c8d50419810d
                                             ></Feature>
                                         </Layer>
                                     }
