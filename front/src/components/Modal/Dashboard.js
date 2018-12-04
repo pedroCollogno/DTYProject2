@@ -18,9 +18,21 @@ class Dashboard extends Component {
     this.getEmittorList = this.getEmittorList.bind(this);
     this.rainbow = this.rainbow.bind(this);
     this.handleChange = this.handleChange.bind(this);
+    this.clickEvent = this.clickEvent.bind(this);
+  }
+
+  clickEvent(c, i) {
+    console.log(c, i)
+    // e = i[0];
+    // console.log(e._index)
+    // var x_value = this.data.labels[e._index];
+    // var y_value = this.data.datasets[0].data[e._index];
+    // console.log(x_value);
+    // console.log(y_value);
   }
 
   toggleModal() {
+    console.log(this.props.emittors[0])
     this.setState((prev, props) => {
       const newState = !prev.modalState;
 
@@ -56,11 +68,24 @@ class Dashboard extends Component {
   }
 
   getEmittorList() {
+    var stats = {
+      networks: {
+        numberEVF: 0,
+        numberFF: 0,
+        numberBurst: 0,
+        numberNetworks: 0
+      },
+      cycle: {
+        progress: 0
+      }
+    }
     var networks = this.props.emittors;
     // The id of each network
     var networksIndex = Object.keys(networks).map((network, i) => (
       i
     ))
+
+    stats.networks.numberNetworks = networksIndex.length
 
     var networksLengths = []
     var networksTypes = []
@@ -72,11 +97,9 @@ class Dashboard extends Component {
     var emitterLat = []
     var emitterLng = []
 
-    var progressDuration = []
-
     Object.keys(networks).forEach(element => {
       // The total duration
-      progressDuration = Object.values(networks[element])[0]['progress']
+      stats.cycle.progress = Object.values(networks[element])[0]['progress']
       // The size of each network
       networksLengths.push(Object.keys(networks[element]).length)
       // The type of emission of each network
@@ -88,7 +111,7 @@ class Dashboard extends Component {
         // The network id of each emittor
         emittersNetworksIds.push(networks[element][i]['network_id']);
         // The duration of each emittor
-        emittersDurations.push(networks[element][i]['duration'] / 10e6);
+        emittersDurations.push(networks[element][i]['duration'] / 1e6);
         // The id of each emittor
         emittersIds.push(networks[element][i]['track_id']);
         // The Latitude of each emittor
@@ -110,6 +133,9 @@ class Dashboard extends Component {
     //   ...
     // }
 
+    console.log('networks', networks)
+
+
     var valuesEVF = []
     var valuesFF = []
     var valuesBurst = []
@@ -118,16 +144,19 @@ class Dashboard extends Component {
         valuesFF.push(networksLengths[i])
         valuesEVF.push(0)
         valuesBurst.push(0)
+        stats.networks.numberFF++
       }
       if (networksTypes[i] == 2) {
         valuesFF.push(0)
         valuesEVF.push(networksLengths[i])
         valuesBurst.push(0)
+        stats.networks.numberEVF++
       }
       if (networksTypes[i] == 3) {
         valuesFF.push(0)
         valuesEVF.push(0)
         valuesBurst.push(networksLengths[i])
+        stats.networks.numberBurst++
       }
     }
 
@@ -156,6 +185,7 @@ class Dashboard extends Component {
           data: valuesBurst,
         }],
       options: {
+        'onClick': this.clickEvent(),
         scales: {
           xAxes: [{
             stacked: true,
@@ -170,45 +200,25 @@ class Dashboard extends Component {
       }
     }
 
-    // var bubbleXYR = []
-    // for (var i = 0; i<networksIndex.length; i++) {
-    //   bubbleXYR.push({
-    //     x: networksIndex[i],
-    //     y: networksFrequenciesMHz[i],
-    //     r: networksLengths[i]
-    //   })
-    // }
-
-    // const bubbleData = { 
-    //     labels : "test",
-    //     datasets: [{
-    //         label: "Networks ammount of emittors",
-    //         backgroundColor: "blue",
-    //         borderColor: "blue",
-    //         data: bubbleXYR,
-    //         }]
-    // }
-
-    // console.log(bubbleXYR)
-
     var dataEmittors = {}
 
     for (var i in emittersNetworksIds) {
       !(emittersNetworksIds[i] in dataEmittors) && (dataEmittors[emittersNetworksIds[i]] = {
-        'pos': [],
+        //'pos': [],
         'ids': [],
         'durations': []
       });
-      dataEmittors[emittersNetworksIds[i]]['pos'].push(
-        {
-          x: emitterLng[i],
-          y: emitterLat[i],
-          r: emittersDurations[i] / (progressDuration * 10e3)
-        }
-      );
+      // dataEmittors[emittersNetworksIds[i]]['pos'].push(
+      //   {
+      //     x: emitterLng[i],
+      //     y: emitterLat[i],
+      //     r: emittersDurations[i] / (progressDuration*10e3)
+      //   }
+      // );
       dataEmittors[emittersNetworksIds[i]]['ids'].push(emittersIds[i]);
       dataEmittors[emittersNetworksIds[i]]['durations'].push(emittersDurations[i])
     }
+
 
     var pieLabels = dataEmittors[this.state.networkSelected] || { 'ids': [] }
     var pieValues = dataEmittors[this.state.networkSelected] || { 'durations': [] }
@@ -218,31 +228,6 @@ class Dashboard extends Component {
       pieColors.push(this.rainbow(pieLabels['ids'].length, i));
     }
 
-    var bubbleValues = dataEmittors[this.state.networkSelected] || { 'pos': [] }
-
-    const bubbleData = {
-      labels: this.state.networkSelected,
-      datasets: [{
-        label: "Networks ammount of emittors",
-        backgroundColor: "blue",
-        borderColor: "blue",
-        data: bubbleValues['pos']
-      }],
-      options: {
-        scales: {
-          xAxes: [{
-            ticks: {
-              stepSize: 0.5
-            }
-          }],
-          yAxes: [{
-            ticks: {
-              stepSize: 0.5
-            }
-          }]
-        }
-      }
-    }
 
     const pieData = {
       labels: pieLabels['ids'],
@@ -252,28 +237,13 @@ class Dashboard extends Component {
         hoverBackgroundColor: pieColors
       }]
     }
-
-    const polarData = {
-      labels: pieLabels['ids'],
-      datasets: [{
-        data: pieValues['durations'],
-        backgroundColor: pieColors,
-        hoverBackgroundColor: pieColors
-      }]
-    }
-
     return (
-      <div class="column">
-        <div class="level">
-          <div class="level-left">
-            <div class="level-item">
-              <div class="dashboard title">Dashboard</div>
-            </div>
-          </div>
-          <div class="level-right">
-            <div class="level-item">
-              <div class="control">
-                <div class="select">
+      <div className="column">
+        <div className="level">
+          <div className="level-right">
+            <div className="level-item">
+              <div className="control">
+                <div className="select">
                   <select value={this.state.networkSelected} onChange={this.handleChange}>
                     {networksIndex.map((i) => {
                       return (<option value={i} key={i}>{i}</option>)
@@ -285,106 +255,106 @@ class Dashboard extends Component {
           </div>
         </div>
 
-        <div class="columns is-multiline">
-          <div class="column">
-            <div class="box">
-              <div class="heading">Number of Networks</div>
-              <div class="dashboard title">{networksIndex.length}</div>
-              <div class="level">
-                <div class="level-item">
-                  <div class="">
-                    <div class="heading">Burst</div>
-                    <div class="dashboard title is-5">250,000</div>
+        <div className="columns is-multiline">
+          <div className="column">
+            <div className="box">
+              <div className="heading">Number of Networks</div>
+              <div className="dashboard title">{stats.networks.numberNetworks}</div>
+              <div className="level">
+                <div className="level-item">
+                  <div className="">
+                    <div className="heading">Burst</div>
+                    <div className="dashboard title is-5">{stats.networks.numberBurst}</div>
                   </div>
                 </div>
-                <div class="level-item">
-                  <div class="">
-                    <div class="heading">FF</div>
-                    <div class="dashboard title is-5">750,000</div>
+                <div className="level-item">
+                  <div className="">
+                    <div className="heading">FF</div>
+                    <div className="dashboard title is-5">{stats.networks.numberFF}</div>
                   </div>
                 </div>
-                <div class="level-item">
-                  <div class="">
-                    <div class="heading">EVF</div>
-                    <div class="dashboard title is-5">25%</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="column">
-            <div class="box">
-              <div class="heading">Revenue / Expenses</div>
-              <div class="dashboard title">55% / 45%</div>
-              <div class="level">
-                <div class="level-item">
-                  <div class="">
-                    <div class="heading">Rev Prod $</div>
-                    <div class="dashboard title is-5">30%</div>
-                  </div>
-                </div>
-                <div class="level-item">
-                  <div class="">
-                    <div class="heading">Rev Serv $</div>
-                    <div class="dashboard title is-5">25%</div>
-                  </div>
-                </div>
-                <div class="level-item">
-                  <div class="">
-                    <div class="heading">Exp %</div>
-                    <div class="dashboard title is-5">45%</div>
+                <div className="level-item">
+                  <div className="">
+                    <div className="heading">EVF</div>
+                    <div className="dashboard title is-5">{stats.networks.numberEVF}</div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          <div class="column">
-            <div class="box">
-              <div class="heading">Feedback Activity</div>
-              <div class="dashboard title">78% &uarr;</div>
-              <div class="level">
-                <div class="level-item">
-                  <div class="">
-                    <div class="heading">Positive</div>
-                    <div class="dashboard title is-5">1560</div>
+          <div className="column">
+            <div className="box">
+              <div className="heading">Cycle</div>
+              <div className="dashboard title">#{stats.cycle.progress}</div>
+              <div className="level">
+                <div className="level-item">
+                  <div className="">
+                    <div className="heading">Rev Prod $</div>
+                    <div className="dashboard title is-5">30%</div>
                   </div>
                 </div>
-                <div class="level-item">
-                  <div class="">
-                    <div class="heading">Negative</div>
-                    <div class="dashboard title is-5">368</div>
+                <div className="level-item">
+                  <div className="">
+                    <div className="heading">Rev Serv $</div>
+                    <div className="dashboard title is-5">25%</div>
                   </div>
                 </div>
-                <div class="level-item">
-                  <div class="">
-                    <div class="heading">Pos/Neg %</div>
-                    <div class="dashboard title is-5">77% / 23%</div>
+                <div className="level-item">
+                  <div className="">
+                    <div className="heading">Exp %</div>
+                    <div className="dashboard title is-5">45%</div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          <div class="column">
-            <div class="box">
-              <div class="heading">Orders / Returns</div>
-              <div class="dashboard title">75% / 25%</div>
-              <div class="level">
-                <div class="level-item">
-                  <div class="">
-                    <div class="heading">Orders $</div>
-                    <div class="dashboard title is-5">425,000</div>
+          <div className="column">
+            <div className="box">
+              <div className="heading">Feedback Activity</div>
+              <div className="dashboard title">78% &uarr;</div>
+              <div className="level">
+                <div className="level-item">
+                  <div className="">
+                    <div className="heading">Positive</div>
+                    <div className="dashboard title is-5">1560</div>
                   </div>
                 </div>
-                <div class="level-item">
-                  <div class="">
-                    <div class="heading">Returns $</div>
-                    <div class="dashboard title is-5">106,250</div>
+                <div className="level-item">
+                  <div className="">
+                    <div className="heading">Negative</div>
+                    <div className="dashboard title is-5">368</div>
                   </div>
                 </div>
-                <div class="level-item">
-                  <div class="">
-                    <div class="heading">Success %</div>
-                    <div class="dashboard title is-5">+ 28,5%</div>
+                <div className="level-item">
+                  <div className="">
+                    <div className="heading">Pos/Neg %</div>
+                    <div className="dashboard title is-5">77% / 23%</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="column">
+            <div className="box">
+              <div className="heading">Orders / Returns</div>
+              <div className="dashboard title">75% / 25%</div>
+              <div className="level">
+                <div className="level-item">
+                  <div className="">
+                    <div className="heading">Orders $</div>
+                    <div className="dashboard title is-5">425,000</div>
+                  </div>
+                </div>
+                <div className="level-item">
+                  <div className="">
+                    <div className="heading">Returns $</div>
+                    <div className="dashboard title is-5">106,250</div>
+                  </div>
+                </div>
+                <div className="level-item">
+                  <div className="">
+                    <div className="heading">Success %</div>
+                    <div className="dashboard title is-5">+ 28,5%</div>
                   </div>
                 </div>
               </div>
@@ -392,34 +362,30 @@ class Dashboard extends Component {
           </div>
         </div>
 
-        <div class="columns is-multiline">
-          <div class="column is-6">
-            <div class="panel">
-              <p class="panel-heading">
+        <div className="columns is-multiline">
+          <div className="column is-6">
+            <div className="panel">
+              <p className="panel-heading">
                 All Networks
-                    </p>
-              <div class="panel-block">
-                < Bar data={barData} />
-
+                      </p>
+              <div className="panel-block">
+                < Bar ref='barchart' data={barData} getElementAtEvent={dataset => this.setState({ networkSelected: dataset[0]._index })} />
               </div>
             </div>
           </div>
-          <div class="column is-6">
-            <div class="panel">
-              <p class="panel-heading">
+          <div className="column is-6">
+            <div className="panel">
+              <p className="panel-heading">
                 Network #{this.state.networkSelected}
               </p>
-              <div class="panel-block">
+              <div className="panel-block">
                 < Doughnut data={pieData} />
               </div>
             </div>
           </div>
         </div>
-
       </div>
-
     )
-
   }
 
   render() {
@@ -438,9 +404,7 @@ class Dashboard extends Component {
           title="Dashboard"
         >
           <p>
-
             {this.getEmittorList()}
-
           </p>
         </Modal>
       </div>
