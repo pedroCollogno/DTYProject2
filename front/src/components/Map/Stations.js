@@ -9,7 +9,7 @@ class Stations extends Component {
         let r = parseInt(color.slice(0, 2), 16);
         let g = parseInt(color.slice(2, 4), 16);
         let b = parseInt(color.slice(4, 6), 16);
-        return ("rgba(" + r + "," + g + "," + b + ",0.5)");
+        return ("rgba(" + r + "," + g + "," + b + ",0.3)");
     }
 
     getColor(station) {
@@ -47,7 +47,8 @@ class Stations extends Component {
                 paint={{
                     "circle-stroke-color": ["get", "color"],
                     "circle-radius": 4,
-                    "circle-stroke-width": 3
+                    "circle-stroke-width": 3,
+                    "circle-color": "rgba(0,0,0,0)"
                 }}>
                 {
                     Object.keys(this.props.stations).map((station_id, k) =>
