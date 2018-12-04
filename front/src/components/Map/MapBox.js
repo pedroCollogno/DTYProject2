@@ -125,13 +125,13 @@ class MapBox extends Component {
         let networkNumber = parseInt(network);
         if (networkNumber < 0) {
             console.log("Unidentified network");
-            return "grey";
+            return "#5c5c5c";
         }
         if (this.state.colors[networkNumber] != undefined) {
             return this.state.colors[networkNumber];
         }
         console.log("Color " + network + " is undefined");
-        return "white";
+        return "#ffffff";
     }
 
     render() {
@@ -153,9 +153,7 @@ class MapBox extends Component {
                     }}
                     onStyleLoad={(map) => {
                         map.addImage("recStation", htmlRecImage);
-                        console.log("OK");
                         map.addImage("networkCenter", htmlCenterImage);
-                        console.log("OK");
                     }}
                 // where the map is centered when rendering /!\ ATTENTION : enlever si trop chiant /!\
                 // center={this.center()}
@@ -206,9 +204,10 @@ class MapBox extends Component {
                             let lines = toggled && (network != "-1000");
                             let potentialLinks = [];
                             Object.keys(emittors).map((track_id, keyy) => {
-                                if (emittors[track_id]["possible_network"] != undefined) {
+                                let potentialNetwork = emittors[track_id]["possible_network"];
+                                if (potentialNetwork != undefined && potentialNetwork != network) {
                                     potentialLinks.push([[emittors[track_id]["coordinates"]["lng"], emittors[track_id]["coordinates"]["lat"]],
-                                    this.clusterCenter(emittors[track_id]["possible_network"])]);
+                                    this.clusterCenter(potentialNetwork)]);
                                 }
                             });
                             let showPotential = (toggled && potentialLinks.length != 0);
