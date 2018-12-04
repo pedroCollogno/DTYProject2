@@ -1,9 +1,5 @@
 @import '../../sass/mixins/variables';
 
-p {
-    color: black;
-}
-
 .modal {
   opacity: 1;
   transition: opacity 300ms ease-in-out
@@ -11,5 +7,9 @@ p {
 
 .modal-card {
     width: 95%;
+}
+
+.dashboard.title{
+    color: black !important;
 }
   
