@@ -43,6 +43,8 @@ class EWHandler:
         self.total_duration = 0
         self.progress = 0
         self.model_handler = None
+        self.current_time = time.time()
+        self.last_duration = 0
 
     def stop(self):
         """
@@ -96,6 +98,7 @@ class EWHandler:
         while self.progress < self.total_duration and self.running:
             while self.paused:
                 time.sleep(0.5)
+            self.current_time = time.time()
 
             track_streams = []
             latest_track_streams = []
@@ -103,7 +106,6 @@ class EWHandler:
                 track_streams.append(arg[:self.progress])
                 begin = max(0, self.progress - j)
                 latest_track_streams.append(arg[begin:self.progress])
-
             logger.info(
                 "\nMerging info from all stations... Reading %s sensor cycles... Last cycle is cycle n.%s" % (len(track_streams[0]), self.progress))
             prev_tracks_data = copy.deepcopy(all_tracks_data)
@@ -113,12 +115,14 @@ class EWHandler:
             _, latest_tracks_data = fuse_all_station_tracks(
                 *latest_track_streams)
 
+            self.last_duration = int((time.time() - self.current_time) * 1000)
+            logger.info("Merge done in %s ms !" % self.last_duration)
+
             for track_id in all_tracks_data.keys():
                 if track_id in latest_tracks_data.keys():
                     all_tracks_data[track_id]['talking'] = True
                     all_tracks_data[track_id]['duration'] = latest_tracks_data[track_id]['duration']
-
-            logger.debug("Merge done !")
+                all_tracks_data[track_id]['read_duration'] = self.last_duration
 
             self.make_emittor_clusters(global_track_streams,
                                        all_tracks_data, prev_tracks_data, debug=debug, sender_function=sender_function, use_deep=use_deep, mix=mix)
@@ -143,6 +147,7 @@ class EWHandler:
         :param mix: boolean to know if clustering should use a complementary mix of DB_Scan and Deep Learning methods
         """
         raw_tracks = []
+        self.current_time = time.time()
 
         if sender_function is None:
             raise ValueError(
@@ -180,10 +185,10 @@ class EWHandler:
 
                     min_score_cluster = min(
                         possible_scores, key=possible_scores.get)
-                    all_tracks_data[emittor_id]['possible_network'] = min_score_cluster
-                    logger.warning("Emittor %s is pretty close to cluster %s !" % (
+                    all_tracks_data[emittor_id]['possible_network'] = int(
+                        min_score_cluster)
+                    logger.warning("Emittor %s seems pretty close to cluster %s !" % (
                         emittor_id, min_score_cluster))
-
             else:
                 y_pred, ids, n_cluster = get_dbscan_prediction(
                     raw_tracks, all_tracks_data)
@@ -196,6 +201,7 @@ class EWHandler:
                 logger.error(err)
                 raise ValueError(err)
 
+            self.last_duration = int((time.time() - self.current_time) * 1000)
             for label in y_pred:
                 if use_deep:
                     track_id = ids[i]
@@ -205,15 +211,12 @@ class EWHandler:
                 all_tracks_data[track_id]['network_id'] = int(label)
                 all_tracks_data[track_id]['total_duration'] = self.total_duration
                 all_tracks_data[track_id]['progress'] = self.progress
+                all_tracks_data[track_id]['cluster_duration'] = self.last_duration
                 i += 1
 
-            logger.info("Found %s networks on the field.\n" % n_cluster)
+            logger.info("Found %s networks on the field in %s ms.\n" % (
+                n_cluster, self.last_duration))
             logger.info("Sending emittors through socket")
-
-            # for key in all_tracks_data.keys():
-            # if key not in prev_tracks_data.keys() and not debug:
-
-            # sender_function(all_tracks_data[key])
             sender_function(all_tracks_data)
 
         if debug:

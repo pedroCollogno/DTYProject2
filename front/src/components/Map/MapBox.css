@@ -3,7 +3,7 @@
   border: 1px solid #eeeeee;
   border-radius: 10px;
   height: 500px;
-  min-width: 53%; }
+  min-width: 60%; }
 
 .mapMarker {
   width: 0.7rem;
@@ -41,3 +41,22 @@
   flex-direction: column;
   padding: 0.5em;
   font-size: 1.2em; }
+
+.widgets {
+  text-align: right;
+  position: absolute;
+  top: 80px;
+  right: 10px;
+  box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  bottom: auto;
+  left: auto;
+  background-color: #eeeeee;
+  height: 28px;
+  width: 28px; }
+  .widgets a#center-button {
+    color: black;
+    font-size: 1em; }
+  .widgets span.icon {
+    height: 28px;
+    width: 28px; }

@@ -9,7 +9,7 @@ class PotentialLines extends Component {
             key={"potential_lines" + this.props.network}
             paint={{
                 "line-color": "grey",
-                "line-dasharray": [5, 10]
+                "line-dasharray": [5, 5]
             }}>
             {this.props.links.map((link, keyy) =>
                 <Feature coordinates={link} key={keyy}></Feature>

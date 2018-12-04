@@ -8,6 +8,8 @@ import Lines from "./Lines.js";
 import PotentialLines from "./PotentialLines.js";
 import { global } from "./style";
 import PropTypes from "prop-types";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+
 import "./MapBox.css";
 
 const Map = ReactMapboxGl({ // Only set in case internet is used, as an optional feature.
@@ -42,7 +44,7 @@ class MapBox extends Component {
         }
         this.mouseEnter = this.mouseEnter.bind(this); // allows those functions to update the state of the component 
         this.mouseExit = this.mouseExit.bind(this); // (here, we want to update highlights)
-
+        this.center = this.center.bind(this)
     }
 
     /**
@@ -71,13 +73,13 @@ class MapBox extends Component {
         }
     }
 
-    center() { // N.B. : a revoir, super chiant sa race
+    center() {
         let keys = this.state.networksLabels;
         if (keys.length === 0) {
-            return [2.33, 48.86]; // centered on Paris if no emittor to display
+            this.map.state.map.flyTo({ center: [2.33, 48.86] }); // centered on Paris if no emittor to display
         }
         let firstEmittor = Object.keys(this.props.emittors[keys[0]])[0]; // else, centered on the very first emittor received
-        return [this.props.emittors[keys[0]][firstEmittor].coordinates.lng, this.props.emittors[keys[0]][firstEmittor].coordinates.lat];
+        this.map.state.map.flyTo({ center: [this.props.emittors[keys[0]][firstEmittor].coordinates.lng, this.props.emittors[keys[0]][firstEmittor].coordinates.lat] });
     }
 
     /**
@@ -151,12 +153,11 @@ class MapBox extends Component {
                         height: "100%",
                         width: "100%"
                     }}
+                    ref={(e) => { this.map = e; }}
                     onStyleLoad={(map) => {
                         map.addImage("recStation", htmlRecImage);
                         map.addImage("networkCenter", htmlCenterImage);
                     }}
-                // where the map is centered when rendering /!\ ATTENTION : enlever si trop chiant /!\
-                // center={this.center()}
                 >
 
                     <div id="showhide">
@@ -164,13 +165,13 @@ class MapBox extends Component {
                         <div className="field">
                             <input className="is-checkradio is-block" type="checkbox" id="show_checkbox" name="show_checkbox" checked={this.props.showVal} onChange={this.props.changeShowVal} onClick={() => this.props.switchAll(true)} />
                             <label htmlFor="show_checkbox">
-                                <span> </span>- Show all
+                                <span> </span>Show all
                             </label>
                         </div>
                         <div className="field">
                             <input className="is-checkradio is-block" type="checkbox" id="hide_checkbox" name="hide_checkbox" checked={this.props.hideVal} onChange={this.props.changeHideVal} onClick={() => this.props.switchAll(false)} />
                             <label htmlFor="hide_checkbox">
-                                <span> </span>- Hide all
+                                <span> </span>Hide all
                             </label>
                         </div>
                     </div>
@@ -199,7 +200,7 @@ class MapBox extends Component {
                             toggled = !(toggled == undefined || !toggled);
                             toggled = !this.props.hideAll && (toggled || this.props.showAll);
                             toggled = (emittorsNumber == 1) || toggled;
-                            // toggled is True iff it's defined, not manually de-toggled (= False) and hideAll is not active
+                            // toggled is True if it's defined, not manually de-toggled (= False) and hideAll is not active
                             // or simply if showAll is active. Single emittors are always displayed. 
                             let lines = toggled && (network != "-1000");
                             let potentialLinks = [];
@@ -231,7 +232,6 @@ class MapBox extends Component {
                                                 "icon-size": 0.08,
                                                 "icon-allow-overlap": true,
                                                 "text-font": ["Open Sans Regular"],
-                                                "text-allow-overlap": true
                                             }} paint={{
                                                 "text-color": this.getColor(network),
                                                 "text-halo-color": "black",
@@ -259,9 +259,17 @@ class MapBox extends Component {
                                 </div>)
                         })
                     }
-                    {/* Gadgets */}
+                    {/* Widgets */}
+                    <div className="widgets">
+                        <a id="center-button" onClick={this.center}>
+                            <span className="icon">
+                                <FontAwesomeIcon icon='location-arrow' />
+                            </span>
+                        </a>
+                    </div>
                     <ZoomControl></ZoomControl>
                     <ScaleControl></ScaleControl>
+
                 </Map >
             </div >
         )
