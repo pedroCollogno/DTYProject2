@@ -3,7 +3,7 @@
   border: 1px solid #eeeeee;
   border-radius: 10px;
   height: 500px;
-  min-width: 60%; }
+  width: 60%; }
 
 .mapMarker {
   width: 0.7rem;

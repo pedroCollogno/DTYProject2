@@ -328,7 +328,7 @@ class App extends Component {
             hideAll={this.state.hideAll} showAll={this.state.showAll} networksToggled={this.state.networksToggled}
             changeHideVal={this.changeHideVal} changeShowVal={this.changeShowVal} hideVal={this.state.hideVal} showVal={this.state.showVal} />
           {
-            <div className="test" id="tabletile">
+            <div id="tabletile">
               <table className='table is-hoverable'>
                 <thead>
                   <tr>
