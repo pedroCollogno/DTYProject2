@@ -137,7 +137,6 @@ class MapBox extends Component {
     }
 
     render() {
-        console.log(this.state);
         let htmlRecImage = new Image(934, 1321); // image for the reception stations
         htmlRecImage.src = recImage; // HTML format to render it in the canvas
         let htmlCenterImage = new Image(256, 256); // image for the network centers 
@@ -231,6 +230,7 @@ class MapBox extends Component {
                                                 "icon-image": "networkCenter",
                                                 "icon-size": 0.08,
                                                 "icon-allow-overlap": true,
+                                                "text-allow-overlap": true,
                                                 "text-font": ["Open Sans Regular"],
                                             }} paint={{
                                                 "text-color": this.getColor(network),
