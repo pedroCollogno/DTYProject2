@@ -98,19 +98,23 @@ class HttpRequestHandler extends Component {
      * @param {*} files 
      */
     fileUpload(files) {
-        const url = 'http://localhost:8000/upload'; // server route to POST request
-        const formData = new FormData();
-        let i = 0;
-        for (let file of files) {
-            formData.append("File" + i, file, file.name); // standardized name for formData entry : "File{i}" (Django)
-            i += 1;
-        }
-        const config = {
-            headers: {
-                'content-type': 'multipart/form-data'
-            }
-        }
-        return axios.post(url, formData, config) // sends POST request
+        return this.reset()
+            .then((res) => {
+                const url = 'http://localhost:8000/upload'; // server route to POST request
+                const formData = new FormData();
+                let i = 0;
+                for (let file of files) {
+                    formData.append("File" + i, file, file.name); // standardized name for formData entry : "File{i}" (Django)
+                    i += 1;
+                }
+                const config = {
+                    headers: {
+                        'content-type': 'multipart/form-data'
+                    }
+                }
+                return axios.post(url, formData, config) // sends POST request
+            })
+
     }
 
     /**
@@ -133,11 +137,47 @@ class HttpRequestHandler extends Component {
         }
     }
 
+
+    handleResetError(error) {
+        // Error
+        if (error.response) {
+            if (error.response.status == 500) { // Reset even if backend has internal error while resetting
+                console.log("Simulation stopped, even though backend ran into internal error (500) !");
+                this.setState({
+                    files: [],
+                    fileNames: {},
+                    loaded: false,
+                    dropText: "Or drop your .PRP files here !",
+                    inputFiles: []
+                });
+                this.props.reset();
+            } else {
+                console.log(error.response.data);
+                console.log(error.response.status);
+                console.log(error.response.headers);
+            }
+        } else if (error.request) { // Reset even if backend is down
+            console.log("Simulation stopped, even though backend was down !");
+            this.setState({
+                files: [],
+                fileNames: {},
+                loaded: false,
+                dropText: "Or drop your .PRP files here !",
+                inputFiles: []
+            });
+            this.props.reset();
+        } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+        }
+        // console.log(error.config);
+    }
+
     /**
      * Resets the environment. (stops backends processing of data)
      */
     reset() {
-        axios.get("http://localhost:8000/stopsimulation")
+        return axios.get("http://localhost:8000/stopsimulation")
             .then((res) => {
                 console.log("Simulation stopped !");
                 this.setState({
@@ -148,6 +188,9 @@ class HttpRequestHandler extends Component {
                     inputFiles: []
                 });
                 this.props.reset();
+            })
+            .catch((error) => {
+                this.handleResetError(error);
             });
     }
 

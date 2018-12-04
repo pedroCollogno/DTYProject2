@@ -47,13 +47,12 @@ body {
   width: 100%; }
   .map-table-container #tabletile {
     font-size: 0.8em;
-    width: 100%;
-    height: 510px;
+    height: 500px;
     padding-left: 1em;
     padding-right: 1em;
-    overflow-y: scroll; }
-    .map-table-container #tabletile table, .map-table-container #tabletile tr {
-      width: 100%; }
+    overflow-y: scroll;
+    width: 40%; }
     .map-table-container #tabletile .table {
+      width: 100%;
       background-color: #eeeeee;
       border-radius: 5px 5px 0px 0px; }
