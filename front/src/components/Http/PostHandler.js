@@ -14,7 +14,9 @@ class HttpRequestHandler extends Component {
             fileNames: {}, // Contains all the uploaded files names (useful to avoid posting the same file twice)
             loaded: false, // Did the posting of the files go well ?
             dropText: "Or drop your .PRP files here !", // Text to display in the drop zone
-            inputFiles: []
+            inputFiles: [],
+            progress: 0,
+            total_duration: 0
         };
         this.onFormSubmit = this.onFormSubmit.bind(this); // functions allowed to update the state of the component
         this.onChange = this.onChange.bind(this);
@@ -163,6 +165,15 @@ class HttpRequestHandler extends Component {
             });
     }
 
+    componentWillReceiveProps(nextProps) {
+        if (nextProps != this.props) {
+            this.setState({
+                progress: nextProps.progress,
+                total_duration: nextProps.total_duration
+            })
+        }
+    }
+
     render() {
         return (
             <div>
@@ -233,7 +244,7 @@ class HttpRequestHandler extends Component {
                             <FontAwesomeIcon icon='pause' />
                         </span>
                     </a>
-                    <progress className="progress is-medium is-blue item" id="progressbar" value={this.props.progress} max={this.props.total_duration}></progress>
+                    <progress className="progress is-medium is-blue item" id="progressbar" value={this.state.progress} max={this.state.total_duration}></progress>
                 </section>
                 {/* "Start simulation" button, active if the posting of the files went ok */}
                 <div className="tile">

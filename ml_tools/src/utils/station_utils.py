@@ -49,7 +49,7 @@ def sync_station_streams(station_1_track_stream, station_2_track_stream):
                 (s_1_dates[0], s_2_dates[0]))
 
 
-def fuse_all_station_tracks(*args):
+def fuse_all_station_tracks(*args, prev_tracks_data={}):
     """Fuse all station streams passed as inputs and returns the output.
     """
     n = len(args)
@@ -64,16 +64,16 @@ def fuse_all_station_tracks(*args):
     for i in range(n-1):
         if i == 0:
             global_track_streams, all_tracks_data, met_track_ids = get_fused_station_tracks(
-                args[i], args[i+1], all_track_data={})
+                args[i], args[i+1], all_track_data={}, prev_tracks_data=prev_tracks_data)
 
         else:
             global_track_streams, all_tracks_data, met_track_ids = get_fused_station_tracks(
-                global_track_streams, args[i+1], are_lists=[True, False], all_track_data=all_tracks_data, met_track_ids=met_track_ids)
+                global_track_streams, args[i+1], are_lists=[True, False], all_track_data=all_tracks_data, met_track_ids=met_track_ids, prev_tracks_data=prev_tracks_data)
 
     return global_track_streams, all_tracks_data
 
 
-def get_fused_station_tracks(station_1_track_streams, station_2_track_streams, are_lists=[False, False], all_track_data={}, met_track_ids=[]):
+def get_fused_station_tracks(station_1_track_streams, station_2_track_streams, are_lists=[False, False], all_track_data={}, met_track_ids=[], prev_tracks_data={}):
     """Fuses the track stream for two given stations. Returns a track list, without duplicates
 
     :param station_1_track_streams: the track streams from the first station
@@ -103,7 +103,8 @@ def get_fused_station_tracks(station_1_track_streams, station_2_track_streams, a
             for track in track_stream_1:
                 track_id = get_track_id(track)
                 if track_id not in all_track_data.keys():
-                    add_track_to_dict(track, all_track_data)
+                    add_track_to_dict(track, all_track_data,
+                                      prev_tracks_data=prev_tracks_data)
                 if track_id not in met_track_ids:
                     met_track_ids.append(track_id)
                 track_stream.append(track)
@@ -116,7 +117,7 @@ def get_fused_station_tracks(station_1_track_streams, station_2_track_streams, a
 
                     if track_2_id not in all_track_data.keys():
                         add_track_to_dict(
-                            track_2, all_track_data)
+                            track_2, all_track_data, prev_tracks_data=prev_tracks_data)
 
                     if track_1_id == track_2_id:
                         lat, lng = coords_from_tracks(track_1, track_2)
@@ -134,7 +135,6 @@ def get_fused_station_tracks(station_1_track_streams, station_2_track_streams, a
             pbar.update(progress)
 
         pbar.finish()
-
     except ValueError as e:
         logger.error("Ran into ValueError : %s \nWhen looking at track %s" % (
             e, track_2_id))

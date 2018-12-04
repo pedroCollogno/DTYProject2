@@ -70,9 +70,9 @@ def start_simulation(request):
             'simulation': 'start using DB_SCAN, corrected by Deep Learning for clustering'
         })
     })
+    manager.reset_thread()
 
     track_streams = manager.get_track_streams()
-
     manager.set_deep(False)
     manager.set_mix(True)
     manager.get_thread().set_track_streams(*track_streams)
@@ -91,9 +91,9 @@ def start_simulation_ml(request):
             'simulation': 'start using only DB_SCAN clustering'
         })
     })
+    manager.reset_thread()
 
     track_streams = manager.get_track_streams()
-
     manager.set_deep(False)
     manager.set_mix(False)
     manager.get_thread().set_track_streams(*track_streams)
@@ -106,15 +106,16 @@ def start_simulation_dl(request):
     """
         Called when lauching the simulation using only deep learning for clustering
     """
+
     send_emittor_to_front({'json': 'containing data'})
     Group('users').send({
         'text': json.dumps({
             'simulation': 'start using only Deep Learning for clustering'
         })
     })
+    manager.reset_thread()
 
     track_streams = manager.get_track_streams()
-
     manager.set_deep(True)
     manager.set_mix(False)
     manager.get_thread().set_track_streams(*track_streams)
@@ -129,8 +130,8 @@ def stop_simulation(request):
     """
     res = manager.get_thread().stop_thread()
     manager.clear_paths()
-    manager.reset_thread()
     manager.clear_track_streams()
+    manager.reset_thread()
     if res:
         return (HttpResponse('Stopped thread !', status=200))
     return (HttpResponse('Could not stop...', status=500))

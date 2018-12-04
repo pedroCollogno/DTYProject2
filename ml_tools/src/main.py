@@ -98,14 +98,25 @@ class EWHandler:
                 time.sleep(0.5)
 
             track_streams = []
+            latest_track_streams = []
             for arg in args:
                 track_streams.append(arg[:self.progress])
+                begin = max(0, self.progress - j)
+                latest_track_streams.append(arg[begin:self.progress])
+
             logger.info(
                 "\nMerging info from all stations... Reading %s sensor cycles... Last cycle is cycle n.%s" % (len(track_streams[0]), self.progress))
             prev_tracks_data = copy.deepcopy(all_tracks_data)
 
             global_track_streams, all_tracks_data = fuse_all_station_tracks(
-                *track_streams)
+                *track_streams, prev_tracks_data=prev_tracks_data)
+            _, latest_tracks_data = fuse_all_station_tracks(
+                *latest_track_streams)
+
+            for track_id in all_tracks_data.keys():
+                if track_id in latest_tracks_data.keys():
+                    all_tracks_data[track_id]['talking'] = True
+                    all_tracks_data[track_id]['duration'] = latest_tracks_data[track_id]['duration']
 
             logger.debug("Merge done !")
 
@@ -195,6 +206,7 @@ class EWHandler:
                 all_tracks_data[track_id]['total_duration'] = self.total_duration
                 all_tracks_data[track_id]['progress'] = self.progress
                 i += 1
+
             logger.info("Found %s networks on the field.\n" % n_cluster)
             logger.info("Sending emittors through socket")
 

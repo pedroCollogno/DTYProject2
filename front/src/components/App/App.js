@@ -161,11 +161,7 @@ class App extends Component {
               dic["" + emit.network_id][emit.track_id] = emit;
             }
 
-            if (this.state.total_duration === 0) {
-              total_duration = emit.total_duration;
-            } else {
-              total_duration = this.state.total_duration;
-            }
+            total_duration = emit.total_duration;
 
             if (progress == 0) {
               progress = emit.progress;
@@ -325,6 +321,7 @@ class App extends Component {
                     <th colSpan='2'>Coordinates</th>
                     <th>Frequency</th>
                     <th>Network</th>
+                    <th>Just talked</th>
                   </tr>
                 </thead>
                 {
@@ -345,6 +342,7 @@ class App extends Component {
                                   <td>{deg_to_dms(this.state.emittors[key][emittor_id].coordinates.lng)}</td>
                                   <td>{round_frequency(this.state.emittors[key][emittor_id].frequency)} MHz</td>
                                   <td>{this.state.emittors[key][emittor_id].network_id + 1}</td>
+                                  <td>{this.state.emittors[key][emittor_id].talking.toString()}</td>
                                 </tr>
                               )
                             })
@@ -373,6 +371,7 @@ class App extends Component {
                                   <td>{deg_to_dms(this.state.emittors[key][emittor_id].coordinates.lng)}</td>
                                   <td>{round_frequency(this.state.emittors[key][emittor_id].frequency)} MHz</td>
                                   <td>{this.state.emittors[key][emittor_id].network_id + 1}</td>
+                                  <td>{this.state.emittors[key][emittor_id].talking.toString()}</td>
                                 </tr>
                               )
                             })
