@@ -2,8 +2,8 @@ import React, { Component } from "react";
 import ReactMapboxGl, { Layer, Feature, ZoomControl, ScaleControl } from "react-mapbox-gl";
 import colormap from "colormap";
 import Stations from "./Stations.js";
-import stationImage from "./EW_high.png";
-import triangle from "./dashed-circle.png";
+import recImage from "./EW_high.png";
+import centerImage from "./dashed-circle.png";
 import Lines from "./Lines.js";
 import PotentialLines from "./PotentialLines.js";
 import { global } from "./style";
@@ -136,12 +136,11 @@ class MapBox extends Component {
 
     render() {
         console.log(this.state);
-        let statImage = new Image(934, 1321); // image for the stations
-        statImage.src = stationImage;
-        let triImage = new Image(256, 256);
-        triImage.src = triangle;
-        let images = ["stationImage", statImage]; // sets it as a source for the map
-        let triImages = ["triImage", triImage];
+        let htmlRecImage = new Image(934, 1321); // image for the reception stations
+        htmlRecImage.src = recImage; // HTML format to render it in the canvas
+        let htmlCenterImage = new Image(256, 256); // image for the network centers 
+        htmlCenterImage.src = centerImage;
+
         return (
             <div className="map-container">
                 {/* the map contains everything (because it implements the actual HTML canvas) */}
@@ -151,6 +150,12 @@ class MapBox extends Component {
                     containerStyle={{
                         height: "100%",
                         width: "100%"
+                    }}
+                    onStyleLoad={(map) => {
+                        map.addImage("recStation", htmlRecImage);
+                        console.log("OK");
+                        map.addImage("networkCenter", htmlCenterImage);
+                        console.log("OK");
                     }}
                 // where the map is centered when rendering /!\ ATTENTION : enlever si trop chiant /!\
                 // center={this.center()}
@@ -172,9 +177,9 @@ class MapBox extends Component {
                         </div>
                     </div>
                     <Layer id="recStations" key="recStations" type="symbol" layout={{
-                        "icon-image": "stationImage",
+                        "icon-image": "recStation",
                         "icon-size": 0.03
-                    }} images={images} >
+                    }}>
                         {/* Displays the reception stations as images using the previously defined source image */}
                         {
                             Object.keys(this.props.recStations).map((station, k) =>
@@ -223,7 +228,7 @@ class MapBox extends Component {
                                             layout={{
                                                 "text-field": "" + emittorsNumber,
                                                 "text-size": 15,
-                                                "icon-image": "triImage",
+                                                "icon-image": "networkCenter",
                                                 "icon-size": 0.08,
                                                 "icon-allow-overlap": true,
                                                 "text-font": ["Open Sans Regular"],
@@ -233,11 +238,12 @@ class MapBox extends Component {
                                                 "text-halo-color": "black",
                                                 "text-halo-width": 0.1 + this.state.highlights["" + network],
                                             }}
-                                            images={triImages}
+
                                         >
                                             <Feature coordinates={clusterCenter} onClick={() => this.props.toggleNetwork(network)}
                                                 onMouseEnter={() => this.mouseEnter(network)}
                                                 onMouseLeave={() => this.mouseExit(network)}
+                                                key={"featurecenter" + network}
                                             ></Feature>
                                         </Layer>
                                     }

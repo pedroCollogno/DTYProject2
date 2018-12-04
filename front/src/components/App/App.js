@@ -339,7 +339,7 @@ class App extends Component {
                                   <td>{deg_to_dms(this.state.emittors[key][emittor_id].coordinates.lng)}</td>
                                   <td>{round_frequency(this.state.emittors[key][emittor_id].frequency)} MHz</td>
                                   <td>{this.state.emittors[key][emittor_id].network_id + 1}</td>
-                                  <td>{this.state.emittors[key][emittor_id].talking.toString()}</td>
+                                  <td>{"" + this.state.emittors[key][emittor_id].talking}</td>
                                 </tr>
                               )
                             })
@@ -368,7 +368,7 @@ class App extends Component {
                                   <td>{deg_to_dms(this.state.emittors[key][emittor_id].coordinates.lng)}</td>
                                   <td>{round_frequency(this.state.emittors[key][emittor_id].frequency)} MHz</td>
                                   <td>{this.state.emittors[key][emittor_id].network_id + 1}</td>
-                                  <td>{this.state.emittors[key][emittor_id].talking.toString()}</td>
+                                  <td>{"" + this.state.emittors[key][emittor_id].talking}</td>
                                 </tr>
                               )
                             })
