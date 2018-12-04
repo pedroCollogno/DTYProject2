@@ -127,13 +127,13 @@ class MapBox extends Component {
         let networkNumber = parseInt(network);
         if (networkNumber < 0) {
             console.log("Unidentified network");
-            return "grey";
+            return "#5c5c5c";
         }
         if (this.state.colors[networkNumber] != undefined) {
             return this.state.colors[networkNumber];
         }
         console.log("Color " + network + " is undefined");
-        return "white";
+        return "#ffffff";
     }
 
     render() {
@@ -156,9 +156,7 @@ class MapBox extends Component {
                     ref={(e) => { this.map = e; }}
                     onStyleLoad={(map) => {
                         map.addImage("recStation", htmlRecImage);
-                        console.log("OK");
                         map.addImage("networkCenter", htmlCenterImage);
-                        console.log("OK");
                     }}
                 >
 
@@ -207,9 +205,10 @@ class MapBox extends Component {
                             let lines = toggled && (network != "-1000");
                             let potentialLinks = [];
                             Object.keys(emittors).map((track_id, keyy) => {
-                                if (emittors[track_id]["possible_network"] != undefined) {
+                                let potentialNetwork = emittors[track_id]["possible_network"];
+                                if (potentialNetwork != undefined && potentialNetwork != network) {
                                     potentialLinks.push([[emittors[track_id]["coordinates"]["lng"], emittors[track_id]["coordinates"]["lat"]],
-                                    this.clusterCenter(emittors[track_id]["possible_network"])]);
+                                    this.clusterCenter(potentialNetwork)]);
                                 }
                             });
                             let showPotential = (toggled && potentialLinks.length != 0);
@@ -220,7 +219,7 @@ class MapBox extends Component {
                                             clusterCenter={clusterCenter} color={color}
                                             network={network} stations={emittors} />
                                     }
-                                    {network != "-1000" && emittorsNumber > 1 && // always rendering when simulation has started
+                                    {network != "-1000" && emittorsNumber > 1 && !toggled && // always rendering when simulation has started
                                         <Layer
                                             id={"center" + network}
                                             key={"center" + network}
@@ -243,14 +242,36 @@ class MapBox extends Component {
                                             <Feature coordinates={clusterCenter} onClick={() => this.props.toggleNetwork(network)}
                                                 onMouseEnter={() => this.mouseEnter(network)}
                                                 onMouseLeave={() => this.mouseExit(network)}
-                                                key={"featurecenter" + network}
+                                                key={"featureCenter" + network}
                                             ></Feature>
                                         </Layer>
                                     }
+
+                                    {network != "-1000" && emittorsNumber > 1 && toggled && // always rendering when simulation has started
+                                        <Layer
+                                            id={"centerToggled" + network}
+                                            key={"centerToggled" + network}
+                                            type="circle"
+                                            onClick={() => { this.props.toggleNetwork(network) }}
+                                            paint={{
+                                                "circle-color": this.getColor(network),
+                                                "circle-radius": 3,
+                                                "circle-stroke-width": this.state.highlights["" + network]
+                                            }}
+
+                                        >
+                                            <Feature coordinates={clusterCenter} onClick={() => this.props.toggleNetwork(network)}
+                                                onMouseEnter={() => this.mouseEnter(network)}
+                                                onMouseLeave={() => this.mouseExit(network)}
+                                                key={"featureCenterToggled" + network}
+                                            ></Feature>
+                                        </Layer>
+                                    }
+
                                     {toggled && // conditionnal rendering
                                         <Stations
                                             stations={emittors} network={network}
-                                            color={color} />
+                                            color={color} multiple={emittorsNumber > 1} />
                                     }
                                     {showPotential &&
                                         <PotentialLines

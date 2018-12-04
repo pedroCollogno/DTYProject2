@@ -77,7 +77,8 @@ class App extends Component {
       hideVal: false,
       showVal: false,
       total_duration: 0,
-      progress: 0
+      progress: 0,
+      white: ""
     };
     // functions that are allowed to update the state of the component
     this.newEmittors = this.newEmittors.bind(this);
@@ -89,6 +90,7 @@ class App extends Component {
     this.reset = this.reset.bind(this);
     this.changeShowVal = this.changeShowVal.bind(this);
     this.changeHideVal = this.changeHideVal.bind(this);
+    this.clickRow = this.clickRow.bind(this);
   }
 
 
@@ -267,7 +269,8 @@ class App extends Component {
       hideVal: false,
       showVal: false,
       total_duration: 0,
-      progress: 0
+      progress: 0,
+      white: ""
     });
   }
 
@@ -277,6 +280,18 @@ class App extends Component {
 
   changeHideVal() {
     this.setState({ hideVal: !this.state.hideVal });
+  }
+
+  clickRow(network, emittor) {
+    this.setState({ white: emittor });
+    this.toggleNetwork(network);
+  }
+
+  getBackgroundStyle(emittor) {
+    if (this.state.white == emittor) {
+      return ({ borderWidth: 10 });
+    }
+    return ({ borderWidth: 0 });
   }
 
   render() {
@@ -336,7 +351,7 @@ class App extends Component {
                           {
                             Object.keys(this.state.emittors[key]).map((emittor_id) => {
                               return (
-                                <tr key={this.state.emittors[key][emittor_id].track_id}>
+                                <tr key={this.state.emittors[key][emittor_id].track_id} onClick={() => this.clickRow(key, emittor_id)} style={this.getBackgroundStyle(emittor_id)}>
                                   <td>{int_to_emittor_type(this.state.emittors[key][emittor_id].emission_type)}</td>
                                   <td>{deg_to_dms(this.state.emittors[key][emittor_id].coordinates.lat)}</td>
                                   <td>{deg_to_dms(this.state.emittors[key][emittor_id].coordinates.lng)}</td>
@@ -365,7 +380,7 @@ class App extends Component {
                           {
                             Object.keys(this.state.emittors[key]).map((emittor_id) => {
                               return (
-                                <tr key={this.state.emittors[key][emittor_id].track_id}>
+                                <tr key={this.state.emittors[key][emittor_id].track_id} onClick={() => this.clickRow(key, emittor_id)} style={this.getBackgroundStyle(emittor_id)}>
                                   <td>{int_to_emittor_type(this.state.emittors[key][emittor_id].emission_type)}</td>
                                   <td>{deg_to_dms(this.state.emittors[key][emittor_id].coordinates.lat)}</td>
                                   <td>{deg_to_dms(this.state.emittors[key][emittor_id].coordinates.lng)}</td>
