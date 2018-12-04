@@ -38,9 +38,6 @@ article.tile {
         height: 100%;
     }
 }
-#start-sim-button {
-    width: 96%;
-}
 
 #upload-button {
     border-bottom-left-radius: 0;
@@ -57,5 +54,4 @@ article.tile {
     }
     background-color: darken($grey, 50);
     border-radius: 5px;
-
 }

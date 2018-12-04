@@ -8,10 +8,11 @@ import Dashboard from '../Modal/Dashboard'
 
 // Set fontAwesome icons up -> Define all icons that will be used in the app.
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faUpload, faDownload, faUndo, faPlay, faPause, faLocationArrow } from '@fortawesome/free-solid-svg-icons'
+import { faUpload, faDownload, faUndo, faPlay, faPause, faLocationArrow, faCheck, faExclamationTriangle, faCircle, faCircleNotch } from '@fortawesome/free-solid-svg-icons'
+library.add(faUpload, faDownload, faUndo, faPlay, faPause, faLocationArrow, faCheck, faExclamationTriangle, faCircle, faCircleNotch)
+// Setup complete, import them
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
-library.add(faUpload, faDownload, faUndo, faPlay, faPause, faLocationArrow)
-// Setup complete
 
 function deg_to_dms(deg) {
   let d = Math.floor(deg);
@@ -61,6 +62,39 @@ function round_frequency(freq) {
   let MHz = Math.floor(freq / 10000) / 100
   return MHz
 }
+
+function show_network(emittor) {
+  let network = emittor.network_id
+  let icon = "check"
+  let possible_network = -1000
+  if (Object.keys(emittor).includes('possible_network')) {
+    possible_network = emittor.possible_network
+    if (possible_network != network) {
+      icon = "exclamation-triangle"
+    }
+  }
+  return (
+    <span className="network-display">
+      <p>{network + 1}</p> <FontAwesomeIcon icon={icon} className={icon}></FontAwesomeIcon>
+    </span>
+  )
+}
+
+function show_talking(emittor) {
+  let icon = "circle";
+  let clss = "not-talking";
+  let talking = false
+  if (Object.keys(emittor).includes('talking')) {
+    talking = emittor.talking
+    if (talking) {
+      clss = "talking"
+    }
+  }
+  return (
+    <FontAwesomeIcon icon={icon} className={clss}></FontAwesomeIcon>
+  )
+}
+
 class App extends Component {
   constructor() {
     super();
@@ -356,8 +390,8 @@ class App extends Component {
                                   <td>{deg_to_dms(this.state.emittors[key][emittor_id].coordinates.lat)}</td>
                                   <td>{deg_to_dms(this.state.emittors[key][emittor_id].coordinates.lng)}</td>
                                   <td>{round_frequency(this.state.emittors[key][emittor_id].frequency)} MHz</td>
-                                  <td>{this.state.emittors[key][emittor_id].network_id + 1}</td>
-                                  <td>{"" + this.state.emittors[key][emittor_id].talking}</td>
+                                  <td>{show_network(this.state.emittors[key][emittor_id])}</td>
+                                  <td>{show_talking(this.state.emittors[key][emittor_id])}</td>
                                 </tr>
                               )
                             })
@@ -385,8 +419,8 @@ class App extends Component {
                                   <td>{deg_to_dms(this.state.emittors[key][emittor_id].coordinates.lat)}</td>
                                   <td>{deg_to_dms(this.state.emittors[key][emittor_id].coordinates.lng)}</td>
                                   <td>{round_frequency(this.state.emittors[key][emittor_id].frequency)} MHz</td>
-                                  <td>{this.state.emittors[key][emittor_id].network_id + 1}</td>
-                                  <td>{"" + this.state.emittors[key][emittor_id].talking}</td>
+                                  <td>{show_network(this.state.emittors[key][emittor_id])}</td>
+                                  <td>{show_talking(this.state.emittors[key][emittor_id])}</td>
                                 </tr>
                               )
                             })

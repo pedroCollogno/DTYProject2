@@ -28,9 +28,6 @@ article.tile {
   .right-buttons button {
     height: 100%; }
 
-#start-sim-button {
-  width: 96%; }
-
 #upload-button {
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0; }

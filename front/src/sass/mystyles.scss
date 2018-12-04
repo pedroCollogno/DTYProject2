@@ -16,8 +16,7 @@ $danger: $orange;
 $family-primary: $family-serif;
 
 // 4. Setup your Custom Colors
-$blue: rgba(0, 204, 170, 0.747);
-$blue-invert: findColorInvert($blue);
+
 
 // 5. Add new color variables to the color map.
 @import '../../node_modules/bulma/sass/utilities/derived-variables';

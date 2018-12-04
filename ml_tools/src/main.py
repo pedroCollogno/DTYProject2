@@ -187,7 +187,7 @@ class EWHandler:
                         possible_scores, key=possible_scores.get)
                     all_tracks_data[emittor_id]['possible_network'] = int(
                         min_score_cluster)
-                    logger.warning("Emittor %s seems pretty close to cluster %s !" % (
+                    logger.debug("Emittor %s seems pretty close to cluster %s !" % (
                         emittor_id, min_score_cluster))
             else:
                 y_pred, ids, n_cluster = get_dbscan_prediction(

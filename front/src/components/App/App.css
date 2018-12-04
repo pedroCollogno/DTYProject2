@@ -56,3 +56,20 @@ body {
       width: 100%;
       background-color: #eeeeee;
       border-radius: 5px 5px 0px 0px; }
+      .map-table-container #tabletile .table td, .map-table-container #tabletile .table th {
+        text-align: center; }
+
+.network-display {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly; }
+  .network-display .check {
+    color: rgba(0, 204, 170, 0.747); }
+  .network-display .exclamation-triangle {
+    color: #e4bb07; }
+
+.talking {
+  color: rgba(0, 204, 170, 0.747); }
+
+.not-talking {
+  color: rgba(255, 0, 0, 0.678); }
