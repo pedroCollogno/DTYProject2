@@ -8,9 +8,9 @@ import Dashboard from '../Modal/Dashboard'
 
 // Set fontAwesome icons up -> Define all icons that will be used in the app.
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faUpload, faDownload, faUndo, faPlay, faPause } from '@fortawesome/free-solid-svg-icons'
+import { faUpload, faDownload, faUndo, faPlay, faPause, faLocationArrow } from '@fortawesome/free-solid-svg-icons'
 
-library.add(faUpload, faDownload, faUndo, faPlay, faPause)
+library.add(faUpload, faDownload, faUndo, faPlay, faPause, faLocationArrow)
 // Setup complete
 
 function deg_to_dms(deg) {
@@ -253,7 +253,7 @@ class App extends Component {
   }
 
   reset() {
-    console.log("Reset");
+    console.log("Resetting App.js.");
     this.setState({
       emittors: {}, // list of all the detected stations so far in the form :
       // { network_id : 
@@ -296,7 +296,7 @@ class App extends Component {
               <div className="field switch-container">
                 <input id="switchRoundedOutlinedInfo" type="checkbox" name="switchRoundedOutlinedInfo" className="switch is-rtl is-rounded is-outlined is-info" onChange={this.handleChange} />
                 <label htmlFor="switchRoundedOutlinedInfo"><strong>Switch to {this.getConnection()} map</strong></label>
-                <Dashboard emittors = {this.state.emittors}
+                <Dashboard emittors={this.state.emittors}
                 />
               </div>
             </div>

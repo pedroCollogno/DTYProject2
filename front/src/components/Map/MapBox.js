@@ -8,6 +8,8 @@ import Lines from "./Lines.js";
 import PotentialLines from "./PotentialLines.js";
 import { global } from "./style";
 import PropTypes from "prop-types";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+
 import "./MapBox.css";
 
 const Map = ReactMapboxGl({ // Only set in case internet is used, as an optional feature.
@@ -196,7 +198,7 @@ class MapBox extends Component {
                             toggled = !(toggled == undefined || !toggled);
                             toggled = !this.props.hideAll && (toggled || this.props.showAll);
                             toggled = (emittorsNumber == 1) || toggled;
-                            // toggled is True iff it's defined, not manually de-toggled (= False) and hideAll is not active
+                            // toggled is True if it's defined, not manually de-toggled (= False) and hideAll is not active
                             // or simply if showAll is active. Single emittors are always displayed. 
                             let lines = toggled && (network != "-1000");
                             let potentialLinks = [];
@@ -227,7 +229,6 @@ class MapBox extends Component {
                                                 "icon-size": 0.08,
                                                 "icon-allow-overlap": true,
                                                 "text-font": ["Open Sans Regular"],
-                                                "text-allow-overlap": true
                                             }} paint={{
                                                 "text-color": this.getColor(network),
                                                 "text-halo-color": "black",
@@ -238,6 +239,7 @@ class MapBox extends Component {
                                             <Feature coordinates={clusterCenter} onClick={() => this.props.toggleNetwork(network)}
                                                 onMouseEnter={() => this.mouseEnter(network)}
                                                 onMouseLeave={() => this.mouseExit(network)}
+                                                key={"feature_center" + network}
                                             ></Feature>
                                         </Layer>
                                     }
@@ -257,6 +259,11 @@ class MapBox extends Component {
                     {/* Gadgets */}
                     <ZoomControl></ZoomControl>
                     <ScaleControl></ScaleControl>
+                    <a class="button">
+                        <span class="icon is-small">
+                            <FontAwesomeIcon icon='location-arrow' />
+                        </span>
+                    </a>
                 </Map >
             </div >
         )
