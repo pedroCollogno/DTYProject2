@@ -10,6 +10,7 @@ class Stations extends Component {
             <Layer
                 type="circle"
                 id={"circles" + this.props.network}
+                key={"circles" + this.props.network}
                 paint={{
                     "circle-color": this.props.color,
                     "circle-radius": 5

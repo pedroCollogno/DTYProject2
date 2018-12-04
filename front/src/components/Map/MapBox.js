@@ -44,7 +44,7 @@ class MapBox extends Component {
         }
         this.mouseEnter = this.mouseEnter.bind(this); // allows those functions to update the state of the component 
         this.mouseExit = this.mouseExit.bind(this); // (here, we want to update highlights)
-
+        this.center = this.center.bind(this)
     }
 
     /**
@@ -73,13 +73,13 @@ class MapBox extends Component {
         }
     }
 
-    center() { // N.B. : a revoir, super chiant sa race
+    center() {
         let keys = this.state.networksLabels;
         if (keys.length === 0) {
-            return [2.33, 48.86]; // centered on Paris if no emittor to display
+            this.map.state.map.flyTo({ center: [2.33, 48.86] }); // centered on Paris if no emittor to display
         }
         let firstEmittor = Object.keys(this.props.emittors[keys[0]])[0]; // else, centered on the very first emittor received
-        return [this.props.emittors[keys[0]][firstEmittor].coordinates.lng, this.props.emittors[keys[0]][firstEmittor].coordinates.lat];
+        this.map.state.map.flyTo({ center: [this.props.emittors[keys[0]][firstEmittor].coordinates.lng, this.props.emittors[keys[0]][firstEmittor].coordinates.lat] });
     }
 
     /**
@@ -154,8 +154,9 @@ class MapBox extends Component {
                         height: "100%",
                         width: "100%"
                     }}
-                // where the map is centered when rendering /!\ ATTENTION : enlever si trop chiant /!\
-                // center={this.center()}
+                    // where the map is centered when rendering /!\ ATTENTION : enlever si trop chiant /!\
+                    // center={this.center()}
+                    ref={(e) => { this.map = e; }}
                 >
 
                     <div id="showhide">
@@ -256,14 +257,17 @@ class MapBox extends Component {
                                 </div>)
                         })
                     }
-                    {/* Gadgets */}
+                    {/* Widgets */}
+                    <div className="widgets">
+                        <a id="center-button" onClick={this.center}>
+                            <span className="icon">
+                                <FontAwesomeIcon icon='location-arrow' />
+                            </span>
+                        </a>
+                    </div>
                     <ZoomControl></ZoomControl>
                     <ScaleControl></ScaleControl>
-                    <a class="button">
-                        <span class="icon is-small">
-                            <FontAwesomeIcon icon='location-arrow' />
-                        </span>
-                    </a>
+
                 </Map >
             </div >
         )
