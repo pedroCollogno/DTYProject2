@@ -20,15 +20,34 @@ class Stations extends Component {
     }
 
     render() {
+        if (this.props.multiple) {
+            return (
+                <Layer
+                    type="circle"
+                    id={"circles" + this.props.network}
+                    key={"circles" + this.props.network}
+                    paint={{
+                        "circle-color": ["get", "color"],
+                        "circle-radius": 5
+                    }}>
+                    {
+                        Object.keys(this.props.stations).map((station_id, k) =>
+                            <Feature coordinates={[this.props.stations[station_id].coordinates.lng, this.props.stations[station_id].coordinates.lat]} key={100 * this.props.stations[station_id].coordinates.lng + this.props.stations[station_id].coordinates.lat}
+                                properties={this.getColor(this.props.stations[station_id])} />
+                        )
+                    }
+                </Layer>
+            );
+        }
         return (
-
             <Layer
                 type="circle"
                 id={"circles" + this.props.network}
                 key={"circles" + this.props.network}
                 paint={{
-                    "circle-color": ["get", "color"],
-                    "circle-radius": 5
+                    "circle-stroke-color": ["get", "color"],
+                    "circle-radius": 4,
+                    "circle-stroke-width": 3
                 }}>
                 {
                     Object.keys(this.props.stations).map((station_id, k) =>
