@@ -135,7 +135,6 @@ class Dashboard extends Component {
 
     console.log('networks', networks)
 
-
     var valuesEVF = []
     var valuesFF = []
     var valuesBurst = []
