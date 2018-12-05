@@ -11,7 +11,8 @@ class Dashboard extends Component {
 
     this.state = {
       modalState: false,
-      networkSelected: 0
+      networkSelected: 0,
+      emittorSelected: null
     };
 
     this.toggleModal = this.toggleModal.bind(this);
@@ -19,6 +20,7 @@ class Dashboard extends Component {
     this.rainbow = this.rainbow.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.clickEvent = this.clickEvent.bind(this);
+    this.degToDms = this.degToDms.bind(this);
   }
 
   clickEvent(c, i) {
@@ -38,6 +40,26 @@ class Dashboard extends Component {
 
       return { modalState: newState };
     });
+  }
+  
+
+  degToDms(deg) {
+    let d = Math.floor(deg);
+    let minfloat = (deg - d) * 60;
+    let m = Math.floor(minfloat);
+    let secfloat = (minfloat - m) * 60;
+    let s = Math.round(secfloat);
+    // After rounding, the seconds might become 60. These two
+    // if-tests are not necessary if no rounding is done.
+    if (s == 60) {
+      m++;
+      s = 0;
+    }
+    if (m == 60) {
+      d++;
+      m = 0;
+    }
+    return ("" + d + "°" + m + "'" + s + '"');
   }
 
   rainbow(numOfSteps, step) {
@@ -76,7 +98,15 @@ class Dashboard extends Component {
         numberNetworks: 0
       },
       cycle: {
-        progress: 0
+        progress: 0,
+        clusterDuration: 0,
+        readDuration: 0
+      },
+      emittor: {
+        id: null,
+        lat: 0,
+        lng: 0,
+        network: 0
       }
     }
     var networks = this.props.emittors;
@@ -100,6 +130,10 @@ class Dashboard extends Component {
     Object.keys(networks).forEach(element => {
       // The total duration
       stats.cycle.progress = Object.values(networks[element])[0]['progress']
+      // The read duration 
+      stats.cycle.readDuration = Object.values(networks[element])[0]['read_duration']
+      // The clustering duration
+      stats.cycle.clusterDuration = Object.values(networks[element])[0]['cluster_duration']
       // The size of each network
       networksLengths.push(Object.keys(networks[element]).length)
       // The type of emission of each network
@@ -121,6 +155,13 @@ class Dashboard extends Component {
       })
     });
 
+    // Set default index of emittor selected
+    var emittorIndex = emittersIds.indexOf(this.state.emittorSelected) || 0
+    stats.emittor.id = emittersIds[emittorIndex]
+    stats.emittor.lat = this.degToDms(emitterLat[emittorIndex])
+    stats.emittor.lng = this.degToDms(emitterLng[emittorIndex])
+    stats.emittor.network = emittersNetworksIds[emittorIndex]
+
     // Gather the durations and ids of emittors, indexed by network id
     // dataEmittors = {
     //   '0' : {
@@ -132,6 +173,8 @@ class Dashboard extends Component {
     //   }
     //   ...
     // }
+
+
 
     console.log('networks', networks)
 
@@ -238,7 +281,7 @@ class Dashboard extends Component {
     }
     return (
       <div className="column">
-        <div className="level">
+        {/* <div className="level">
           <div className="level-right">
             <div className="level-item">
               <div className="control">
@@ -252,12 +295,12 @@ class Dashboard extends Component {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         <div className="columns is-multiline">
           <div className="column">
             <div className="box">
-              <div className="heading">Number of Networks</div>
+              <div className="heading">All Networks</div>
               <div className="dashboard title">{stats.networks.numberNetworks}</div>
               <div className="level">
                 <div className="level-item">
@@ -288,72 +331,40 @@ class Dashboard extends Component {
               <div className="level">
                 <div className="level-item">
                   <div className="">
-                    <div className="heading">Rev Prod $</div>
-                    <div className="dashboard title is-5">30%</div>
+                    <div className="heading">Data merging</div>
+                    <div className="dashboard title is-5">{stats.cycle.readDuration}ms</div>
                   </div>
                 </div>
                 <div className="level-item">
                   <div className="">
-                    <div className="heading">Rev Serv $</div>
-                    <div className="dashboard title is-5">25%</div>
-                  </div>
-                </div>
-                <div className="level-item">
-                  <div className="">
-                    <div className="heading">Exp %</div>
-                    <div className="dashboard title is-5">45%</div>
+                    <div className="heading">Clustering</div>
+                    <div className="dashboard title is-5">{stats.cycle.clusterDuration}ms</div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          <div className="column">
+          <div className="column is-6">
             <div className="box">
-              <div className="heading">Feedback Activity</div>
-              <div className="dashboard title">78% &uarr;</div>
+              <div className="heading">Emittor</div>
+              <div className="dashboard title">#{stats.emittor.id}</div>
               <div className="level">
                 <div className="level-item">
                   <div className="">
-                    <div className="heading">Positive</div>
-                    <div className="dashboard title is-5">1560</div>
+                    <div className="heading">Network</div>
+                    <div className="dashboard title is-5">#{stats.emittor.network}</div>
                   </div>
                 </div>
                 <div className="level-item">
                   <div className="">
-                    <div className="heading">Negative</div>
-                    <div className="dashboard title is-5">368</div>
+                    <div className="heading">Latitude</div>
+                    <div className="dashboard title is-5">{stats.emittor.lat}</div>
                   </div>
                 </div>
                 <div className="level-item">
                   <div className="">
-                    <div className="heading">Pos/Neg %</div>
-                    <div className="dashboard title is-5">77% / 23%</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="column">
-            <div className="box">
-              <div className="heading">Orders / Returns</div>
-              <div className="dashboard title">75% / 25%</div>
-              <div className="level">
-                <div className="level-item">
-                  <div className="">
-                    <div className="heading">Orders $</div>
-                    <div className="dashboard title is-5">425,000</div>
-                  </div>
-                </div>
-                <div className="level-item">
-                  <div className="">
-                    <div className="heading">Returns $</div>
-                    <div className="dashboard title is-5">106,250</div>
-                  </div>
-                </div>
-                <div className="level-item">
-                  <div className="">
-                    <div className="heading">Success %</div>
-                    <div className="dashboard title is-5">+ 28,5%</div>
+                    <div className="heading">Longitude</div>
+                    <div className="dashboard title is-5">{stats.emittor.lng}</div>
                   </div>
                 </div>
               </div>
@@ -378,7 +389,7 @@ class Dashboard extends Component {
                 Network #{this.state.networkSelected}
               </p>
               <div className="panel-block">
-                < Doughnut data={pieData} />
+                < Doughnut data={pieData} getElementAtEvent={dataset => this.setState({emittorSelected: dataset[0]._model.label})}/>
               </div>
             </div>
           </div>
