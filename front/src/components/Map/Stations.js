@@ -13,10 +13,14 @@ class Stations extends Component {
     }
 
     getColor(station) {
+        let properties = { "color": this.props.color, "border": "rgba(0,0,0,0)" };
         if (station.talking == undefined || !station.talking) {
-            return { "color": this.fade(this.props.color) };
+            properties["color"] = this.fade(this.props.color);
         }
-        return { "color": this.props.color };
+        if (station["track_id"] == this.props.white) {
+            properties["border"] = "white";
+        }
+        return properties;
     }
 
     render() {
@@ -28,7 +32,9 @@ class Stations extends Component {
                     key={"circles" + this.props.network}
                     paint={{
                         "circle-color": ["get", "color"],
-                        "circle-radius": 5
+                        "circle-radius": 5,
+                        "circle-stroke-width": 2,
+                        "circle-stroke-color": ["get", "border"],
                     }}>
                     {
                         Object.keys(this.props.stations).map((station_id, k) =>
@@ -48,7 +54,7 @@ class Stations extends Component {
                     "circle-stroke-color": ["get", "color"],
                     "circle-radius": 4,
                     "circle-stroke-width": 3,
-                    "circle-color": "rgba(0,0,0,0)"
+                    "circle-color": ["get", "border"]
                 }}>
                 {
                     Object.keys(this.props.stations).map((station_id, k) =>

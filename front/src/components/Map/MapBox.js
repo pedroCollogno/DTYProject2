@@ -37,14 +37,16 @@ class MapBox extends Component {
             networksToggled: { // the networks to display (by default, only one "center" is displayed for better visualization)
             },
             highlights: { // the networks that are hovered over
-            }
+            },
+            nameNets: false
         };
         for (let label of Object.keys(props.emittors)) {
             this.state.highlights[label] = 0; // at the beginning, networks are not hovered over (supposedly)
         }
         this.mouseEnter = this.mouseEnter.bind(this); // allows those functions to update the state of the component 
         this.mouseExit = this.mouseExit.bind(this); // (here, we want to update highlights)
-        this.center = this.center.bind(this)
+        this.center = this.center.bind(this);
+        this.nameNetworks = this.nameNetworks.bind(this);
     }
 
     /**
@@ -52,7 +54,6 @@ class MapBox extends Component {
      * @param {*} nextProps 
      */
     componentWillReceiveProps(nextProps) {
-        console.log(nextProps);
         if (nextProps && nextProps !== this.props) { // little check, doesn't hurt
             let highlights = {};
             for (let label of Object.keys(nextProps.emittors)) { // eventual new network, along with all the other ones, is not highlighted
@@ -68,7 +69,8 @@ class MapBox extends Component {
                     alpha: 1
                 }),
                 highlights: highlights,
-                networksToggled: nextProps.networksToggled
+                networksToggled: nextProps.networksToggled,
+                white: nextProps.white
             });
         }
     }
@@ -134,6 +136,10 @@ class MapBox extends Component {
         }
         console.log("Color " + network + " is undefined");
         return "#ffffff";
+    }
+
+    nameNetworks() {
+        this.setState({ nameNets: !this.state.nameNets });
     }
 
     render() {
@@ -211,6 +217,10 @@ class MapBox extends Component {
                                 }
                             });
                             let showPotential = (toggled && potentialLinks.length != 0);
+                            let textCenter = "" + emittorsNumber;
+                            if (this.state.nameNets) {
+                                textCenter = network;
+                            }
                             return (
                                 <div id={"cluster" + k} key={"cluster" + k}>
                                     {lines &&// conditionnal rendering
@@ -225,7 +235,7 @@ class MapBox extends Component {
                                             type="symbol"
                                             onClick={() => { this.props.toggleNetwork(network) }}
                                             layout={{
-                                                "text-field": "" + emittorsNumber,
+                                                "text-field": textCenter,
                                                 "text-size": 15,
                                                 "icon-image": "networkCenter",
                                                 "icon-size": 0.08,
@@ -271,7 +281,8 @@ class MapBox extends Component {
                                     {toggled && // conditionnal rendering
                                         <Stations
                                             stations={emittors} network={network}
-                                            color={color} multiple={emittorsNumber > 1} />
+                                            color={color} multiple={emittorsNumber > 1}
+                                            white={this.props.white} />
                                     }
                                     {showPotential &&
                                         <PotentialLines
@@ -291,6 +302,13 @@ class MapBox extends Component {
                     </div>
                     <ZoomControl></ZoomControl>
                     <ScaleControl></ScaleControl>
+                    <div className="widgets-tag">
+                        <a id="network-names-button" onClick={this.nameNetworks}>
+                            <span className="icon">
+                                <FontAwesomeIcon icon='tags' />
+                            </span>
+                        </a>
+                    </div>
 
                 </Map >
             </div >
