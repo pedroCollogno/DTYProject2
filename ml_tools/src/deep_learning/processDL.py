@@ -233,12 +233,13 @@ def process_data(track_streams, file_name):
     pbar2.finish()
 
 
-def create_clusters():
+def create_clusters(ei):
     """
     Creates an object indexed by cluster id from the object indexed by emittor_id. Lets the user choose the PRP to process
 
     :return: Object indexed by cluster_id containing list of emittor_id and object indexed by emittor_id containing steps
 
+    """
     """
     root = tk.Tk()
     root.withdraw()
@@ -246,7 +247,7 @@ def create_clusters():
     root.update()
     track_streams = get_track_streams_from_prp(file_path)
     ei = process_data_clusters(track_streams, file_path)
-
+"""
     i = 0
     for k in ei:
         if ei[k]['network'] >= i:

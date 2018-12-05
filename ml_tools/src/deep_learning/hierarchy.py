@@ -17,7 +17,7 @@ if __name__ == "__main__":
         os.path.dirname(file_dir)))
 from utils import config
 from utils.loading import get_track_streams_from_prp
-from processDL import process_data_clusters
+from processDL import process_data_clusters, create_clusters
 WEIGHTS_DIR=config['PATH']['weights']
 
 
@@ -26,7 +26,7 @@ def train_hierarchy():
     """ Trains and saves the weights of the model on generated data
     """
     model=Sequential()
-    model.add(LSTM(units=128, input_shape=(1, 1000)))
+    model.add(LSTM(units=128, input_shape=(None, 1)))
     model.add(Dropout(0.5))
     model.add(Dense(3, activation="softmax"))
     my_callbacks = [
@@ -34,7 +34,7 @@ def train_hierarchy():
     model.compile(loss='sparse_categorical_crossentropy', optimizer='rmsprop', metrics=[
                   'accuracy', metrics.f1_score_threshold(), metrics.precision_threshold(), metrics.recall_threshold()])
 
-    data, labels=create_fake_sequences(10000,1000,40)
+    data, labels=create_fake_sequences(1000,70,20)
     X=np.array(data)
     Y=np.array(labels)
     print(X.shape)
@@ -55,7 +55,7 @@ def test_hierarchy():
     Tests the model on a PRP file
     """
     model=Sequential()
-    model.add(LSTM(units=128, input_shape=(1, 1000)))
+    model.add(LSTM(units=128, input_shape=(None, 1)))
     model.add(Dense(3, activation="softmax"))
     model.compile(loss='sparse_categorical_crossentropy', optimizer='rmsprop', metrics=[
                   'accuracy', metrics.f1_score_threshold(), metrics.precision_threshold(), metrics.recall_threshold()])
@@ -68,10 +68,11 @@ def test_hierarchy():
     emittor_infos= process_data_clusters(track_streams)
     to_predict=[]
     total=0
+    clusters=create_clusters(emittor_infos)
     dicto={}
     for k in emittor_infos:
         print("emittor %s in cluster %s" %(k, emittor_infos[k]['network']))
-        prediction=model.predict(np.array(([[emittor_infos[k]['steps'][-1000:]]])))
+        prediction=model.predict(np.array(([[[a] for a in emittor_infos[k]['steps']]])))
         most_likely=prediction.argmax()
         try:
             dicto[emittor_infos[k]['network']].append(most_likely)
@@ -79,18 +80,20 @@ def test_hierarchy():
             dicto[emittor_infos[k]['network']]=[most_likely]
         print(prediction)
         print(most_likely)
+        print(len(emittor_infos[k]['steps']))
         if emittor_infos[k]['network']==1:
-            total+=(emittor_infos[k]['steps'][-1000:]).count(1)/1000.0
+            total+=(emittor_infos[k]['steps']).count(1)/len(emittor_infos[k]['steps'])
         if (most_likely==0):
             print("big chef")
-            print((emittor_infos[k]['steps'][-1000:]).count(1)/1000.0)
+            print((emittor_infos[k]['steps']).count(1)/len(emittor_infos[k]['steps']))
         elif (most_likely==1):
             print("small chef")
-            print((emittor_infos[k]['steps'][-1000:]).count(1)/1000.0)
+            print((emittor_infos[k]['steps']).count(1)/len(emittor_infos[k]['steps']))
         else:
             print("shit unit")
-            print((emittor_infos[k]['steps'][-1000:]).count(1)/1000.0)
+            print((emittor_infos[k]['steps']).count(1)/len(emittor_infos[k]['steps']))
     print(total)
     print(dicto)
+    print(clusters[0])
 #print(test_hierarchy())
 print(test_hierarchy()) 
