@@ -8,8 +8,8 @@ import Dashboard from '../Modal/Dashboard'
 
 // Set fontAwesome icons up -> Define all icons that will be used in the app.
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faUpload, faDownload, faUndo, faPlay, faPause, faLocationArrow, faCheck, faExclamationTriangle, faCircle, faCircleNotch } from '@fortawesome/free-solid-svg-icons'
-library.add(faUpload, faDownload, faUndo, faPlay, faPause, faLocationArrow, faCheck, faExclamationTriangle, faCircle, faCircleNotch)
+import { faUpload, faDownload, faUndo, faPlay, faPause, faLocationArrow, faCheck, faExclamationTriangle, faCircle, faCircleNotch, faTags } from '@fortawesome/free-solid-svg-icons'
+library.add(faUpload, faDownload, faUndo, faPlay, faPause, faLocationArrow, faCheck, faExclamationTriangle, faCircle, faCircleNotch, faTags)
 // Setup complete, import them
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
@@ -124,7 +124,8 @@ class App extends Component {
     this.reset = this.reset.bind(this);
     this.changeShowVal = this.changeShowVal.bind(this);
     this.changeHideVal = this.changeHideVal.bind(this);
-    this.clickRow = this.clickRow.bind(this);
+    this.hoverIn = this.hoverIn.bind(this);
+    this.hoverOut = this.hoverOut.bind(this);
   }
 
 
@@ -316,17 +317,19 @@ class App extends Component {
     this.setState({ hideVal: !this.state.hideVal });
   }
 
-  clickRow(network, emittor) {
-    this.setState({ white: emittor });
-    this.toggleNetwork(network);
+  hoverIn(network, emittor) {
+    if (this.state.networksToggled[network] == true) {
+      this.setState({ white: emittor });
+    }
   }
 
-  getBackgroundStyle(emittor) {
+  hoverOut(emittor) {
     if (this.state.white == emittor) {
-      return ({ borderWidth: 10 });
+      this.setState({ white: "" });
     }
-    return ({ borderWidth: 0 });
   }
+
+
 
   render() {
     return (
@@ -360,7 +363,8 @@ class App extends Component {
           <MapBox emittors={this.state.emittors} recStations={this.state.stations} connection={this.state.connection}
             toggleNetwork={this.toggleNetwork} switchAll={this.switchAll}
             hideAll={this.state.hideAll} showAll={this.state.showAll} networksToggled={this.state.networksToggled}
-            changeHideVal={this.changeHideVal} changeShowVal={this.changeShowVal} hideVal={this.state.hideVal} showVal={this.state.showVal} />
+            changeHideVal={this.changeHideVal} changeShowVal={this.changeShowVal} hideVal={this.state.hideVal} showVal={this.state.showVal}
+            white={this.state.white} />
           {
             <div id="tabletile">
               <table className='table is-hoverable'>
@@ -385,7 +389,8 @@ class App extends Component {
                           {
                             Object.keys(this.state.emittors[key]).map((emittor_id) => {
                               return (
-                                <tr key={this.state.emittors[key][emittor_id].track_id} onClick={() => this.clickRow(key, emittor_id)} style={this.getBackgroundStyle(emittor_id)}>
+                                <tr key={this.state.emittors[key][emittor_id].track_id} onClick={() => this.toggleNetwork(key)} onMouseEnter={() => this.hoverIn(key, emittor_id)}
+                                  onMouseLeave={() => this.hoverOut(emittor_id)}>
                                   <td>{int_to_emittor_type(this.state.emittors[key][emittor_id].emission_type)}</td>
                                   <td>{deg_to_dms(this.state.emittors[key][emittor_id].coordinates.lat)}</td>
                                   <td>{deg_to_dms(this.state.emittors[key][emittor_id].coordinates.lng)}</td>
@@ -414,7 +419,8 @@ class App extends Component {
                           {
                             Object.keys(this.state.emittors[key]).map((emittor_id) => {
                               return (
-                                <tr key={this.state.emittors[key][emittor_id].track_id} onClick={() => this.clickRow(key, emittor_id)} style={this.getBackgroundStyle(emittor_id)}>
+                                <tr key={this.state.emittors[key][emittor_id].track_id} onClick={() => this.toggleNetwork(key)} onMouseEnter={() => this.hoverIn(key, emittor_id)}
+                                  onMouseLeave={() => this.hoverOut(emittor_id)}>
                                   <td>{int_to_emittor_type(this.state.emittors[key][emittor_id].emission_type)}</td>
                                   <td>{deg_to_dms(this.state.emittors[key][emittor_id].coordinates.lat)}</td>
                                   <td>{deg_to_dms(this.state.emittors[key][emittor_id].coordinates.lng)}</td>

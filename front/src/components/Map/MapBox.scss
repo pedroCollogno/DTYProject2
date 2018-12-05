@@ -64,10 +64,33 @@
     height: 28px;
     width: 28px;
     
-
-    a#center-button {       
+    a#center-button {
         color: black;
-        font-size: 1em;
+    }
+
+    span.icon {
+        height: 28px;
+        width: 28px;
+    }
+}
+
+.widgets-tag {
+    text-align: right;
+    position: absolute; 
+    top: 115px; 
+    right: 10px; 
+    box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px; 
+    border: 1px solid rgba(0, 0, 0, 0.1); 
+    bottom: auto; 
+    left: auto;
+    background-color: $grey;
+
+    height: 28px;
+    width: 28px;
+
+    a#network-names-button {
+        color: black;     
+        top:    115px;
     }
 
     span.icon {
