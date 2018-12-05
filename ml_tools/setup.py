@@ -28,7 +28,8 @@ setup(
         'scikit-learn',
         'progressbar',
         'PyGeodesy',
-        'protobuf'
+        'protobuf',
+        'psutil'
     ],  # external packages as dependencies
     zip_safe=False,
 )

@@ -67,6 +67,28 @@ def start_simulation(request):
     send_emittor_to_front({'json': 'containing data'})
     Group('users').send({
         'text': json.dumps({
+            'simulation': 'starting simulation, no clustering'
+        })
+    })
+    manager.reset_thread()
+
+    track_streams = manager.get_track_streams()
+    manager.set_deep(False)
+    manager.set_mix(False)
+    manager.set_display_only(True)
+    manager.get_thread().set_track_streams(*track_streams)
+    manager.get_thread().set_sender_function(send_emittor_to_front)
+    manager.get_thread().start()
+    return render(request, 'back/user_list.html')
+
+
+def start_simulation_mix(request):
+    """
+        Called when lauching the simulation using a mix of DB_Scan and Deep Learning
+    """
+    send_emittor_to_front({'json': 'containing data'})
+    Group('users').send({
+        'text': json.dumps({
             'simulation': 'start using DB_SCAN, corrected by Deep Learning for clustering'
         })
     })
@@ -75,6 +97,7 @@ def start_simulation(request):
     track_streams = manager.get_track_streams()
     manager.set_deep(False)
     manager.set_mix(True)
+    manager.set_display_only(False)
     manager.get_thread().set_track_streams(*track_streams)
     manager.get_thread().set_sender_function(send_emittor_to_front)
     manager.get_thread().start()
@@ -96,6 +119,7 @@ def start_simulation_ml(request):
     track_streams = manager.get_track_streams()
     manager.set_deep(False)
     manager.set_mix(False)
+    manager.set_display_only(False)
     manager.get_thread().set_track_streams(*track_streams)
     manager.get_thread().set_sender_function(send_emittor_to_front)
     manager.get_thread().start()
@@ -118,6 +142,7 @@ def start_simulation_dl(request):
     track_streams = manager.get_track_streams()
     manager.set_deep(True)
     manager.set_mix(False)
+    manager.set_display_only(False)
     manager.get_thread().set_track_streams(*track_streams)
     manager.get_thread().set_sender_function(send_emittor_to_front)
     manager.get_thread().start()

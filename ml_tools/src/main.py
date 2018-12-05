@@ -16,6 +16,7 @@ import json
 import copy
 import logging
 import time
+import psutil
 
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
@@ -40,11 +41,17 @@ class EWHandler:
         """
         self.running = False
         self.paused = False
+
         self.total_duration = 0
         self.progress = 0
-        self.model_handler = None
-        self.current_time = time.time()
         self.last_duration = 0
+
+        self.model_handler = None
+        self.sender_function = None
+
+        self.pid = os.getpid()
+        self.current_time = time.time()
+
 
     def stop(self):
         """
@@ -64,23 +71,26 @@ class EWHandler:
         """
         self.paused = False
 
-    def main(self, *args, debug=False, sender_function=None, use_deep=False, mix=False):
+    def set_sender_function(self, sender_function):
+        """ Sets the current handlers function for sending data
+
+        :param sender_function: the function to use, to send data after processing it
+        """
+        self.sender_function = sender_function
+
+    def main(self, *args, debug=False, use_deep=False, mix=False, display_only=True):
         """Main function.
 
         :param debug: (optional) default is to False, set to True to enter debug mode (more logs)
-        :param sender_function: the function used to send emittors to a frontend.
-            This function is not defined in this package, and can be of any kind.
         :param use_deep: boolean to know if clustering should be done using deep learning or not (using DBScan clustering)
         :param mix: boolean to know if clustering should use a complementary mix of DB_Scan and Deep Learning methods
+        :param display_only: A boolean, True if simulation should not do any clustering, False if otherwise
         """
         self.running = True
         self.paused = False
 
         if debug:
             logger.handlers[1].setLevel(logging.DEBUG)
-        if sender_function is None:
-            raise ValueError(
-                "No sender function, cannot interact with backend.")
 
         all_tracks_data = {}
         self.total_duration = len(args[0])
@@ -104,14 +114,16 @@ class EWHandler:
             latest_track_streams = []
             for arg in args:
                 track_streams.append(arg[:self.progress])
-                begin = max(0, self.progress - j)
+                begin = self.progress - 1
                 latest_track_streams.append(arg[begin:self.progress])
+
             logger.info(
                 "\nMerging info from all stations... Reading %s sensor cycles... Last cycle is cycle n.%s" % (len(track_streams[0]), self.progress))
             prev_tracks_data = copy.deepcopy(all_tracks_data)
 
             global_track_streams, all_tracks_data = fuse_all_station_tracks(
                 *track_streams, prev_tracks_data=prev_tracks_data)
+
             _, latest_tracks_data = fuse_all_station_tracks(
                 *latest_track_streams)
 
@@ -123,14 +135,37 @@ class EWHandler:
                     all_tracks_data[track_id]['talking'] = True
                     all_tracks_data[track_id]['duration'] = latest_tracks_data[track_id]['duration']
                 all_tracks_data[track_id]['read_duration'] = self.last_duration
+                all_tracks_data[track_id]['progress'] = self.progress
+                all_tracks_data[track_id]['total_duration'] = self.total_duration
 
-            self.make_emittor_clusters(global_track_streams,
-                                       all_tracks_data, prev_tracks_data, debug=debug, sender_function=sender_function, use_deep=use_deep, mix=mix)
+            if not display_only:
+                self.make_emittor_clusters(global_track_streams,
+                                           all_tracks_data, prev_tracks_data, debug=debug, use_deep=use_deep, mix=mix)
+            self.send_to_front(all_tracks_data)
             self.progress += j
+
+            py = psutil.Process(pid)
+
+            memory_info = py.memory_info().rss / 1e6
+            memory_percent = py.memory_percent()
+            cpu_percent = py.cpu_percent()
+            cpu_times = py.cpu_times()
+
+            logger.warning('For process %s - memory_info: %.1f' %
+                           (pid, memory_info))
+            logger.warning('For process %s - memory_percent: %s' %
+                           (pid, str(memory_percent)))
+            logger.warning('For process %s - cpu_percent: %s' %
+                           (pid, str(cpu_percent)))
+            logger.warning('For process %s - cpu_times: %s' %
+                           (pid, str(cpu_times)))
+
             time.sleep(0.5)
+
+        # Clear keras backend session, in order to be able to restart once done with a simulation
         K.clear_session()
 
-    def make_emittor_clusters(self, global_track_streams, all_tracks_data, prev_tracks_data, debug=False, sender_function=None, use_deep=False, mix=False):
+    def make_emittor_clusters(self, global_track_streams, all_tracks_data, prev_tracks_data, debug=False, use_deep=False, mix=False):
         """ Makes the whole job of clustering emittors together from tracks
 
             Clusters emittors into networks using DBSCAN clustering algorithm. Updates the
@@ -141,15 +176,14 @@ class EWHandler:
         :param all_tracks_data: Data on all tracks from global_track_streams, as a dictionnary
         :param prev_tracks_data: Data from all tracks from previous cycle batch
         :param debug: (optional) default is to False, set to True to enter debug mode (more logs)
-        :param sender_function: the function used to send emittors to a frontend.
-            This function is not defined in this package, and can be of any kind.
         :param use_deep: boolean to know if clustering should be done using deep learning or not (using DBScan clustering)
         :param mix: boolean to know if clustering should use a complementary mix of DB_Scan and Deep Learning methods
+        :param display_only: A boolean, True if simulation should not do any clustering, False if otherwise
         """
         raw_tracks = []
         self.current_time = time.time()
 
-        if sender_function is None:
+        if self.sender_function is None:
             raise ValueError(
                 "No sender function, cannot interact with backend.")
 
@@ -209,15 +243,11 @@ class EWHandler:
                     track_id = get_track_id(raw_tracks[i])
                 # Need to convert np.int64 to int for JSON format
                 all_tracks_data[track_id]['network_id'] = int(label)
-                all_tracks_data[track_id]['total_duration'] = self.total_duration
-                all_tracks_data[track_id]['progress'] = self.progress
                 all_tracks_data[track_id]['cluster_duration'] = self.last_duration
                 i += 1
 
             logger.info("Found %s networks on the field in %s ms.\n" % (
                 n_cluster, self.last_duration))
-            logger.info("Sending emittors through socket")
-            sender_function(all_tracks_data)
 
         if debug:
             create_new_folder('tracks_json', LOGS_DIR)
@@ -231,7 +261,10 @@ class EWHandler:
             with open(file_path, 'w') as fp:
                 json.dump(all_tracks_data, fp)
 
+    def send_to_front(self, data):
+        """ Sends the data contained in the all_tracks_data, using the object's sender_function
 
-"""This part runs if you run 'python main.py' in the console"""
-if __name__ == '__main__':
-    main(debug=True)
+        :param data: the data to send
+        """
+        logger.info("Sending emittors through socket")
+        self.sender_function(data)

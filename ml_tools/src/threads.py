@@ -10,7 +10,7 @@ class DataProcessThread(threading.Thread):
         This thread processes the Data from track streams set as inputs using ML/DL algorithms
     """
 
-    def __init__(self, debug=False, use_deep=False, mix=False):
+    def __init__(self, debug=False, use_deep=False, mix=False, display_only=True):
         """ Initiates the Thread
 
         :param debug: (optional) (default False) a kwarg to set the debug mode
@@ -20,6 +20,7 @@ class DataProcessThread(threading.Thread):
         self.mix = mix
         self.debug = debug
         self.use_deep = use_deep
+        self.display_only = display_only
 
         self.handler = EWHandler()
         threading.Thread.__init__(self)
@@ -36,6 +37,7 @@ class DataProcessThread(threading.Thread):
         :param sender_function: the function used by the backend to send data
         """
         self.sender_function = sender_function
+        self.handler.set_sender_function(sender_function)
 
     def set_deep(self, deep):
         """ Changes the value of the use_deep attribute
@@ -51,11 +53,18 @@ class DataProcessThread(threading.Thread):
         """
         self.mix = mix
 
+    def set_display_only(self, display_only):
+        """ Changes the value of the display_only attribute
+
+        :param display_only: A boolean, True if simulation should not do any clustering, False if otherwise
+        """
+        self.display_only = display_only
+
     def run(self):
         """ Runs the given thread. 
         """
         self.handler.main(*self.track_streams, debug=self.debug,
-                          sender_function=self.sender_function, use_deep=self.use_deep, mix=self.mix)
+                          use_deep=self.use_deep, mix=self.mix, display_only=self.display_only)
         logger.warning('EWHandler Finished !')
         self.handler = EWHandler()
 

@@ -13,6 +13,7 @@ class EWManager:
         self.track_streams = []
         self.use_deep = False
         self.mix = False
+        self.display_only = True
 
     def add_path(self, path):
         """ Adds a path to the paths attribute
@@ -45,7 +46,7 @@ class EWManager:
         Used to reset the current manager's thread. Called after a simulation is stopped.
         """
         self.thread = DataProcessThread(
-            debug=False, use_deep=self.use_deep, mix=self.mix)
+            debug=False, use_deep=self.use_deep, mix=self.mix, display_only=self.display_only)
 
     def add_track_stream(self, track_stream):
         """ Adds a track_stream to the track_streams attribute
@@ -81,3 +82,11 @@ class EWManager:
         """
         self.mix = mix
         self.thread.set_mix(mix)
+
+    def set_display_only(self, display_only):
+        """ Changes the value of the mix attribute
+
+        :param display_only: A boolean, True if simulation should not do any clustering, False if otherwise
+        """
+        self.display_only = display_only
+        self.thread.set_display_only(display_only)
