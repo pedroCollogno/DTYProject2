@@ -8,8 +8,8 @@ import Dashboard from '../Modal/Dashboard'
 
 // Set fontAwesome icons up -> Define all icons that will be used in the app.
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faUpload, faDownload, faUndo, faPlay, faPause, faLocationArrow, faCheck, faExclamationTriangle, faCircle, faCircleNotch, faTags } from '@fortawesome/free-solid-svg-icons'
-library.add(faUpload, faDownload, faUndo, faPlay, faPause, faLocationArrow, faCheck, faExclamationTriangle, faCircle, faCircleNotch, faTags)
+import { faUpload, faDownload, faUndo, faPlay, faPause, faLocationArrow, faCheck, faExclamationTriangle, faCircle, faCircleNotch, faTags, faInfo, faMagic } from '@fortawesome/free-solid-svg-icons'
+library.add(faUpload, faDownload, faUndo, faPlay, faPause, faLocationArrow, faCheck, faExclamationTriangle, faCircle, faCircleNotch, faTags, faInfo, faMagic)
 // Setup complete, import them
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 

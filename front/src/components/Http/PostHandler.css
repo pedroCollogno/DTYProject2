@@ -41,3 +41,6 @@ article.tile {
   border-radius: 5px; }
   .control-section a, .control-section progress {
     margin: 2px; }
+
+.simulation {
+  padding: 1em; }
