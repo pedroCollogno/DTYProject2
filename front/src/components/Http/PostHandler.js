@@ -290,14 +290,49 @@ class HttpRequestHandler extends Component {
                     <progress className="progress is-medium is-blue item" id="progressbar" value={this.state.progress} max={this.state.total_duration}></progress>
                 </section>
                 {/* "Start simulation" button, active if the posting of the files went ok */}
-                <div className="tile">
-                    <button className="button" id="start-sim-ml-button" disabled={!this.state.loaded} onClick={this.onStartML}>
-                        Simulation with Clustering only</button>
-                    <button className="button" id="start-sim-dl-button" disabled={!this.state.loaded} onClick={this.onStartDL}>
-                        Simulation with Deep Learning only</button>
-                    <button className="button" id="start-sim-button" disabled={!this.state.loaded} onClick={this.onStart}>
-                        Simulation with both techniques</button>
-                </div>
+                <section className="simulation">
+                    <div className="columns">
+                        <div className="buttons has-addons column">
+                            <span className="button" id="start-sim-ml-button" disabled={!this.state.loaded} onClick={this.onStartML}>
+                                <span className="file-icon">
+                                    <FontAwesomeIcon icon='magic' />
+                                </span>
+                                Clustering
+                            </span>
+                            <span className="button">
+                                <span className="icon is-small">
+                                    <FontAwesomeIcon icon='info' />
+                                </span>
+                            </span>
+                        </div>
+                        <div className="buttons has-addons column">
+                            <span className="button" id="start-sim-dl-button" disabled={!this.state.loaded} onClick={this.onStartDL}>
+                                <span className="file-icon">
+                                    <FontAwesomeIcon icon='magic' />
+                                </span>
+                                Emittor-to-Emittor Deep Learning
+                                </span>
+                            <span className="button">                        
+                                <span className="icon is-small">
+                                    <FontAwesomeIcon icon='info' />
+                                </span>
+                            </span>
+                        </div>
+                        <div className="buttons has-addons column">
+                            <span className="button" id="start-sim-button" disabled={!this.state.loaded} onClick={this.onStart}>
+                                <span className="file-icon">
+                                    <FontAwesomeIcon icon='magic' />
+                                </span>
+                                Clustering + Emittor-to-Cluster Deep Learning
+                                </span>
+                            <span className="button">
+                                <span className="icon is-small">
+                                    <FontAwesomeIcon icon='info' />
+                                </span>
+                            </span>
+                        </div>
+                    </div>
+                </section>
             </div>
         )
     }

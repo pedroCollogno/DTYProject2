@@ -2,8 +2,6 @@ import React, { Component } from 'react';
 import Modal from './Modal.js';
 import './Dashboard.css';
 
-import { Bar, Pie, Bubble, Polar, Doughnut } from 'react-chartjs-2';
-
 
 class Dashboard extends Component {
   constructor(props) {
@@ -401,7 +399,7 @@ class Dashboard extends Component {
   render() {
 
     return (
-      <div className="dashboard-button">
+      <div>
         <div className="has-text-centered content">
           <a className="button is-blue" onClick={this.toggleModal}>
             Dashboard
@@ -414,9 +412,9 @@ class Dashboard extends Component {
           title="Dashboard"
         >
           <p>
-            {this.getEmittorList()}
+            
           </p>
-        </Modal>      
+        </Modal>
       </div>
     );
   }
