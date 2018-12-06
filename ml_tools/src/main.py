@@ -182,6 +182,8 @@ class EWHandler:
 
         self.model_handler=None
         self.sender_function=None
+        self.progress_list=[]
+        self.mem_usage_list=[]
 
         self.pid=os.getpid()
         self.cycle_profiler=ProcessProfiler(self.pid)
@@ -288,6 +290,7 @@ class EWHandler:
                                            all_tracks_data, prev_tracks_data, debug=debug, use_deep=use_deep, mix=mix)
             self.send_to_front(all_tracks_data)
 
+            
             self.cycle_profiler.stop()
             memory_data=self.cycle_profiler.get_mean_info()
             memory_data['progress'] = self.progress
@@ -295,13 +298,18 @@ class EWHandler:
             memory_data['read_duration'] = self.read_duration
             memory_data['cluster_duration'] = self.cluster_duration
 
+            self.progress_list.append(self.progress)
+            self.mem_usage_list.append(memory_data['memory_info'])
+
             self.send_to_front({
                 'cycle_mem_info_'+str(self.progress): memory_data
             })
             self.cycle_profiler.reset_profiler()
 
             global_memory_data=self.global_profiler.get_mean_info()
+            global_memory_data['mem_usage_list'] = self.mem_usage_list
             global_memory_data['progress'] = self.progress
+            global_memory_data['progress_list'] = self.progress_list
             global_memory_data['total_duration'] = self.total_duration
             global_memory_data['time_since_init'] = self.end_time
             self.send_to_front({
