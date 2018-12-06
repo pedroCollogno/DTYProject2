@@ -211,8 +211,8 @@ class HttpRequestHandler extends Component {
     componentWillReceiveProps(nextProps) {
         if (nextProps != this.props) {
             this.setState({
-                progress: nextProps.progress,
-                total_duration: nextProps.total_duration
+                progress: nextProps.cycle_mem_info.progress,
+                total_duration: nextProps.cycle_mem_info.total_duration
             })
         }
     }
@@ -312,7 +312,7 @@ class HttpRequestHandler extends Component {
                                 </span>
                                 Emittor-to-Emittor Deep Learning
                                 </span>
-                            <span className="button">                        
+                            <span className="button">
                                 <span className="icon is-small">
                                     <FontAwesomeIcon icon='info' />
                                 </span>

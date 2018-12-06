@@ -132,7 +132,9 @@ class EWHandler:
 
         self.total_duration=0
         self.progress=0
-        self.last_duration=0
+        self.cluster_duration=0
+        self.read_duration=0
+        self.end_time=0
 
         self.model_handler=None
         self.sender_function=None
@@ -140,7 +142,9 @@ class EWHandler:
         self.pid=os.getpid()
         self.cycle_profiler=ProcessProfiler(self.pid)
         self.global_profiler=ProcessProfiler(self.pid)
+        
         self.current_time=time.time()
+        self.init_time=time.time()
 
     def stop(self):
         """
@@ -227,16 +231,13 @@ class EWHandler:
             _, latest_tracks_data=fuse_all_station_tracks(
                 *latest_track_streams)
 
-            self.last_duration=int((time.time() - self.current_time) * 1000)
-            logger.info("Merge done in %s ms !" % self.last_duration)
+            self.read_duration=int((time.time() - self.current_time) * 1000)
+            logger.info("Merge done in %s ms !" % self.read_duration)
 
             for track_id in all_tracks_data.keys():
                 if track_id in latest_tracks_data.keys():
                     all_tracks_data[track_id]['talking']=True
                     all_tracks_data[track_id]['duration']=latest_tracks_data[track_id]['duration']
-                all_tracks_data[track_id]['read_duration']=self.last_duration
-                all_tracks_data[track_id]['progress']=self.progress
-                all_tracks_data[track_id]['total_duration']=self.total_duration
 
             if not display_only:
                 self.make_emittor_clusters(global_track_streams,
@@ -245,21 +246,40 @@ class EWHandler:
 
             self.cycle_profiler.stop()
             memory_data=self.cycle_profiler.get_mean_info()
+            memory_data['progress'] = self.progress
+            memory_data['total_duration'] = self.total_duration
+            memory_data['read_duration'] = self.read_duration
+            memory_data['cluster_duration'] = self.cluster_duration
+
             self.send_to_front({
                 'cycle_mem_info_'+str(self.progress): memory_data
             })
             self.cycle_profiler.reset_profiler()
 
+            global_memory_data=self.global_profiler.get_mean_info()
+            global_memory_data['progress'] = self.progress
+            global_memory_data['total_duration'] = self.total_duration
+            global_memory_data['time_since_init'] = self.end_time
+            self.send_to_front({
+                'global_mem_info': global_memory_data
+            })
+
             self.progress += j
             time.sleep(0.5)
 
         # Clear keras backend session, in order to be able to restart once done with a simulation
+        self.end_time=int((time.time() - self.init_time) * 1000)
+        logger.info("Simulation finished in %s ms !" % self.end_time)
+        
         K.clear_session()
 
         self.global_profiler.stop()
-        memory_data=self.global_profiler.get_mean_info()
+        global_memory_data=self.global_profiler.get_mean_info()
+        global_memory_data['progress'] = self.progress
+        global_memory_data['total_duration'] = self.total_duration
+        global_memory_data['time_since_init'] = self.end_time
         self.send_to_front({
-            'global_mem_info': memory_data
+            'global_mem_info': global_memory_data
         })
         self.global_profiler.reset_profiler()
 
@@ -333,7 +353,7 @@ class EWHandler:
                 logger.error(err)
                 raise ValueError(err)
 
-            self.last_duration=int((time.time() - self.current_time) * 1000)
+            self.cluster_duration=int((time.time() - self.current_time) * 1000)
             for label in y_pred:
                 if use_deep:
                     track_id=ids[i]
@@ -341,11 +361,10 @@ class EWHandler:
                     track_id=get_track_id(raw_tracks[i])
                 # Need to convert np.int64 to int for JSON format
                 all_tracks_data[track_id]['network_id']=int(label)
-                all_tracks_data[track_id]['cluster_duration']=self.last_duration
                 i += 1
 
             logger.info("Found %s networks on the field in %s ms.\n" % (
-                n_cluster, self.last_duration))
+                n_cluster, self.cluster_duration))
 
         if debug:
             create_new_folder('tracks_json', LOGS_DIR)

@@ -41,7 +41,7 @@ class Dashboard extends Component {
       return { modalState: newState };
     });
   }
-  
+
 
   degToDms(deg) {
     let d = Math.floor(deg);
@@ -110,6 +110,9 @@ class Dashboard extends Component {
       }
     }
     var networks = this.props.emittors;
+    var cycle_mem_info = this.props.cycle_mem_info;
+    var global_mem_info = this.props.global_mem_info;
+
     // The id of each network
     var networksIndex = Object.keys(networks).map((network, i) => (
       i
@@ -129,11 +132,11 @@ class Dashboard extends Component {
 
     Object.keys(networks).forEach(element => {
       // The total duration
-      stats.cycle.progress = Object.values(networks[element])[0]['progress']
+      stats.cycle.progress = cycle_mem_info['progress']
       // The read duration 
-      stats.cycle.readDuration = Object.values(networks[element])[0]['read_duration']
+      stats.cycle.readDuration = cycle_mem_info['read_duration']
       // The clustering duration
-      stats.cycle.clusterDuration = Object.values(networks[element])[0]['cluster_duration']
+      stats.cycle.clusterDuration = cycle_mem_info['cluster_duration']
       // The size of each network
       networksLengths.push(Object.keys(networks[element]).length)
       // The type of emission of each network
@@ -389,7 +392,7 @@ class Dashboard extends Component {
                 Network #{this.state.networkSelected}
               </p>
               <div className="panel-block">
-                < Doughnut data={pieData} getElementAtEvent={dataset => this.setState({emittorSelected: dataset[0]._model.label})}/>
+                < Doughnut data={pieData} getElementAtEvent={dataset => this.setState({ emittorSelected: dataset[0]._model.label })} />
               </div>
             </div>
           </div>
@@ -416,7 +419,7 @@ class Dashboard extends Component {
           <p>
             {this.getEmittorList()}
           </p>
-        </Modal>      
+        </Modal>
       </div>
     );
   }

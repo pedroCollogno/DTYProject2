@@ -104,14 +104,14 @@ class App extends Component {
       //        { track_id : {coordinates: { lat: int, lng: int }, ... }
       // }
       stations: {}, // list of the reception stations
+      cycle_mem_info: {}, // 
+      global_mem_info: {}, // 
       connection: "offline", // selcects the style of the map (to be fetched from the Web or locally)
       networksToggled: {}, // the networks toggled : used to highlight them in the list and display them on the map
       showAll: false, // the state of the checkbuttons of the map (combined with networksToggled)
       hideAll: false,
       hideVal: false,
       showVal: false,
-      total_duration: 0,
-      progress: 0,
       white: ""
     };
     // functions that are allowed to update the state of the component
@@ -171,21 +171,18 @@ class App extends Component {
   /**
    * Adds the emittors coming from the backend to the list of the emittors.
    * Stores them as {network_id : {track_id : {coordinates : {lat : int, lng : int}, ...}}}
-   * @param {*} emittors 
+   * @param {*} data 
    */
-  newEmittors(emittors) {
-    console.log("BIIIIITE", emittors)
-    if (emittors) {
-      let emitts = JSON.parse(emittors);
+  newEmittors(data) {
+    if (data) {
+      let d = JSON.parse(data);
       let dic = JSON.parse(JSON.stringify(this.state.emittors));
-      let total_duration = 0;
-      let progress = 0;
       if (dic["-1000"] != undefined) {
         delete dic["-1000"];
       }
-      if (Object.entries(emitts)[0][1]["network_id"] != undefined) {
-        for (let key of Object.keys(emitts)) {
-          let emit = emitts[key];
+      if (Object.entries(d)[0][1]["network_id"] != undefined) {
+        for (let key of Object.keys(d)) {
+          let emit = d[key];
           if (emit.coordinates) {
             let longitude = emit.coordinates.lng;
             if (longitude < -180) {
@@ -198,17 +195,14 @@ class App extends Component {
               dic["" + emit.network_id] = {};
               dic["" + emit.network_id][emit.track_id] = emit;
             }
-
-            total_duration = emit.total_duration;
-
-            if (progress == 0) {
-              progress = emit.progress;
-            }
           }
         }
-        this.setState({ emittors: dic, progress: progress, total_duration: total_duration });
+        this.setState({ emittors: dic });
+      } else if (Object.keys(d)[0].includes("cycle_mem_info")) {
+        this.setState({ cycle_mem_info: d[Object.keys(d)[0]] });
+      } else if (Object.keys(d)[0].includes("global_mem_info")) {
+        this.setState({ global_mem_info: d[Object.keys(d)[0]] });
       }
-
     }
   }
 
@@ -298,14 +292,14 @@ class App extends Component {
       //        { track_id : {coordinates: { lat: int, lng: int }, ... }
       // }
       stations: {}, // list of the reception stations
+      cycle_mem_info: {}, // 
+      global_mem_info: {}, //
       connection: "offline", // selcects the style of the map (to be fetched from the Web or locally)
       networksToggled: {}, // the networks toggled : used to highlight them in the list and display them on the map
       showAll: false, // the state of the checkbuttons of the map (combined with networksToggled)
       hideAll: false,
       hideVal: false,
       showVal: false,
-      total_duration: 0,
-      progress: 0,
       white: ""
     });
   }
@@ -349,8 +343,7 @@ class App extends Component {
               <div className="field switch-container">
                 <input id="switchRoundedOutlinedInfo" type="checkbox" name="switchRoundedOutlinedInfo" className="switch is-rtl is-rounded is-outlined is-info" onChange={this.handleChange} />
                 <label htmlFor="switchRoundedOutlinedInfo"><strong>Switch to {this.getConnection()} map</strong></label>
-                <Dashboard emittors={this.state.emittors}
-                />
+                <Dashboard emittors={this.state.emittors} cycle_mem_info={this.state.cycle_mem_info} global_mem_info={this.state.global_mem_info} />
               </div>
             </div>
           </div>
@@ -444,7 +437,7 @@ class App extends Component {
         </div>
 
         {/* Handles the HTTP requests and their responses from the backend */}
-        <PostHandler getStations={this.getStations} reset={this.reset} getEmittorsPositions={this.getEmittorsPositions} total_duration={this.state.total_duration} progress={this.state.progress} />
+        <PostHandler getStations={this.getStations} reset={this.reset} getEmittorsPositions={this.getEmittorsPositions} cycle_mem_info={this.state.cycle_mem_info} />
 
       </div >
     );
