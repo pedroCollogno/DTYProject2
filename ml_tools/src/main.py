@@ -32,8 +32,15 @@ LOGS_DIR = config['PATH']['logs']
 
 
 class ProcessProfiler:
+    """
+    Profiler class, used to profile data CPU and memory usage by our algorithm.
+    """
 
     def __init__(self, pid):
+        """ Initiate the ProcessProfiler object
+
+        :param pid: the ID of the process to profile
+        """
         self.memory_info = []
         self.memory_percent = []
         self.cpu_percent = []
@@ -42,10 +49,16 @@ class ProcessProfiler:
         self.pid = pid
 
     def start(self):
+        """
+        Starts profiling CPU and memory usage
+        """
         self.profiler_thread = ProfilerThread(self.pid, self)
         self.profiler_thread.start()
 
     def stop(self):
+        """
+        Stops profiling CPU and memory usage
+        """
         if self.profiler_thread is not None:
             self.profiler_thread.stop()
 
@@ -62,41 +75,72 @@ class ProcessProfiler:
         self.profiler_thread.pause()
 
     def reset_profiler(self):
+        """
+        Resets the ProcessProfiler object
+        """
         self.__init__(self.pid)
 
     def add_memory_info(self, memory_info):
+        """ Adds a memory usage measure
+
+        :param memory_info: the measure that was taken
+        """
         self.memory_info.append(memory_info)
 
     def add_memory_percent(self, memory_percent):
+        """ Adds a memory percentage measure
+
+        :param memory_percent: the measure that was taken
+        """
         self.memory_percent.append(memory_percent)
 
     def add_cpu_percent(self, cpu_percent):
+        """ Adds a cpu usage measure in percents
+
+        :param cpu_percent: the measure that was taken
+        """
         self.cpu_percent.append(cpu_percent)
 
     def add_cpu_times(self, cpu_times):
+        """ Adds the time spent by normal processes executing in user mode
+
+        :param cpu_times: the measure that was taken
+        """
         self.cpu_times.append(cpu_times)
 
     def get_memory_info(self):
+        """ Gets the amount of memory used
+        
+        :return: the amount of memory used by this process
+        """
         return self.memory_info
 
     def get_memory_percent(self):
+        """ Gets the memory percentage usage
+        
+        :return: the percentage of memory used by this process
+        """
         return self.memory_percent
 
     def get_cpu_percent(self):
+        """ Gets the CPU percentage usage
+
+        :return: the percentage of CPU used by this process
+        """
         return self.cpu_percent
 
     def get_cpu_times(self):
+        """ Gets the time spent by normal processes executing in user mode
+
+        :return: the time spend by CPU in user mode for this process
+        """
         return self.cpu_times
 
-    def get_all_info(self):
-        return ({
-            'memory_info': self.memory_info,
-            'memory_percent': self.memory_percent,
-            'cpu_percent': self.cpu_percent,
-            'cpu_times': self.cpu_times
-        })
-
     def get_mean_info(self):
+        """ Gets the a summary of the process' CPU and memory usage
+        
+        :return: A dictionnary, containing the mean values for memory and CPU usage
+        """
         return ({
             'memory_info': sum(self.memory_info)/len(self.memory_info),
             'memory_percent': sum(self.memory_percent)/len(self.memory_percent),
@@ -383,5 +427,5 @@ class EWHandler:
 
         :param data: the data to send
         """
-        logger.info("Sending emittors through socket")
+        logger.info("Sending data through socket")
         self.sender_function(data)
