@@ -1,4 +1,4 @@
-from ml_tools.threads import DataProcessThread
+from ml_tools.process_thread import DataProcessThread
 
 
 class EWManager:

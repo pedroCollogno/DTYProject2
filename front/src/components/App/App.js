@@ -174,6 +174,7 @@ class App extends Component {
    * @param {*} emittors 
    */
   newEmittors(emittors) {
+    console.log("BIIIIITE", emittors)
     if (emittors) {
       let emitts = JSON.parse(emittors);
       let dic = JSON.parse(JSON.stringify(this.state.emittors));

@@ -5,8 +5,8 @@
 /node_modules
 
 # map tiles
-cholet-tiles/
-country-vectors/
+*-tiles/
+*-vectors/
 font/
 
 # production

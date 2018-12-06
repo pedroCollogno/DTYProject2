@@ -61,7 +61,7 @@ class DataProcessThread(threading.Thread):
         self.display_only = display_only
 
     def run(self):
-        """ Runs the given thread. 
+        """ Runs the given thread.
         """
         self.handler.main(*self.track_streams, debug=self.debug,
                           use_deep=self.use_deep, mix=self.mix, display_only=self.display_only)
