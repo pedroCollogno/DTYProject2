@@ -130,13 +130,14 @@ class Dashboard extends Component {
     var emitterLat = []
     var emitterLng = []
 
+    // The total duration
+    stats.cycle.progress = cycle_mem_info['progress']
+    // The read duration 
+    stats.cycle.readDuration = cycle_mem_info['read_duration']
+    // The clustering duration
+    stats.cycle.clusterDuration = cycle_mem_info['cluster_duration']
+
     Object.keys(networks).forEach(element => {
-      // The total duration
-      stats.cycle.progress = cycle_mem_info['progress']
-      // The read duration 
-      stats.cycle.readDuration = cycle_mem_info['read_duration']
-      // The clustering duration
-      stats.cycle.clusterDuration = cycle_mem_info['cluster_duration']
       // The size of each network
       networksLengths.push(Object.keys(networks[element]).length)
       // The type of emission of each network
