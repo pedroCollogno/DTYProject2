@@ -219,7 +219,7 @@ class MapBox extends Component {
                             let showPotential = (toggled && potentialLinks.length != 0);
                             let textCenter = "" + emittorsNumber;
                             if (this.state.nameNets) {
-                                textCenter = network;
+                                textCenter = "" + (parseInt(network) + 1);
                             }
                             return (
                                 <div id={"cluster" + k} key={"cluster" + k}>

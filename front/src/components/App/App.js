@@ -403,32 +403,30 @@ class App extends Component {
                 }
                 {
                   Object.keys(this.state.emittors).map((key) => {
-                    if (!this.state.networksToggled[key]) {
-                      return (
-                        <tbody key={key} style={{
-                          borderStyle: this.getBorderStyle(key),
-                          borderColor: this.getBorderColor(key),
-                          borderWidth: 5
-                        }}>
-                          {
-                            Object.keys(this.state.emittors[key]).map((emittor_id) => {
-                              return (
-                                <tr key={this.state.emittors[key][emittor_id].track_id} onClick={() => this.toggleNetwork(key)} onMouseEnter={() => this.hoverIn(key, emittor_id)}
-                                  onMouseLeave={() => this.hoverOut(emittor_id)}>
-                                  <td>{int_to_emittor_type(this.state.emittors[key][emittor_id].emission_type)}</td>
-                                  <td>{deg_to_dms(this.state.emittors[key][emittor_id].coordinates.lat)}</td>
-                                  <td>{deg_to_dms(this.state.emittors[key][emittor_id].coordinates.lng)}</td>
-                                  <td>{round_frequency(this.state.emittors[key][emittor_id].frequency)} MHz</td>
-                                  <td>{show_network(this.state.emittors[key][emittor_id])}</td>
-                                  <td>{show_talking(this.state.emittors[key][emittor_id])}</td>
-                                </tr>
-                              )
-                            })
-                          }
-                          <tr></tr>
-                        </tbody>
-                      )
-                    }
+                    return (
+                      <tbody key={key} style={{
+                        borderStyle: this.getBorderStyle(key),
+                        borderColor: this.getBorderColor(key),
+                        borderWidth: 5
+                      }}>
+                        {
+                          Object.keys(this.state.emittors[key]).map((emittor_id) => {
+                            return (
+                              <tr key={this.state.emittors[key][emittor_id].track_id} onClick={() => this.toggleNetwork(key)} onMouseEnter={() => this.hoverIn(key, emittor_id)}
+                                onMouseLeave={() => this.hoverOut(emittor_id)}>
+                                <td>{int_to_emittor_type(this.state.emittors[key][emittor_id].emission_type)}</td>
+                                <td>{deg_to_dms(this.state.emittors[key][emittor_id].coordinates.lat)}</td>
+                                <td>{deg_to_dms(this.state.emittors[key][emittor_id].coordinates.lng)}</td>
+                                <td>{round_frequency(this.state.emittors[key][emittor_id].frequency)} MHz</td>
+                                <td>{show_network(this.state.emittors[key][emittor_id])}</td>
+                                <td>{show_talking(this.state.emittors[key][emittor_id])}</td>
+                              </tr>
+                            )
+                          })
+                        }
+                        <tr></tr>
+                      </tbody>
+                    )
                   })
                 }
               </table>
