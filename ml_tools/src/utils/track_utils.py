@@ -63,12 +63,10 @@ def get_track_id(track):
         freq = track.itr_measurement.central_freq_hz
         em_type = track.itr_measurement.type
 
-    track_begin_date = int(track_begin_date/100)*100
+    track_begin_date = int(track_begin_date//100)*100
     #freq = int(freq/1000)*1000
 
-    track_id = track_begin_date*100**3 + freq * \
-        100**2 + em_type*100**1
-
+    track_id = track_begin_date*100**3 + freq/100 + em_type*10**1
     return(track_id)
 
 
