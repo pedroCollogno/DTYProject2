@@ -183,6 +183,7 @@ class EWHandler:
         self.sender_function=None
         self.progress_list=[]
         self.mem_usage_list=[]
+        self.cpu_usage_list=[]
         self.read_duration_list=[]
         self.cluster_duration_list=[]
 
@@ -302,6 +303,7 @@ class EWHandler:
 
             self.progress_list.append(self.progress)
             self.mem_usage_list.append(memory_data['memory_info'])
+            self.cpu_usage_list.append(memory_data['cpu_percent'])
             self.read_duration_list.append(self.read_duration)
             self.cluster_duration_list.append(self.cluster_duration)
 
@@ -313,6 +315,7 @@ class EWHandler:
 
             global_memory_data=self.global_profiler.get_mean_info()
             global_memory_data['mem_usage_list'] = self.mem_usage_list
+            global_memory_data['cpu_usage_list'] = self.cpu_usage_list
             global_memory_data['progress'] = self.progress
             global_memory_data['progress_list'] = self.progress_list
             global_memory_data['total_duration'] = self.total_duration
