@@ -19,6 +19,7 @@ class ProfilerThread(threading.Thread):
         :param process_profiler: the parent process_profiler, that created the Thread
         """
         self.running = True
+        self.paused = False
         self.process = psutil.Process()
 
         self.process_profiler = process_profiler
