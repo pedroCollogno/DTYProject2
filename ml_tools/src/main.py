@@ -145,28 +145,24 @@ class ProcessProfiler:
                 'memory_info': sum(self.memory_info)/len(self.memory_info),
                 'memory_percent': sum(self.memory_percent)/len(self.memory_percent),
                 'cpu_percent': sum(self.cpu_percent)/len(self.cpu_percent),
-                'cpu_times': sum(self.cpu_times)/len(self.cpu_times)
             })
         else:
             return({
-                'memory_info': -1,
-                'memory_percent': -1,
-                'cpu_percent': -1,
-                'cpu_times': -1
+                'memory_info': sum(self.memory_info),
+                'memory_percent': sum(self.memory_percent),
+                'cpu_percent': sum(self.cpu_percent),
             })
 
     def log(self):
         """
         Logs the last measured metrics
         """
-        logger.warning('For process %s - memory_info: %.1f' %
-                       (self.pid, sum(self.memory_info)/len(self.memory_info)))
-        logger.warning('For process %s - memory_percent: %s' %
-                       (self.pid, sum(self.memory_percent)/len(self.memory_percent)))
-        logger.warning('For process %s - cpu_percent: %s' %
-                       (self.pid, sum(self.cpu_percent)/len(self.cpu_percent)))
-        logger.warning('For process %s - cpu_times: %s' %
-                       (self.pid, sum(self.cpu_times)/len(self.cpu_times)))
+        logger.warning('For Python processes - memory_info: %.1f' %
+                       (sum(self.memory_info)/len(self.memory_info)))
+        logger.warning('For Python processes - memory_percent: %s' %
+                       (sum(self.memory_percent)/len(self.memory_percent)))
+        logger.warning('For Python processes - cpu_percent: %s' %
+                       (sum(self.cpu_percent)/len(self.cpu_percent)))
 
 
 class EWHandler:

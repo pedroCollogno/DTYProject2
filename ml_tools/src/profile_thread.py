@@ -20,20 +20,38 @@ class ProfilerThread(threading.Thread):
         """
         self.running = True
         self.paused = False
-        self.process = psutil.Process()
+        self.processes = self.get_python_processes()
 
         self.process_profiler = process_profiler
         threading.Thread.__init__(self)
+
+    def get_python_processes(self):
+        processes = []
+        for proc in psutil.process_iter():
+            try:
+                pinfo = proc.as_dict(
+                    attrs=['pid', 'name', 'username'])
+                if 'Python' in pinfo['name'] or 'python' in pinfo['name'] : # Monitor all Python processes
+                    processes.append(proc)
+            except psutil.NoSuchProcess as err:
+                logger.error(err)
+        return processes
 
     def measure(self):
         """
         Make a measurement for the process
         """
-        self.process_profiler.add_memory_info(self.process.memory_info().rss /  # Replace by "Add To Manager" functions
-                                              1e6)  # Memory usage in MegaBytes
-        self.process_profiler.add_memory_percent(self.process.memory_percent())
-        self.process_profiler.add_cpu_percent(self.process.cpu_percent())
-        self.process_profiler.add_cpu_times(self.process.cpu_times().user)
+        total_mem_info = 0
+        total_mem_percent = 0
+        total_cpu_percent = 0
+        for process in self.processes:
+            total_mem_info += process.memory_info().rss
+            total_mem_percent += process.memory_percent()
+            total_cpu_percent += process.cpu_percent()
+
+        self.process_profiler.add_memory_info(total_mem_info / 1e6)  # Memory usage in MegaBytes
+        self.process_profiler.add_memory_percent(total_mem_percent)
+        self.process_profiler.add_cpu_percent(total_cpu_percent)
 
     def run(self):
         """
