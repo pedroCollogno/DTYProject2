@@ -66,11 +66,20 @@ class HttpRequestHandler extends Component {
     }
 
     /**
-     * Triggered when the "Simulation with both techniques" button is pushed. Starts the simulation. 
+     * Triggered when the "Just run" button is pushed. Starts the simulation. 
      * @param {*} e 
      */
     onStart(e) {
         axios.get("http://localhost:8000/startsimulation")
+            .then((res) => console.log("Simulation started !"));
+    }
+
+    /**
+     * Triggered when the "Simulation with both techniques" button is pushed. Starts the simulation. 
+     * @param {*} e 
+     */
+    onStartMix(e) {
+        axios.get("http://localhost:8000/startsimulationMix")
             .then((res) => console.log("Simulation started !"));
     }
 
@@ -217,6 +226,35 @@ class HttpRequestHandler extends Component {
         }
     }
 
+    getProgressStart() {
+        let delta = "0:00"
+        if (this.state.progress) {
+            let d = new Date()
+            let date_delta = new Date(this.state.progress * 1000 + d.getTimezoneOffset() * 60000)
+            if (date_delta.getHours()) {
+                delta = "" + date_delta.getHours() + ":" + date_delta.getMinutes();
+            } else if (date_delta.getMinutes()) {
+                delta = "" + date_delta.getMinutes() + ":" + date_delta.getSeconds();
+            }
+        }
+        return delta
+    }
+
+
+    getProgressEnd() {
+        let delta = "0:00"
+        if (this.state.progress) {
+            let d = new Date()
+            let date_delta = new Date(this.state.total_duration * 1000 + d.getTimezoneOffset() * 60000)
+            if (date_delta.getHours()) {
+                delta = "" + date_delta.getHours() + ":" + date_delta.getMinutes();
+            } else if (date_delta.getMinutes()) {
+                delta = "" + date_delta.getMinutes() + ":" + date_delta.getSeconds();
+            }
+        }
+        return delta
+    }
+
     render() {
         return (
             <div>
@@ -287,11 +325,26 @@ class HttpRequestHandler extends Component {
                             <FontAwesomeIcon icon='pause' />
                         </span>
                     </a>
-                    <progress className="progress is-medium is-blue item" id="progressbar" value={this.state.progress} max={this.state.total_duration}></progress>
+                    <span className="button time-before">{this.getProgressStart()}</span>
+                    <progress className="progress is-medium is-blue" value={this.state.progress} max={this.state.total_duration}></progress>
+                    <span className="button time-after">{this.getProgressEnd()}</span>
                 </section>
                 {/* "Start simulation" button, active if the posting of the files went ok */}
                 <section className="simulation">
                     <div className="columns">
+                        <div className="buttons has-addons column">
+                            <span className="button" id="start-sim-ml-button" disabled={!this.state.loaded} onClick={this.onStart}>
+                                <span className="file-icon">
+                                    <FontAwesomeIcon icon='magic' />
+                                </span>
+                                Just Run
+                            </span>
+                            <span className="button">
+                                <span className="icon is-small">
+                                    <FontAwesomeIcon icon='info' />
+                                </span>
+                            </span>
+                        </div>
                         <div className="buttons has-addons column">
                             <span className="button" id="start-sim-ml-button" disabled={!this.state.loaded} onClick={this.onStartML}>
                                 <span className="file-icon">
@@ -310,7 +363,7 @@ class HttpRequestHandler extends Component {
                                 <span className="file-icon">
                                     <FontAwesomeIcon icon='magic' />
                                 </span>
-                                Emittor-to-Emittor Deep Learning
+                                Emittor-to-Emittor DL
                                 </span>
                             <span className="button">
                                 <span className="icon is-small">
@@ -319,11 +372,11 @@ class HttpRequestHandler extends Component {
                             </span>
                         </div>
                         <div className="buttons has-addons column">
-                            <span className="button" id="start-sim-button" disabled={!this.state.loaded} onClick={this.onStart}>
+                            <span className="button" id="start-sim-button" disabled={!this.state.loaded} onClick={this.onStartMix}>
                                 <span className="file-icon">
                                     <FontAwesomeIcon icon='magic' />
                                 </span>
-                                Clustering + Emittor-to-Cluster Deep Learning
+                                Clustering + Emittor-to-Cluster DL
                                 </span>
                             <span className="button">
                                 <span className="icon is-small">

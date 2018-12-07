@@ -35,12 +35,18 @@ article.tile {
 .control-section {
   display: flex;
   align-items: center;
+  align-content: center;
   margin-left: 1em;
   margin-right: 1em;
   background-color: #6f6f6f;
-  border-radius: 5px; }
-  .control-section a, .control-section progress {
+  border-radius: 5px;
+  color: #eeeeee; }
+  .control-section a, .control-section progress, .control-section span {
     margin: 2px; }
+  .control-section .progress:not(:last-child) {
+    margin-bottom: 0px; }
+  .control-section .time-after, .control-section .time-before {
+    background-color: #e1e1e1; }
 
 .simulation {
   padding: 1em; }
