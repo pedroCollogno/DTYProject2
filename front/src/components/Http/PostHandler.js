@@ -20,11 +20,12 @@ class HttpRequestHandler extends Component {
             files: [], // Contains all the uploaded files
             savedFiles: [], // copy of the uploaded files to easily switch simulation modes
             fileNames: {}, // Contains all the uploaded files names (useful to avoid posting the same file twice)
-            loaded: false, // Did the posting of the files go well ?
+            loaded: undefined, // Did the posting of the files go well ?
             dropText: "Or drop your .PRP files here !", // Text to display in the drop zone
             inputFiles: [],
             progress: 0,
             total_duration: 0,
+            network_num: 0,
             playing: true
         };
         this.postFiles = this.postFiles.bind(this); // functions allowed to update the state of the component
@@ -141,6 +142,7 @@ class HttpRequestHandler extends Component {
     fileUpload(files) {
         return this.reset()
             .then((res) => {
+                this.setState({ loaded: false });
                 const url = 'http://localhost:8000/upload'; // server route to POST request
                 const formData = new FormData();
                 let i = 0;
@@ -191,7 +193,7 @@ class HttpRequestHandler extends Component {
                 this.setState({
                     files: [],
                     fileNames: {},
-                    loaded: false,
+                    loaded: undefined,
                     dropText: "Or drop your .PRP files here !",
                     inputFiles: []
                 });
@@ -206,7 +208,7 @@ class HttpRequestHandler extends Component {
             this.setState({
                 files: [],
                 fileNames: {},
-                loaded: false,
+                loaded: undefined,
                 dropText: "Or drop your .PRP files here !",
                 inputFiles: []
             });
@@ -231,7 +233,7 @@ class HttpRequestHandler extends Component {
                 this.setState({
                     files: [],
                     fileNames: {},
-                    loaded: false,
+                    loaded: undefined,
                     dropText: "Or drop your .PRP files here !",
                     inputFiles: []
                 });
@@ -271,7 +273,8 @@ class HttpRequestHandler extends Component {
         if (nextProps != this.props) {
             this.setState({
                 progress: nextProps.cycle_mem_info.progress,
-                total_duration: nextProps.cycle_mem_info.total_duration
+                total_duration: nextProps.cycle_mem_info.total_duration,
+                network_num: nextProps.network_num
             })
         }
     }
@@ -305,6 +308,21 @@ class HttpRequestHandler extends Component {
         return delta
     }
 
+    loading_spinner() {
+        console.log("PATATE", this.state.network_num)
+        console.log("MOUTON", this.state.loaded)
+
+        if (this.state.network_num == 0 && this.state.loaded != undefined) {
+            return (
+                <div id='spinner'>
+                    <div class="lds-ripple"><div></div><div></div></div>
+                </div>
+            )
+        } else {
+            return
+        }
+
+    }
 
     getProgressEnd() {
         let delta = "0:00"
@@ -337,6 +355,7 @@ class HttpRequestHandler extends Component {
     render() {
         return (
             <div>
+                {this.loading_spinner()}
                 <form onSubmit={(e) => this.onFormSubmit(e)}>
                     <div className="tile is-ancestor is-vertical">
                         <div className="tile">
@@ -390,6 +409,7 @@ class HttpRequestHandler extends Component {
                                     </div>
                                 </article>
                             </div>
+
                         </div>
                     </div>
                 </form>

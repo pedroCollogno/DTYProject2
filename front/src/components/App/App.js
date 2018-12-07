@@ -204,7 +204,7 @@ class App extends Component {
                   emit.coordinates.lng = longitude + 360;
                 }
                 if (dic["" + emit.network_id] && dic["" + emit.network_id][emit.track_id] == undefined) {
-                  let id = "" + emit.network_id + "_" + Object.keys(dic["" + emit.network_id]).length;
+                  let id = "" + (emit.network_id + 1) + "_" + (Object.keys(dic["" + emit.network_id]).length + 1);
                   dic["" + emit.network_id][emit.track_id] = emit;
                   dic["" + emit.network_id][emit.track_id]["id"] = id;
 
@@ -212,7 +212,7 @@ class App extends Component {
                 else {
                   dic["" + emit.network_id] = {};
                   dic["" + emit.network_id][emit.track_id] = emit;
-                  dic["" + emit.network_id][emit.track_id]["id"] = "" + emit.network_id + "_0";
+                  dic["" + emit.network_id][emit.track_id]["id"] = "" + (emit.network_id + 1) + "_1";
                 }
               }
             }
@@ -482,7 +482,7 @@ class App extends Component {
 
         {/* Handles the HTTP requests and their responses from the backend */}
         <PostHandler getStations={this.getStations} reset={this.reset} changeSimulationMode={this.changeSimulationMode}
-          getEmittorsPositions={this.getEmittorsPositions} cycle_mem_info={this.state.cycle_mem_info} />
+          getEmittorsPositions={this.getEmittorsPositions} cycle_mem_info={this.state.cycle_mem_info} network_num={Object.keys(this.state.emittors).length} />
 
       </div >
     );
