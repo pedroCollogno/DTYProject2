@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import Modal from './Modal.js';
 import './Dashboard.css';
 
-import { Bar, Pie, Bubble, Polar, Doughnut } from 'react-chartjs-2';
+import { Bar, Pie, Bubble, Polar, Doughnut, Line } from 'react-chartjs-2';
 
 
 class Dashboard extends Component {
@@ -19,22 +19,10 @@ class Dashboard extends Component {
     this.getEmittorList = this.getEmittorList.bind(this);
     this.rainbow = this.rainbow.bind(this);
     this.handleChange = this.handleChange.bind(this);
-    this.clickEvent = this.clickEvent.bind(this);
     this.degToDms = this.degToDms.bind(this);
   }
 
-  clickEvent(c, i) {
-    console.log(c, i)
-    // e = i[0];
-    // console.log(e._index)
-    // var x_value = this.data.labels[e._index];
-    // var y_value = this.data.datasets[0].data[e._index];
-    // console.log(x_value);
-    // console.log(y_value);
-  }
-
   toggleModal() {
-    console.log(this.props.emittors[0])
     this.setState((prev, props) => {
       const newState = !prev.modalState;
 
@@ -100,7 +88,9 @@ class Dashboard extends Component {
       cycle: {
         progress: 0,
         clusterDuration: 0,
-        readDuration: 0
+        readDuration: 0,
+        memoryUsageList: 0,
+        progressList: 0
       },
       emittor: {
         id: null,
@@ -136,6 +126,10 @@ class Dashboard extends Component {
     stats.cycle.readDuration = cycle_mem_info['read_duration']
     // The clustering duration
     stats.cycle.clusterDuration = cycle_mem_info['cluster_duration']
+    // Cumulative memory usage
+    stats.cycle.memoryUsageList = global_mem_info['mem_usage_list']
+    // Progress list since start
+    stats.cycle.progressList = global_mem_info['progress_list']
 
     Object.keys(networks).forEach(element => {
       // The size of each network
@@ -179,8 +173,18 @@ class Dashboard extends Component {
     // }
 
 
+    // ---------------- LINE CHART DATA ----------------
 
-    console.log('networks', networks)
+    const lineData = {
+      labels: stats.cycle.progressList || [],
+      datasets:[{
+        label: "Memory usage",
+        data: stats.cycle.memoryUsageList || []
+      }]
+    }
+    console.log(lineData)
+
+    // ---------------- BAR CHART DATA ----------------
 
     var valuesEVF = []
     var valuesFF = []
@@ -231,7 +235,6 @@ class Dashboard extends Component {
           data: valuesBurst,
         }],
       options: {
-        'onClick': this.clickEvent(),
         scales: {
           xAxes: [{
             stacked: true,
@@ -245,6 +248,8 @@ class Dashboard extends Component {
         }
       }
     }
+
+    // ---------------- PIE CHART DATA ----------------
 
     var dataEmittors = {}
 
@@ -283,59 +288,39 @@ class Dashboard extends Component {
         hoverBackgroundColor: pieColors
       }]
     }
+
+
     return (
       <div className="column">
-        {/* <div className="level">
-          <div className="level-right">
-            <div className="level-item">
-              <div className="control">
-                <div className="select">
-                  <select value={this.state.networkSelected} onChange={this.handleChange}>
-                    {networksIndex.map((i) => {
-                      return (<option value={i} key={i}>{i}</option>)
-                    })}
-                  </select>
+        <div className="columns is-multiline">
+          {/* <div className="column is-3">
+              <div className="panel">
+                <p className="panel-heading">
+                  All Networks
+                        </p>
+                <div className="panel-block">
+                  < Line ref='linechart' data={lineData}/>
                 </div>
               </div>
-            </div>
-          </div>
-        </div> */}
-
-        <div className="columns is-multiline">
-          <div className="column">
+            </div> */}
+          <div className="column is-third">
             <div className="box">
-              <div className="heading">All Networks</div>
-              <div className="dashboard title">{stats.networks.numberNetworks}</div>
               <div className="level">
                 <div className="level-item">
-                  <div className="">
-                    <div className="heading">Burst</div>
-                    <div className="dashboard title is-5">{stats.networks.numberBurst}</div>
-                  </div>
+                < Line ref='linechart' data={lineData}/>
                 </div>
-                <div className="level-item">
-                  <div className="">
-                    <div className="heading">FF</div>
-                    <div className="dashboard title is-5">{stats.networks.numberFF}</div>
-                  </div>
-                </div>
-                <div className="level-item">
-                  <div className="">
-                    <div className="heading">EVF</div>
-                    <div className="dashboard title is-5">{stats.networks.numberEVF}</div>
-                  </div>
-                </div>
+          
               </div>
             </div>
-          </div>
-          <div className="column">
+          </div> */}
+          <div className="column is-third">
             <div className="box">
               <div className="heading">Cycle</div>
               <div className="dashboard title">#{stats.cycle.progress}</div>
               <div className="level">
                 <div className="level-item">
                   <div className="">
-                    <div className="heading">Data merging</div>
+                    <div className="heading">Data processing</div>
                     <div className="dashboard title is-5">{stats.cycle.readDuration}ms</div>
                   </div>
                 </div>
@@ -348,7 +333,7 @@ class Dashboard extends Component {
               </div>
             </div>
           </div>
-          <div className="column is-6">
+          <div className="column is-third">
             <div className="box">
               <div className="heading">Emittor</div>
               <div className="dashboard title">#{stats.emittor.id}</div>
@@ -390,7 +375,7 @@ class Dashboard extends Component {
           <div className="column is-6">
             <div className="panel">
               <p className="panel-heading">
-                Network #{this.state.networkSelected}
+                Network #{this.state.networkSelected} : speaking times
               </p>
               <div className="panel-block">
                 < Doughnut data={pieData} getElementAtEvent={dataset => this.setState({ emittorSelected: dataset[0]._model.label })} />
