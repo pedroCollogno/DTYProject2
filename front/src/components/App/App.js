@@ -13,7 +13,6 @@ library.add(faUpload, faDownload, faUndo, faPlay, faPause, faStop, faLocationArr
 // Setup complete, import them
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
-
 function deg_to_dms(deg) {
   let d = Math.floor(deg);
   let minfloat = (deg - d) * 60;

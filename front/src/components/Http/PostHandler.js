@@ -5,6 +5,13 @@ import './PostHandler.css';
 import PropTypes from "prop-types";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
+window.onunload = () => {
+    var request = new XMLHttpRequest();
+    request.open('GET', 'http://localhost:8000/stopsimulation', false);  // `false` makes the request synchronous
+    request.send(null);
+}
+
+
 class HttpRequestHandler extends Component {
 
     constructor(props) {
@@ -217,6 +224,7 @@ class HttpRequestHandler extends Component {
                 this.handleResetError(error);
             });
     }
+
 
     play() {
         this.setState({ playing: true });
