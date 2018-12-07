@@ -202,12 +202,12 @@ class App extends Component {
               }
             }
             this.setState({ emittors: dic });
+          } else if (Object.keys(d)[0].includes("cycle_mem_info")) {
+            this.setState({ cycle_mem_info: d[Object.keys(d)[0]] });
+          } else if (Object.keys(d)[0].includes("global_mem_info")) {
+            this.setState({ global_mem_info: d[Object.keys(d)[0]] });
           }
         }
-      } else if (Object.keys(d)[0].includes("cycle_mem_info")) {
-        this.setState({ cycle_mem_info: d[Object.keys(d)[0]] });
-      } else if (Object.keys(d)[0].includes("global_mem_info")) {
-        this.setState({ global_mem_info: d[Object.keys(d)[0]] });
       }
     }
   }
