@@ -47,13 +47,23 @@ article.tile {
 .control-section {
     display: flex;
     align-items: center;
+    align-content: center;
     margin-left: 1em;
     margin-right: 1em;
-    a, progress{
+    a, progress, span{
         margin: 2px;
     }
     background-color: darken($grey, 50);
     border-radius: 5px;
+    color: $grey;
+
+    .progress:not(:last-child) {
+        margin-bottom: 0px;
+    }
+
+    .time-after, .time-before {
+        background-color: darken($grey, 5)
+    }
 }
 
 .simulation {
