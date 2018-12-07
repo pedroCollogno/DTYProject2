@@ -75,6 +75,9 @@ class MapBox extends Component {
         }
     }
 
+    /**
+     * Centers the map on a "relevant" point (Paris by default, the first emittor if .PRP files have already been uploaded)
+     */
     center() {
         let keys = this.state.networksLabels;
         if (keys.length === 0) {
@@ -85,8 +88,8 @@ class MapBox extends Component {
     }
 
     /**
-     * returns the geometric center of all the points of the network, for simpler rendering
-     * @param {*} network 
+     * Returns the geometric center of all the points of the network, for simpler rendering
+     * @param {String} network 
      */
     clusterCenter(network) {
         let x = 0;
@@ -102,8 +105,8 @@ class MapBox extends Component {
     }
 
     /**
-     * when hovering over a network center, highlights it
-     * @param {*} network 
+     * When hovering over a network center, highlights it
+     * @param {String} network 
      */
     mouseEnter(network) {
         let highlights = JSON.parse(JSON.stringify(this.state.highlights));
@@ -113,7 +116,7 @@ class MapBox extends Component {
 
     /**
      * when the pointer leaves, removes the highlight
-     * @param {*} network 
+     * @param {String} network 
      */
     mouseExit(network) {
         let highlights = JSON.parse(JSON.stringify(this.state.highlights));
@@ -123,7 +126,7 @@ class MapBox extends Component {
 
     /**
      * gets the color of each network (white if null)
-     * @param {*} network 
+     * @param {String} network 
      */
     getColor(network) {
         let networkNumber = parseInt(network);
@@ -138,6 +141,9 @@ class MapBox extends Component {
         return "#ffffff";
     }
 
+    /**
+     * Toggles between the network names and their emittors numbers (triggered when clicking the "labels" button)
+     */
     nameNetworks() {
         this.setState({ nameNets: !this.state.nameNets });
     }
@@ -158,9 +164,9 @@ class MapBox extends Component {
                         height: "100%",
                         width: "100%"
                     }}
-                    ref={(e) => { this.map = e; }}
-                    onStyleLoad={(map) => {
-                        map.addImage("recStation", htmlRecImage);
+                    ref={(e) => { this.map = e; }} // Allows direct references to the map (and thus direct actions e.g. "map.flyTo()")
+                    onStyleLoad={(map) => { // Adds the HTML images as sources for later use in Layer components
+                        map.addImage("recStation", htmlRecImage); // The reference name for this image
                         map.addImage("networkCenter", htmlCenterImage);
                     }}
                 >
@@ -180,6 +186,7 @@ class MapBox extends Component {
                             </label>
                         </div>
                     </div>
+
                     <Layer id="recStations" key="recStations" type="symbol" layout={{
                         "icon-image": "recStation",
                         "icon-size": 0.03
@@ -191,32 +198,37 @@ class MapBox extends Component {
                             )
                         }
                     </Layer>
+
                     {
                         this.state.networksLabels.map((network, k) => {
                             // Displays every network using 3 Layers : "center" which contains only the center of the
                             // network, Stations which contains all the actual emittors of the network and Lines which
                             // contains the connections between each node of the network.
                             // Those last 2 are rendered uniquely when toggled or if showAll is active.
-                            let clusterCenter = this.clusterCenter(network);
-                            let color = this.getColor(network);
-                            let emittors = this.state.emittors[network];
+                            let clusterCenter = this.clusterCenter(network); // the center coordinates
+                            let color = this.getColor(network); // the color of the network
+                            let emittors = this.state.emittors[network]; // al the emittors in this network
                             let emittorsNumber = Object.keys(emittors).length;
                             let toggled = this.state.networksToggled[network];
                             toggled = !(toggled == undefined || !toggled);
                             toggled = !this.props.hideAll && (toggled || this.props.showAll);
                             toggled = (emittorsNumber == 1) || toggled;
                             // toggled is True if it's defined, not manually de-toggled (= False) and hideAll is not active
-                            // or simply if showAll is active. Single emittors are always displayed. 
-                            let lines = toggled && (network != "-1000");
-                            let potentialLinks = [];
+                            // or simply if showAll is active. Single emittors are always displayed.
+
+                            let lines = toggled && (network != "-1000"); // We show the lines if the network is toggled.
+                            // At the beginning, no line should be shown (the emittors are shown as a cloud of unconnected points).
+
+                            let potentialLinks = []; // When using both ML and DL : list of all the corrected potential links given by the DL
                             Object.keys(emittors).map((track_id, keyy) => {
                                 let potentialNetwork = emittors[track_id]["possible_network"];
-                                if (potentialNetwork != undefined && potentialNetwork != network) {
+                                if (potentialNetwork != undefined && potentialNetwork != network) { // If there was a match with another network...
                                     potentialLinks.push([[emittors[track_id]["coordinates"]["lng"], emittors[track_id]["coordinates"]["lat"]],
-                                    this.clusterCenter(potentialNetwork)]);
+                                    this.clusterCenter(potentialNetwork)]); // ...the link between the emittors coordinates and the other network's center's coordiantes is saved.
                                 }
                             });
-                            let showPotential = (toggled && potentialLinks.length != 0);
+
+                            let showPotential = (toggled && potentialLinks.length != 0); // We only
                             let textCenter = "" + emittorsNumber;
                             if (this.state.nameNets) {
                                 textCenter = "" + (parseInt(network) + 1);

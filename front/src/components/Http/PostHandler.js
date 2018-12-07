@@ -11,27 +11,36 @@ class HttpRequestHandler extends Component {
         super(props);
         this.state = {
             files: [], // Contains all the uploaded files
+            savedFiles: [], // copy of the uploaded files to easily switch simulation modes
             fileNames: {}, // Contains all the uploaded files names (useful to avoid posting the same file twice)
             loaded: false, // Did the posting of the files go well ?
             dropText: "Or drop your .PRP files here !", // Text to display in the drop zone
             inputFiles: [],
             progress: 0,
-            total_duration: 0
+            total_duration: 0,
+            playing: true
         };
-        this.onFormSubmit = this.onFormSubmit.bind(this); // functions allowed to update the state of the component
+        this.postFiles = this.postFiles.bind(this); // functions allowed to update the state of the component
         this.onChange = this.onChange.bind(this);
         this.fileUpload = this.fileUpload.bind(this);
         this.onDrop = this.onDrop.bind(this);
         this.reset = this.reset.bind(this);
+        this.play = this.play.bind(this);
+        this.pause = this.pause.bind(this);
+        this.stop = this.stop.bind(this);
     }
 
     /**
-     * Called when the from is submitted. Posts the data and checks the response of the backend
+     * Called when the form is submitted. Posts the data and checks the response of the backend
      * @param {*} e 
      */
     onFormSubmit(e) {
         e.preventDefault() // Stops form submit
-        this.fileUpload(this.state.files).then((res1) => {
+        this.postFiles(this.state.files);
+    }
+
+    postFiles(files) {
+        this.fileUpload(files).then((res1) => {
             console.log(res1.data); // Should be "POST ok !"
             if (res1.data === "POST ok !") {
                 axios.get("http://localhost:8000/getstations") // GETs the locations of the reception stations...
@@ -121,6 +130,7 @@ class HttpRequestHandler extends Component {
                         'content-type': 'multipart/form-data'
                     }
                 }
+
                 return axios.post(url, formData, config) // sends POST request
             })
 
@@ -146,7 +156,10 @@ class HttpRequestHandler extends Component {
         }
     }
 
-
+    /**
+     * Handles any error that might happen when resetting the simulation.
+     * @param {*} error 
+     */
     handleResetError(error) {
         // Error
         if (error.response) {
@@ -179,7 +192,6 @@ class HttpRequestHandler extends Component {
             // Something happened in setting up the request that triggered an Error
             console.log('Error', error.message);
         }
-        // console.log(error.config);
     }
 
     /**
@@ -189,6 +201,9 @@ class HttpRequestHandler extends Component {
         return axios.get("http://localhost:8000/stopsimulation")
             .then((res) => {
                 console.log("Simulation stopped !");
+                if (this.state.savedFiles.length == 0) {
+                    this.setState({ savedFiles: this.state.files });
+                }
                 this.setState({
                     files: [],
                     fileNames: {},
@@ -204,6 +219,7 @@ class HttpRequestHandler extends Component {
     }
 
     play() {
+        this.setState({ playing: true });
         axios.get("http://localhost:8000/playsimulation")
             .then((res) => {
                 console.log("Simulation restarting after pause !");
@@ -211,12 +227,21 @@ class HttpRequestHandler extends Component {
     }
 
     pause() {
+        this.setState({ playing: false });
         axios.get("http://localhost:8000/pausesimulation")
             .then((res) => {
                 console.log("Simulation paused !");
             });
     }
 
+    stop() {
+        this.postFiles(this.state.savedFiles);
+    }
+
+    /**
+     * Updates the progress bar.
+     * @param {*} nextProps 
+     */
     componentWillReceiveProps(nextProps) {
         if (nextProps != this.props) {
             this.setState({
@@ -225,6 +250,7 @@ class HttpRequestHandler extends Component {
             })
         }
     }
+
 
     getProgressStart() {
         let delta = "0:00"
@@ -258,7 +284,7 @@ class HttpRequestHandler extends Component {
     render() {
         return (
             <div>
-                <form onSubmit={this.onFormSubmit}>
+                <form onSubmit={(e) => this.onFormSubmit(e)}>
                     <div className="tile is-ancestor is-vertical">
                         <div className="tile">
                             <div className="tile is-parent" id="upload-tile">
@@ -315,14 +341,19 @@ class HttpRequestHandler extends Component {
                     </div>
                 </form>
                 <section className="control-section">
-                    <a className="button item" onClick={this.play}>
-                        <span className="icon is-small">
+                    <a className="button item" onClick={this.play} disabled={this.state.playing || !this.state.loaded}>
+                        <span className="icon is-small" >
                             <FontAwesomeIcon icon='play' />
                         </span>
                     </a>
-                    <a className="button item" onClick={this.pause}>
+                    <a className="button item" onClick={this.pause} disabled={!this.state.playing || !this.state.loaded}>
                         <span className="icon is-small">
                             <FontAwesomeIcon icon='pause' />
+                        </span>
+                    </a>
+                    <a className="button item" onClick={this.stop} disabled={!this.state.loaded}>
+                        <span className="icon is-small">
+                            <FontAwesomeIcon icon='stop' />
                         </span>
                     </a>
                     <span className="button time-before">{this.getProgressStart()}</span>
@@ -333,7 +364,7 @@ class HttpRequestHandler extends Component {
                 <section className="simulation">
                     <div className="columns">
                         <div className="buttons has-addons column">
-                            <span className="button" id="start-sim-ml-button" disabled={!this.state.loaded} onClick={this.onStart}>
+                            <span className="button" id="start-sim-button" disabled={!this.state.loaded} onClick={this.onStart}>
                                 <span className="file-icon">
                                     <FontAwesomeIcon icon='magic' />
                                 </span>
