@@ -63,13 +63,17 @@ function round_frequency(freq) {
   return MHz
 }
 
+/**
+ * Displays an emittor's important characteristics in the table (returns an HTML "row");
+ * @param {*} emittor 
+ */
 function show_network(emittor) {
   let network = emittor.network_id
   let icon = "check"
   let possible_network = -1000
   if (Object.keys(emittor).includes('possible_network')) {
     possible_network = emittor.possible_network
-    if (possible_network != network) {
+    if (possible_network != network) { // Displays an exclamation triangle if the likeliest network is not the DBScan one
       icon = "exclamation-triangle"
     }
   }
@@ -80,6 +84,10 @@ function show_network(emittor) {
   )
 }
 
+/**
+ * Returns an icon indicating the state of the emittor (emitting/silent).
+ * @param {*} emittor 
+ */
 function show_talking(emittor) {
   let icon = "circle";
   let clss = "not-talking";
@@ -153,6 +161,10 @@ class App extends Component {
     return "online";
   }
 
+  /**
+   * Gets all emittors positions after the prps upload. Displays them without prediction on their networks.
+   * @param {*} response 
+   */
   getEmittorsPositions(response) {
     let dic = {};
     let data = response.data;
@@ -220,7 +232,7 @@ class App extends Component {
 
   /**
    * Updates the state of the component (and thus the rendering) whenever a network is manually toggled
-   * @param {*} network 
+   * @param {String} network 
    */
   toggleNetwork(network) {
     if (network == null) {
@@ -241,7 +253,7 @@ class App extends Component {
 
   /**
    * Gets the display mode (highlighted or not) of the given network in the rendered list
-   * @param {*} network 
+   * @param {String} network 
    */
   getBorderStyle(network) {
     let toggled = this.state.networksToggled[network];
@@ -254,7 +266,7 @@ class App extends Component {
 
   /**
    * Gets the display color of the given network in the rendered list
-   * @param {*} network 
+   * @param {String} network 
    */
   getBorderColor(network) {
     let colors = colormap({ // a colormap to set a different color for each network
@@ -269,7 +281,7 @@ class App extends Component {
   /**
    * Called by pressing the showAll or hideAll buttons. Updates the state accordingly.
    * The param "all" is a boolean : True if showAll was pressed, False if hideAll was pressed.
-   * @param {*} all 
+   * @param {Boolean} all 
    */
   switchAll(all) {
     if (all) {
@@ -284,19 +296,19 @@ class App extends Component {
     }
   }
 
+  /**
+   * Resets the state of the component (called by pressing the "reset" button in the PostHandler component)
+   */
   reset() {
     console.log("Resetting App.js.");
     this.setState({
-      emittors: {}, // list of all the detected stations so far in the form :
-      // { network_id : 
-      //        { track_id : {coordinates: { lat: int, lng: int }, ... }
-      // }
-      stations: {}, // list of the reception stations
-      cycle_mem_info: {}, // 
-      global_mem_info: {}, //
-      connection: "offline", // selcects the style of the map (to be fetched from the Web or locally)
-      networksToggled: {}, // the networks toggled : used to highlight them in the list and display them on the map
-      showAll: false, // the state of the checkbuttons of the map (combined with networksToggled)
+      emittors: {},
+      stations: {},
+      cycle_mem_info: {},
+      global_mem_info: {},
+      connection: "offline",
+      networksToggled: {},
+      showAll: false,
       hideAll: false,
       hideVal: false,
       showVal: false,
@@ -304,20 +316,35 @@ class App extends Component {
     });
   }
 
+  /**
+   * Changes the "show all" checkbox value (in the MapBox component)
+   */
   changeShowVal() {
     this.setState({ showVal: !this.state.showVal });
   }
 
+  /**
+ * Changes the "hide all" checkbox value (in the MapBox component)
+ */
   changeHideVal() {
     this.setState({ hideVal: !this.state.hideVal });
   }
 
+  /**
+   * Highlights (in white) the emittor corresponding to the row hovered over by the mouse if its network is toggled
+   * @param {String} network 
+   * @param {*} emittor 
+   */
   hoverIn(network, emittor) {
     if (this.state.networksToggled[network] == true) {
       this.setState({ white: emittor });
     }
   }
 
+  /**
+   * Removes the highlighting (white) effect (if there was any) when the mouse leaves the row.
+   * @param {*} emittor 
+   */
   hoverOut(emittor) {
     if (this.state.white == emittor) {
       this.setState({ white: "" });
