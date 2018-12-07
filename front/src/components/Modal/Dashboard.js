@@ -88,9 +88,13 @@ class Dashboard extends Component {
       cycle: {
         progress: 0,
         clusterDuration: 0,
-        readDuration: 0,
-        memoryUsageList: 0,
-        progressList: 0
+        readDuration: 0
+      },
+      global : {
+        clusterDurationList: [],
+        readDurationList: [],
+        progressList: [],
+        memoryUsageList: []
       },
       emittor: {
         id: null,
@@ -124,12 +128,14 @@ class Dashboard extends Component {
     stats.cycle.progress = cycle_mem_info['progress']
     // The read duration 
     stats.cycle.readDuration = cycle_mem_info['read_duration']
+    stats.global.readDurationList = global_mem_info['read_duration_list']
     // The clustering duration
     stats.cycle.clusterDuration = cycle_mem_info['cluster_duration']
+    stats.global.clusterDurationList = global_mem_info['cluster_duration_list']
     // Cumulative memory usage
-    stats.cycle.memoryUsageList = global_mem_info['mem_usage_list']
+    stats.global.memoryUsageList = global_mem_info['mem_usage_list']
     // Progress list since start
-    stats.cycle.progressList = global_mem_info['progress_list']
+    stats.global.progressList = global_mem_info['progress_list']
 
     Object.keys(networks).forEach(element => {
       // The size of each network
@@ -172,17 +178,86 @@ class Dashboard extends Component {
     //   ...
     // }
 
-
     // ---------------- LINE CHART DATA ----------------
 
     const lineData = {
-      labels: stats.cycle.progressList || [],
+      labels: stats.global.progressList || [],
       datasets:[{
         label: "Memory usage",
-        data: stats.cycle.memoryUsageList || []
+        data: stats.global.memoryUsageList || []
       }]
     }
-    console.log(lineData)
+    
+    const lineOptions = {
+      scales: {
+        xAxes: [{
+          scaleLabel: {
+            display: true,
+            labelString: 'Cycle'
+          } 
+        }],
+        yAxes: [{
+          scaleLabel: {
+            display: true,
+            labelString: 'Memory Usage (MB)'
+          },
+          ticks: {
+            beginAtZero: false
+          },
+        }]
+      }
+    }
+
+    // ---------------- LINE CHART 2 DATA ----------------
+
+    const lineData2 = {
+      labels: stats.global.progressList || [],
+      datasets:[{
+        label: "Processing",
+        borderColor: 'rgba(185, 24, 24, 1)',
+        backgroundColor: 'rgba(185, 24, 24, 0.5)',
+        data: stats.global.readDurationList || [],
+        yAxisID: 'processing'
+      },
+      {
+        label: "Clustering",
+        borderColor: 'rgba(24, 51, 185, 1)',
+        backgroundColor: 'rgba(24, 51, 185, 0.5)',
+        data: stats.global.clusterDurationList || [],
+        yAxisID: 'clustering'
+      }]
+    }
+    
+    const lineOptions2 = {
+      scales: {
+        xAxes: [{
+          scaleLabel: {
+            display: true,
+            labelString: 'Cycle'
+          } 
+        }],
+        yAxes: [{
+          scaleLabel: {
+            display: true,
+            labelString: 'Processing Time (ms)'
+          },
+          display: true,
+          id: 'processing',
+          position: 'left'
+        },
+        {
+          scaleLabel: {
+            display: true,
+            labelString: 'Clustering Duration (ms)'
+          },
+          display: true,
+          id: 'clustering',
+          position: 'right'
+        }
+      ]
+      }
+    }
+
 
     // ---------------- BAR CHART DATA ----------------
 
@@ -234,18 +309,27 @@ class Dashboard extends Component {
           stack: '1',
           data: valuesBurst,
         }],
-      options: {
-        scales: {
-          xAxes: [{
-            stacked: true,
-          }],
-          yAxes: [{
-            stacked: true,
-            ticks: {
-              beginAtZero: true
-            },
-          }]
-        }
+    }
+
+    const barOptions = {
+      scales: {
+        xAxes: [{
+          stacked: true,
+          scaleLabel: {
+            display: true,
+            labelString: 'Network ID'
+          } 
+        }],
+        yAxes: [{
+          scaleLabel: {
+            display: true,
+            labelString: 'Number of Emittors'
+          },
+          stacked: true,
+          ticks: {
+            beginAtZero: true
+          },
+        }]
       }
     }
 
@@ -289,6 +373,11 @@ class Dashboard extends Component {
       }]
     }
 
+    const pieOptions = {
+
+    }
+
+
 
     return (
       <div className="column">
@@ -303,37 +392,25 @@ class Dashboard extends Component {
                 </div>
               </div>
             </div> */}
-          <div className="column is-third">
+          <div className="column is-half">
             <div className="box">
               <div className="level">
                 <div className="level-item">
-                < Line ref='linechart' data={lineData}/>
-                </div>
-          
-              </div>
-            </div>
-          </div> */}
-          <div className="column is-third">
-            <div className="box">
-              <div className="heading">Cycle</div>
-              <div className="dashboard title">#{stats.cycle.progress}</div>
-              <div className="level">
-                <div className="level-item">
-                  <div className="">
-                    <div className="heading">Data processing</div>
-                    <div className="dashboard title is-5">{stats.cycle.readDuration}ms</div>
-                  </div>
-                </div>
-                <div className="level-item">
-                  <div className="">
-                    <div className="heading">Clustering</div>
-                    <div className="dashboard title is-5">{stats.cycle.clusterDuration}ms</div>
-                  </div>
+                < Line ref='linechart' data={lineData} options={lineOptions}/>
                 </div>
               </div>
             </div>
           </div>
-          <div className="column is-third">
+          <div className="column is-half">
+            <div className="box">
+              <div className="level">
+                <div className="level-item">
+                < Line ref='linechart' data={lineData2} options={lineOptions2}/>
+                </div>
+              </div>
+            </div>
+          </div>
+          {/* <div className="column is-third">
             <div className="box">
               <div className="heading">Emittor</div>
               <div className="dashboard title">#{stats.emittor.id}</div>
@@ -358,7 +435,7 @@ class Dashboard extends Component {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
 
         <div className="columns is-multiline">
@@ -368,7 +445,7 @@ class Dashboard extends Component {
                 All Networks
                       </p>
               <div className="panel-block">
-                < Bar ref='barchart' data={barData} getElementAtEvent={dataset => this.setState({ networkSelected: dataset[0]._index })} />
+                < Bar ref='barchart' data={barData} options={barOptions} getElementAtEvent={dataset => this.setState({ networkSelected: dataset[0]._index })} />
               </div>
             </div>
           </div>
@@ -378,7 +455,7 @@ class Dashboard extends Component {
                 Network #{this.state.networkSelected} : speaking times
               </p>
               <div className="panel-block">
-                < Doughnut data={pieData} getElementAtEvent={dataset => this.setState({ emittorSelected: dataset[0]._model.label })} />
+                < Doughnut data={pieData} options={pieOptions} getElementAtEvent={dataset => this.setState({ emittorSelected: dataset[0]._model.label })} />
               </div>
             </div>
           </div>
