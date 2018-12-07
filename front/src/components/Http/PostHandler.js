@@ -28,6 +28,10 @@ class HttpRequestHandler extends Component {
         this.play = this.play.bind(this);
         this.pause = this.pause.bind(this);
         this.stop = this.stop.bind(this);
+        this.onStart = this.onStart.bind(this);
+        this.onStartML = this.onStartML.bind(this);
+        this.onStartDL = this.onStartDL.bind(this);
+        this.onStartMix = this.onStartMix.bind(this);
     }
 
     /**
@@ -80,7 +84,10 @@ class HttpRequestHandler extends Component {
      */
     onStart(e) {
         axios.get("http://localhost:8000/startsimulation")
-            .then((res) => console.log("Simulation started !"));
+            .then((res) => {
+                console.log("Simulation started !");
+                this.props.changeSimulationMode("Running simulation");
+            });
     }
 
     /**
@@ -89,7 +96,10 @@ class HttpRequestHandler extends Component {
      */
     onStartMix(e) {
         axios.get("http://localhost:8000/startsimulationMix")
-            .then((res) => console.log("Simulation started !"));
+            .then((res) => {
+                console.log("Simulation started !");
+                this.props.changeSimulationMode("Clustering + Emittor-to-Cluster DL");
+            });
     }
 
     /**
@@ -98,7 +108,10 @@ class HttpRequestHandler extends Component {
      */
     onStartML(e) {
         axios.get("http://localhost:8000/startsimulationML")
-            .then((res) => console.log("Simulation started using only DB_SCAN for clustering !"));
+            .then((res) => {
+                console.log("Simulation started using only DB_SCAN for clustering !");
+                this.props.changeSimulationMode("Clustering");
+            });
     }
 
     /**
@@ -107,7 +120,10 @@ class HttpRequestHandler extends Component {
      */
     onStartDL(e) {
         axios.get("http://localhost:8000/startsimulationDL")
-            .then((res) => console.log("Simulation started using only Deep Learning for clustering !"));
+            .then((res) => {
+                console.log("Simulation started using only Deep Learning for clustering !");
+                this.props.changeSimulationMode("Emittor-to-Emittor DL");
+            });
     }
 
     /**
@@ -198,6 +214,7 @@ class HttpRequestHandler extends Component {
      * Resets the environment. (stops backends processing of data)
      */
     reset() {
+        this.props.changeSimulationMode("");
         return axios.get("http://localhost:8000/stopsimulation")
             .then((res) => {
                 console.log("Simulation stopped !");
