@@ -203,14 +203,16 @@ class App extends Component {
                 if (longitude < -180) {
                   emit.coordinates.lng = longitude + 360;
                 }
-                if (dic["" + emit.network_id]) {
+                if (dic["" + emit.network_id] && dic["" + emit.network_id][emit.track_id] == undefined) {
+                  let id = "" + emit.network_id + "_" + Object.keys(dic["" + emit.network_id]).length;
                   dic["" + emit.network_id][emit.track_id] = emit;
-                  // let em_number = parseInt(dic["" + emit.network_id][emit.track_id]["id"].slice(-1)) + 1
+                  dic["" + emit.network_id][emit.track_id]["id"] = id;
+
                 }
                 else {
                   dic["" + emit.network_id] = {};
                   dic["" + emit.network_id][emit.track_id] = emit;
-                  // dic["" + emit.network_id][emit.track_id]["id"] = "" + emit.network_id + "_1"
+                  dic["" + emit.network_id][emit.track_id]["id"] = "" + emit.network_id + "_0";
                 }
               }
             }
