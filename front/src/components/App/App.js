@@ -192,26 +192,30 @@ class App extends Component {
       if (dic["-1000"] != undefined) {
         delete dic["-1000"];
       }
-      if (Object.entries(d)[0][1]["network_id"] != undefined) {
-        for (let key of Object.keys(d)) {
-          let emit = d[key];
-          if (emit.coordinates) {
-            let longitude = emit.coordinates.lng;
-            if (longitude < -180) {
-              emit.coordinates.lng = longitude + 360;
+      if (Object.entries(d)) {
+        if (Object.entries(d)[0]) {
+          if (Object.entries(d)[0][1]["network_id"] != undefined) {
+            for (let key of Object.keys(d)) {
+              let emit = d[key];
+              if (emit.coordinates) {
+                let longitude = emit.coordinates.lng;
+                if (longitude < -180) {
+                  emit.coordinates.lng = longitude + 360;
+                }
+                if (dic["" + emit.network_id]) {
+                  dic["" + emit.network_id][emit.track_id] = emit;
+                  // let em_number = parseInt(dic["" + emit.network_id][emit.track_id]["id"].slice(-1)) + 1
+                }
+                else {
+                  dic["" + emit.network_id] = {};
+                  dic["" + emit.network_id][emit.track_id] = emit;
+                  // dic["" + emit.network_id][emit.track_id]["id"] = "" + emit.network_id + "_1"
+                }
+              }
             }
-            if (dic["" + emit.network_id]) {
-              dic["" + emit.network_id][emit.track_id] = emit;
-              // let em_number = parseInt(dic["" + emit.network_id][emit.track_id]["id"].slice(-1)) + 1
-            }
-            else {
-              dic["" + emit.network_id] = {};
-              dic["" + emit.network_id][emit.track_id] = emit;
-              // dic["" + emit.network_id][emit.track_id]["id"] = "" + emit.network_id + "_1"
-            }
+            this.setState({ emittors: dic });
           }
         }
-        this.setState({ emittors: dic });
       } else if (Object.keys(d)[0].includes("cycle_mem_info")) {
         this.setState({ cycle_mem_info: d[Object.keys(d)[0]] });
       } else if (Object.keys(d)[0].includes("global_mem_info")) {

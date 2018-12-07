@@ -12,7 +12,7 @@ class ProfilerThread(threading.Thread):
     Profiler Thread, used to make performance measurements.
     """
 
-    def __init__(self, pid, process_profiler):
+    def __init__(self, process_profiler):
         """ Initiate the ProfilerThread object
 
         :param pid: the ID of the process to profile
@@ -20,8 +20,7 @@ class ProfilerThread(threading.Thread):
         """
         self.running = True
         self.paused = False
-        self.pid = pid
-        self.process = psutil.Process(self.pid)
+        self.process = psutil.Process()
 
         self.process_profiler = process_profiler
         threading.Thread.__init__(self)

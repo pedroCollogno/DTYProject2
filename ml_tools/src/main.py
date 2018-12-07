@@ -36,7 +36,7 @@ class ProcessProfiler:
     Profiler class, used to profile data CPU and memory usage by our algorithm.
     """
 
-    def __init__(self, pid):
+    def __init__(self):
         """ Initiate the ProcessProfiler object
 
         :param pid: the ID of the process to profile
@@ -46,13 +46,12 @@ class ProcessProfiler:
         self.cpu_percent = []
         self.cpu_times = []
         self.profiler_thread = None
-        self.pid = pid
 
     def start(self):
         """
         Starts profiling CPU and memory usage
         """
-        self.profiler_thread = ProfilerThread(self.pid, self)
+        self.profiler_thread = ProfilerThread(self)
         self.profiler_thread.start()
 
     def stop(self):
@@ -78,7 +77,7 @@ class ProcessProfiler:
         """
         Resets the ProcessProfiler object
         """
-        self.__init__(self.pid)
+        self.__init__()
 
     def add_memory_info(self, memory_info):
         """ Adds a memory usage measure
@@ -141,12 +140,20 @@ class ProcessProfiler:
         
         :return: A dictionnary, containing the mean values for memory and CPU usage
         """
-        return ({
-            'memory_info': sum(self.memory_info)/len(self.memory_info),
-            'memory_percent': sum(self.memory_percent)/len(self.memory_percent),
-            'cpu_percent': sum(self.cpu_percent)/len(self.cpu_percent),
-            'cpu_times': sum(self.cpu_times)/len(self.cpu_times)
-        })
+        if (len(self.memory_info) > 0) and (len(self.memory_percent) > 0) and (len(self.cpu_percent) > 0) and (len(self.cpu_times) > 0) :
+            return ({
+                'memory_info': sum(self.memory_info)/len(self.memory_info),
+                'memory_percent': sum(self.memory_percent)/len(self.memory_percent),
+                'cpu_percent': sum(self.cpu_percent)/len(self.cpu_percent),
+                'cpu_times': sum(self.cpu_times)/len(self.cpu_times)
+            })
+        else:
+            return({
+                'memory_info': -1,
+                'memory_percent': -1,
+                'cpu_percent': -1,
+                'cpu_times': -1
+            })
 
     def log(self):
         """
@@ -184,12 +191,12 @@ class EWHandler:
         self.sender_function=None
         self.progress_list=[]
         self.mem_usage_list=[]
+        self.cpu_usage_list=[]
         self.read_duration_list=[]
         self.cluster_duration_list=[]
 
-        self.pid=os.getpid()
-        self.cycle_profiler=ProcessProfiler(self.pid)
-        self.global_profiler=ProcessProfiler(self.pid)
+        self.cycle_profiler=ProcessProfiler()
+        self.global_profiler=ProcessProfiler()
         
         self.current_time=time.time()
         self.init_time=time.time()
@@ -304,6 +311,7 @@ class EWHandler:
 
             self.progress_list.append(self.progress)
             self.mem_usage_list.append(memory_data['memory_info'])
+            self.cpu_usage_list.append(memory_data['cpu_percent'])
             self.read_duration_list.append(self.read_duration)
             self.cluster_duration_list.append(self.cluster_duration)
 
@@ -315,6 +323,7 @@ class EWHandler:
 
             global_memory_data=self.global_profiler.get_mean_info()
             global_memory_data['mem_usage_list'] = self.mem_usage_list
+            global_memory_data['cpu_usage_list'] = self.cpu_usage_list
             global_memory_data['progress'] = self.progress
             global_memory_data['progress_list'] = self.progress_list
             global_memory_data['total_duration'] = self.total_duration

@@ -254,14 +254,28 @@ class HttpRequestHandler extends Component {
 
     getProgressStart() {
         let delta = "0:00"
+        let hour_append = "";
+        let min_append = "";
+        let sec_append = "";
         if (this.state.progress) {
             let d = new Date()
             let date_delta = new Date(this.state.progress * 1000 + d.getTimezoneOffset() * 60000)
+
             if (date_delta.getHours()) {
-                delta = "" + date_delta.getHours() + ":" + date_delta.getMinutes();
-            } else if (date_delta.getMinutes()) {
-                delta = "" + date_delta.getMinutes() + ":" + date_delta.getSeconds();
+                hour_append = date_delta.getHours() + ":";
             }
+            if (date_delta.getMinutes() < 10 && date_delta.getHours()) {
+                min_append = "0" + date_delta.getMinutes() + ":";
+            } else {
+                min_append = date_delta.getMinutes() + ":";
+            }
+
+            if (date_delta.getSeconds() < 10) {
+                sec_append = "0" + date_delta.getSeconds();
+            } else {
+                sec_append = date_delta.getSeconds();
+            }
+            delta = hour_append + min_append + sec_append
         }
         return delta
     }
@@ -269,14 +283,28 @@ class HttpRequestHandler extends Component {
 
     getProgressEnd() {
         let delta = "0:00"
-        if (this.state.progress) {
+        let hour_append = "";
+        let min_append = "";
+        let sec_append = "";
+        if (this.state.total_duration) {
             let d = new Date()
             let date_delta = new Date(this.state.total_duration * 1000 + d.getTimezoneOffset() * 60000)
+
             if (date_delta.getHours()) {
-                delta = "" + date_delta.getHours() + ":" + date_delta.getMinutes();
-            } else if (date_delta.getMinutes()) {
-                delta = "" + date_delta.getMinutes() + ":" + date_delta.getSeconds();
+                hour_append = date_delta.getHours() + ":";
             }
+            if (date_delta.getMinutes() < 10 && date_delta.getHours()) {
+                min_append = "0" + date_delta.getMinutes() + ":";
+            } else {
+                min_append = date_delta.getMinutes() + ":";
+            }
+
+            if (date_delta.getSeconds() < 10) {
+                sec_append = "0" + date_delta.getSeconds();
+            } else {
+                sec_append = date_delta.getSeconds();
+            }
+            delta = hour_append + min_append + sec_append
         }
         return delta
     }
