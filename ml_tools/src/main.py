@@ -140,12 +140,20 @@ class ProcessProfiler:
         
         :return: A dictionnary, containing the mean values for memory and CPU usage
         """
-        return ({
-            'memory_info': sum(self.memory_info)/len(self.memory_info),
-            'memory_percent': sum(self.memory_percent)/len(self.memory_percent),
-            'cpu_percent': sum(self.cpu_percent)/len(self.cpu_percent),
-            'cpu_times': sum(self.cpu_times)/len(self.cpu_times)
-        })
+        if (len(self.memory_info) > 0) and (len(self.memory_percent) > 0) and (len(self.cpu_percent) > 0) and (len(self.cpu_times) > 0) :
+            return ({
+                'memory_info': sum(self.memory_info)/len(self.memory_info),
+                'memory_percent': sum(self.memory_percent)/len(self.memory_percent),
+                'cpu_percent': sum(self.cpu_percent)/len(self.cpu_percent),
+                'cpu_times': sum(self.cpu_times)/len(self.cpu_times)
+            })
+        else:
+            return({
+                'memory_info': -1,
+                'memory_percent': -1,
+                'cpu_percent': -1,
+                'cpu_times': -1
+            })
 
     def log(self):
         """
