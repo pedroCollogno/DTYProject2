@@ -119,7 +119,8 @@ class App extends Component {
       hideAll: false,
       hideVal: false,
       showVal: false,
-      white: ""
+      white: "",
+      simulationMode: ""
     };
     // functions that are allowed to update the state of the component
     this.newEmittors = this.newEmittors.bind(this);
@@ -133,6 +134,7 @@ class App extends Component {
     this.changeHideVal = this.changeHideVal.bind(this);
     this.hoverIn = this.hoverIn.bind(this);
     this.hoverOut = this.hoverOut.bind(this);
+    this.changeSimulationMode = this.changeSimulationMode.bind(this);
   }
 
 
@@ -356,7 +358,9 @@ class App extends Component {
     }
   }
 
-
+  changeSimulationMode(simulMode) {
+    this.setState({ simulationMode: simulMode });
+  }
 
   render() {
     return (
@@ -371,6 +375,11 @@ class App extends Component {
                 <h2 className="subtitle">
                   AI demonstrator
                 </h2>
+
+                <h2 className="subtitle">
+                  {this.state.simulationMode}
+                </h2>
+
               </div>
               <div className="field switch-container">
                 <input id="switchRoundedOutlinedInfo" type="checkbox" name="switchRoundedOutlinedInfo" className="switch is-rtl is-rounded is-outlined is-info" onChange={this.handleChange} />
@@ -470,7 +479,8 @@ class App extends Component {
         </div>
 
         {/* Handles the HTTP requests and their responses from the backend */}
-        <PostHandler getStations={this.getStations} reset={this.reset} getEmittorsPositions={this.getEmittorsPositions} cycle_mem_info={this.state.cycle_mem_info} />
+        <PostHandler getStations={this.getStations} reset={this.reset} changeSimulationMode={this.changeSimulationMode}
+          getEmittorsPositions={this.getEmittorsPositions} cycle_mem_info={this.state.cycle_mem_info} />
 
       </div >
     );
