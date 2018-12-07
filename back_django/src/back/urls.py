@@ -10,6 +10,7 @@ from .views import *
 urlpatterns = [
     url(r'^$', user_list, name='user_list'),
     url(r'^startsimulation$', start_simulation, name="startsimulation"),
+    url(r'^startsimulationMix$', start_simulation_mix, name="startsimulationMix"),
     url(r'^startsimulationML$', start_simulation_ml, name="startsimulationML"),
     url(r'^startsimulationDL$', start_simulation_dl, name="startsimulationDL"),
     url(r'^stopsimulation$', stop_simulation, name="stopsimulation"),

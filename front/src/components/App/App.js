@@ -202,10 +202,12 @@ class App extends Component {
             }
             if (dic["" + emit.network_id]) {
               dic["" + emit.network_id][emit.track_id] = emit;
+              // let em_number = parseInt(dic["" + emit.network_id][emit.track_id]["id"].slice(-1)) + 1
             }
             else {
               dic["" + emit.network_id] = {};
               dic["" + emit.network_id][emit.track_id] = emit;
+              // dic["" + emit.network_id][emit.track_id]["id"] = "" + emit.network_id + "_1"
             }
           }
         }
@@ -391,6 +393,7 @@ class App extends Component {
               <table className='table is-hoverable'>
                 <thead>
                   <tr>
+                    <th>ID</th>
                     <th>Type</th>
                     <th colSpan='2'>Coordinates</th>
                     <th>Frequency</th>
@@ -412,6 +415,7 @@ class App extends Component {
                               return (
                                 <tr key={this.state.emittors[key][emittor_id].track_id} onClick={() => this.toggleNetwork(key)} onMouseEnter={() => this.hoverIn(key, emittor_id)}
                                   onMouseLeave={() => this.hoverOut(emittor_id)}>
+                                  <td>{this.state.emittors[key][emittor_id].id}</td>
                                   <td>{int_to_emittor_type(this.state.emittors[key][emittor_id].emission_type)}</td>
                                   <td>{deg_to_dms(this.state.emittors[key][emittor_id].coordinates.lat)}</td>
                                   <td>{deg_to_dms(this.state.emittors[key][emittor_id].coordinates.lng)}</td>
@@ -441,6 +445,7 @@ class App extends Component {
                             return (
                               <tr key={this.state.emittors[key][emittor_id].track_id} onClick={() => this.toggleNetwork(key)} onMouseEnter={() => this.hoverIn(key, emittor_id)}
                                 onMouseLeave={() => this.hoverOut(emittor_id)}>
+                                <td>{this.state.emittors[key][emittor_id].id}</td>
                                 <td>{int_to_emittor_type(this.state.emittors[key][emittor_id].emission_type)}</td>
                                 <td>{deg_to_dms(this.state.emittors[key][emittor_id].coordinates.lat)}</td>
                                 <td>{deg_to_dms(this.state.emittors[key][emittor_id].coordinates.lng)}</td>
