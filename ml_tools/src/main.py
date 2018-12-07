@@ -326,13 +326,6 @@ class EWHandler:
         K.clear_session()
 
         self.global_profiler.stop()
-        global_memory_data=self.global_profiler.get_mean_info()
-        global_memory_data['progress'] = self.progress
-        global_memory_data['total_duration'] = self.total_duration
-        global_memory_data['time_since_init'] = self.end_time
-        self.send_to_front({
-            'global_mem_info': global_memory_data
-        })
         self.global_profiler.reset_profiler()
 
     def make_emittor_clusters(self, global_track_streams, all_tracks_data, prev_tracks_data, debug=False, use_deep=False, mix=False):
