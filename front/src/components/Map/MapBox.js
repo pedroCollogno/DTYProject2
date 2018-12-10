@@ -149,7 +149,7 @@ class MapBox extends Component {
     }
 
     render() {
-        let htmlRecImage = new Image(934, 1321); // image for the reception stations
+        let htmlRecImage = new Image(467, 314); // image for the reception stations
         htmlRecImage.src = recImage; // HTML format to render it in the canvas
         let htmlCenterImage = new Image(256, 256); // image for the network centers 
         htmlCenterImage.src = centerImage;
@@ -171,25 +171,40 @@ class MapBox extends Component {
                     }}
                 >
 
-                    <div id="showhide">
-                        {/* The checkboxes to hide/show everything */}
-                        <div className="field">
-                            <input className="is-checkradio is-block" type="checkbox" id="show_checkbox" name="show_checkbox" checked={this.props.showVal} onChange={this.props.changeShowVal} onClick={() => this.props.switchAll(true)} />
-                            <label htmlFor="show_checkbox">
-                                <span> </span>Show all
+                    <div id="legend" className="button is-grey">
+                        <div id="showhide" >
+                            {/* The checkboxes to hide/show everything */}
+                            <div className="field">
+                                <input className="is-checkradio is-block" type="checkbox" id="show_checkbox" name="show_checkbox" checked={this.props.showVal} onChange={this.props.changeShowVal} onClick={() => this.props.switchAll(true)} />
+                                <label htmlFor="show_checkbox">
+                                    <span> </span>Show all
                             </label>
+                            </div>
+                            <div className="field">
+                                <input className="is-checkradio is-block" type="checkbox" id="hide_checkbox" name="hide_checkbox" checked={this.props.hideVal} onChange={this.props.changeHideVal} onClick={() => this.props.switchAll(false)} />
+                                <label htmlFor="hide_checkbox">
+                                    <span> </span>Hide all
+                            </label>
+                            </div>
                         </div>
-                        <div className="field">
-                            <input className="is-checkradio is-block" type="checkbox" id="hide_checkbox" name="hide_checkbox" checked={this.props.hideVal} onChange={this.props.changeHideVal} onClick={() => this.props.switchAll(false)} />
-                            <label htmlFor="hide_checkbox">
-                                <span> </span>Hide all
-                            </label>
+                        <div className="legend-box">
+                            <div className="legend-item">
+                                <p><img src={recImage} alt="Station symbol" />
+                                    Recording station
+                                </p>
+                            </div>
+                            <div className="legend-item">
+                                <p><img src={centerImage} alt="Network centroid" />
+                                    Network centroid
+                                </p>
+                            </div>
+
                         </div>
                     </div>
 
                     <Layer id="recStations" key="recStations" type="symbol" layout={{
                         "icon-image": "recStation",
-                        "icon-size": 0.03
+                        "icon-size": 0.06
                     }}>
                         {/* Displays the reception stations as images using the previously defined source image */}
                         {

@@ -146,6 +146,7 @@ class HttpRequestHandler extends Component {
                 const url = 'http://localhost:8000/upload'; // server route to POST request
                 const formData = new FormData();
                 let i = 0;
+                console.log("FILES", files)
                 for (let file of files) {
                     formData.append("File" + i, file, file.name); // standardized name for formData entry : "File{i}" (Django)
                     i += 1;
@@ -215,7 +216,7 @@ class HttpRequestHandler extends Component {
             this.props.reset();
         } else {
             // Something happened in setting up the request that triggered an Error
-            console.log('Error', error.message);
+            console.error('Error', error.message);
         }
     }
 
@@ -309,9 +310,6 @@ class HttpRequestHandler extends Component {
     }
 
     loading_spinner() {
-        console.log("PATATE", this.state.network_num)
-        console.log("MOUTON", this.state.loaded)
-
         if (this.state.network_num == 0 && this.state.loaded != undefined) {
             return (
                 <div id='spinner'>
@@ -321,7 +319,6 @@ class HttpRequestHandler extends Component {
         } else {
             return
         }
-
     }
 
     getProgressEnd() {
@@ -434,60 +431,58 @@ class HttpRequestHandler extends Component {
                     <span className="button time-after">{this.getProgressEnd()}</span>
                 </section>
                 {/* "Start simulation" button, active if the posting of the files went ok */}
-                <section className="simulation">
-                    <div className="columns">
-                        <div className="buttons has-addons column">
-                            <span className="button" id="start-sim-button" disabled={!this.state.loaded} onClick={this.onStart}>
-                                <span className="file-icon">
-                                    <FontAwesomeIcon icon='magic' />
-                                </span>
-                                Just Run
+                <section className="level">
+                    <div className="buttons has-addons">
+                        <span className="button" id="start-sim-button" disabled={!this.state.loaded} onClick={this.onStart}>
+                            <span className="file-icon">
+                                <FontAwesomeIcon icon='magic' />
                             </span>
-                            <span className="button">
-                                <span className="icon is-small">
-                                    <FontAwesomeIcon icon='info' />
-                                </span>
+                            Just Run
                             </span>
-                        </div>
-                        <div className="buttons has-addons column">
-                            <span className="button" id="start-sim-ml-button" disabled={!this.state.loaded} onClick={this.onStartML}>
-                                <span className="file-icon">
-                                    <FontAwesomeIcon icon='magic' />
-                                </span>
-                                Clustering
+                        <span className="button">
+                            <span className="icon is-small">
+                                <FontAwesomeIcon icon='info' />
                             </span>
-                            <span className="button">
-                                <span className="icon is-small">
-                                    <FontAwesomeIcon icon='info' />
-                                </span>
+                        </span>
+                    </div>
+                    <div className="buttons has-addons">
+                        <span className="button" id="start-sim-ml-button" disabled={!this.state.loaded} onClick={this.onStartML}>
+                            <span className="file-icon">
+                                <FontAwesomeIcon icon='magic' />
                             </span>
-                        </div>
-                        <div className="buttons has-addons column">
-                            <span className="button" id="start-sim-dl-button" disabled={!this.state.loaded} onClick={this.onStartDL}>
-                                <span className="file-icon">
-                                    <FontAwesomeIcon icon='magic' />
-                                </span>
-                                Emittor-to-Emittor DL
-                                </span>
-                            <span className="button">
-                                <span className="icon is-small">
-                                    <FontAwesomeIcon icon='info' />
-                                </span>
+                            Clustering
                             </span>
-                        </div>
-                        <div className="buttons has-addons column">
-                            <span className="button" id="start-sim-button" disabled={!this.state.loaded} onClick={this.onStartMix}>
-                                <span className="file-icon">
-                                    <FontAwesomeIcon icon='magic' />
-                                </span>
-                                Clustering + Emittor-to-Cluster DL
-                                </span>
-                            <span className="button">
-                                <span className="icon is-small">
-                                    <FontAwesomeIcon icon='info' />
-                                </span>
+                        <span className="button">
+                            <span className="icon is-small">
+                                <FontAwesomeIcon icon='info' />
                             </span>
-                        </div>
+                        </span>
+                    </div>
+                    <div className="buttons has-addons">
+                        <span className="button" id="start-sim-dl-button" disabled={!this.state.loaded} onClick={this.onStartDL}>
+                            <span className="file-icon">
+                                <FontAwesomeIcon icon='magic' />
+                            </span>
+                            Emittor-to-Emittor DL
+                                </span>
+                        <span className="button">
+                            <span className="icon is-small">
+                                <FontAwesomeIcon icon='info' />
+                            </span>
+                        </span>
+                    </div>
+                    <div className="buttons has-addons">
+                        <span className="button" id="start-sim-mix-button" disabled={!this.state.loaded} onClick={this.onStartMix}>
+                            <span className="file-icon">
+                                <FontAwesomeIcon icon='magic' />
+                            </span>
+                            Clustering + Emittor-to-Cluster DL
+                                </span>
+                        <span className="button">
+                            <span className="icon is-small">
+                                <FontAwesomeIcon icon='info' />
+                            </span>
+                        </span>
                     </div>
                 </section>
             </div>
