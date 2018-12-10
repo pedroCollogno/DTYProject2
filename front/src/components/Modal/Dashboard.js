@@ -3,6 +3,8 @@ import Modal from './Modal.js';
 import './Dashboard.css';
 
 import { Bar, Pie, Bubble, Polar, Doughnut, Line } from 'react-chartjs-2';
+import 'chartjs-plugin-labels';
+
 
 
 class Dashboard extends Component {
@@ -336,6 +338,11 @@ class Dashboard extends Component {
     }
 
     const barOptions = {
+      plugins: {
+        labels:{
+          render: 'value'
+        }
+      },
       scales: {
         xAxes: [{
           stacked: true,
@@ -398,7 +405,14 @@ class Dashboard extends Component {
     }
 
     const pieOptions = {
-
+      plugins: { 
+          labels: {
+            render: 'percentage',
+            fontColor: '#000',
+            position: 'outside'
+          }
+        
+      }
     }
 
 
