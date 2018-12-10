@@ -53,9 +53,7 @@ class Dashboard extends Component {
   }
 
   rainbow(numOfSteps, step) {
-    // This function generates vibrant, "evenly spaced" colours (i.e. no clustering). This is ideal for creating easily distinguishable vibrant markers in Google Maps and other apps.
-    // Adam Cole, 2011-Sept-14
-    // HSV to RBG adapted from: http://mjijackson.com/2008/02/rgb-to-hsl-and-rgb-to-hsv-color-model-conversion-algorithms-in-javascript
+    // This function generates vibrant, "evenly spaced" colors (i.e. no clustering).
     var r, g, b;
     var h = step / numOfSteps;
     var i = ~~(h * 6);
@@ -92,7 +90,7 @@ class Dashboard extends Component {
         clusterDuration: 0,
         readDuration: 0
       },
-      global : {
+      global: {
         clusterDurationList: [],
         readDurationList: [],
         progressList: [],
@@ -188,25 +186,25 @@ class Dashboard extends Component {
     // ---------------- LINE CHART DATA ----------------
 
     const lineData = {
-      labels: stats.global.progressList || [],
-      datasets:[{
+      labels: stats.global.progressList || [],
+      datasets: [{
         label: "Memory",
         borderColor: 'rgba(185, 24, 24, 1)',
         backgroundColor: 'rgba(185, 24, 24, 0.5)',
-        data: stats.global.memoryUsageList || [],
+        data: stats.global.memoryUsageList || [],
         yAxisID: 'memory'
       },
       {
         label: "CPU",
         borderColor: 'rgba(24, 51, 185, 1)',
         backgroundColor: 'rgba(24, 51, 185, 0.5)',
-        data: stats.global.CPUUsageList || [],
+        data: stats.global.CPUUsageList || [],
         yAxisID: 'CPU'
       }]
     }
-    
+
     const lineOptions = {
-      title:{
+      title: {
         display: true,
         text: 'Computer ressources usage'
       },
@@ -215,7 +213,7 @@ class Dashboard extends Component {
           scaleLabel: {
             display: true,
             labelString: 'Cycle'
-          } 
+          }
         }],
         yAxes: [{
           scaleLabel: {
@@ -241,25 +239,25 @@ class Dashboard extends Component {
     // ---------------- LINE CHART 2 DATA ----------------
 
     const lineData2 = {
-      labels: stats.global.progressList || [],
-      datasets:[{
+      labels: stats.global.progressList || [],
+      datasets: [{
         label: "Processing",
         borderColor: 'rgba(185, 24, 24, 1)',
         backgroundColor: 'rgba(185, 24, 24, 0.5)',
-        data: stats.global.readDurationList || [],
+        data: stats.global.readDurationList || [],
         yAxisID: 'processing'
       },
       {
         label: "Clustering",
         borderColor: 'rgba(24, 51, 185, 1)',
         backgroundColor: 'rgba(24, 51, 185, 0.5)',
-        data: stats.global.clusterDurationList || [],
+        data: stats.global.clusterDurationList || [],
         yAxisID: 'clustering'
       }]
     }
-    
+
     const lineOptions2 = {
-      title:{
+      title: {
         display: true,
         text: 'Process execution time'
       },
@@ -268,7 +266,7 @@ class Dashboard extends Component {
           scaleLabel: {
             display: true,
             labelString: 'Cycle'
-          } 
+          }
         }],
         yAxes: [{
           scaleLabel: {
@@ -288,7 +286,7 @@ class Dashboard extends Component {
           id: 'clustering',
           position: 'right'
         }
-      ]
+        ]
       }
     }
 
@@ -346,12 +344,12 @@ class Dashboard extends Component {
     }
 
     const barOptions = {
-      title:{
+      title: {
         display: true,
         text: 'Number of emittors per Network'
       },
       plugins: {
-        labels:{
+        labels: {
           render: 'value',
           fontColor: 'rgba(0, 0, 0, 0)'
         }
@@ -362,7 +360,7 @@ class Dashboard extends Component {
           scaleLabel: {
             display: true,
             labelString: 'Network ID'
-          } 
+          }
         }],
         yAxes: [{
           scaleLabel: {
@@ -418,24 +416,24 @@ class Dashboard extends Component {
     }
 
     const pieOptions = {
-      title:{
+      title: {
         display: true,
         text: 'Speaking time of each emittor in Network ' + this.state.networkSelected
       },
-      plugins: { 
-          labels: {
-            render: 'percentage',
-            fontColor: '#000',
-            position: 'outside'
-          }
+      plugins: {
+        labels: {
+          render: 'percentage',
+          fontColor: '#000',
+          position: 'outside'
+        }
       },
       tooltips: {
         mode: 'label',
         callbacks: {
-            label: function(tooltipItem, data) { 
-                var indice = tooltipItem.index;                 
-                return  data.labels[indice] +': '+data.datasets[0].data[indice] + ' seconds';
-            }
+          label: function (tooltipItem, data) {
+            var indice = tooltipItem.index;
+            return data.labels[indice] + ': ' + data.datasets[0].data[indice] + ' seconds';
+          }
         }
       }
     }
@@ -449,7 +447,7 @@ class Dashboard extends Component {
             <div className="box">
               <div className="level">
                 <div className="level-item">
-                < Line ref='linechart' data={lineData} options={lineOptions}/>
+                  < Line ref='linechart' data={lineData} options={lineOptions} />
                 </div>
               </div>
             </div>
@@ -458,7 +456,7 @@ class Dashboard extends Component {
             <div className="box">
               <div className="level">
                 <div className="level-item">
-                < Line ref='linechart' data={lineData2} options={lineOptions2}/>
+                  < Line ref='linechart' data={lineData2} options={lineOptions2} />
                 </div>
               </div>
             </div>
