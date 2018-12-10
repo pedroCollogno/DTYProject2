@@ -48,10 +48,11 @@ class ProfilerThread(threading.Thread):
         total_mem_info = 0
         total_mem_percent = 0
         total_cpu_percent = 0
+        cpu_count = psutil.cpu_count()
         for process in self.processes:
             total_mem_info += process.memory_info().rss
             total_mem_percent += process.memory_percent()
-            total_cpu_percent += process.cpu_percent()
+            total_cpu_percent += process.cpu_percent()/cpu_count
 
         self.process_profiler.add_memory_info(total_mem_info / 1e6)  # Memory usage in MegaBytes
         self.process_profiler.add_memory_percent(total_mem_percent)
