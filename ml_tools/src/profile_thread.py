@@ -52,7 +52,8 @@ class ProfilerThread(threading.Thread):
         for process in self.processes:
             memory_info = process.memory_info().rss
             memory_percent = process.memory_percent()
-            cpu_percent = process.cpu_percent()/cpu_count
+            cpu_percent = sum([perc if perc <= 100 else 100 for perc in process.cpu_percent(percpu=True)])/cpu_count
+
             if memory_info > 0:
                 total_mem_info += memory_info
             if memory_percent > 0:
