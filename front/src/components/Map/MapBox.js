@@ -313,9 +313,9 @@ class MapBox extends Component {
                                             onClick={() => { this.props.toggleNetwork(network) }}
                                             layout={{
                                                 "text-field": textCenter,
-                                                "text-size": 15,
+                                                "text-size": 19,
                                                 "icon-image": "networkCenter",
-                                                "icon-size": 0.08,
+                                                "icon-size": 0.1,
                                                 "icon-allow-overlap": true,
                                                 "text-allow-overlap": true,
                                                 "text-font": ["Open Sans Regular"],
