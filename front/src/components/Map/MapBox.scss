@@ -55,8 +55,9 @@
     padding: 0.5em;
     font-size: 1.2em;
     cursor: grab;
+    background-color: rgba( $grey, .7 );
     &:hover {
-        background-color: $grey;
+        background-color: rgba( $grey, .7 );
     }
     .legend {
         display: flex;

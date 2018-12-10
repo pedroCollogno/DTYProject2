@@ -223,7 +223,7 @@ class EWHandler:
             logger.handlers[1].setLevel(logging.DEBUG)
 
         all_tracks_data={}
-        self.total_duration=len(args[0])
+        self.total_duration=len(args[0]) - 1
 
         j=cycles_per_batch # usual amount of cycles read at once
         k=1
@@ -236,7 +236,7 @@ class EWHandler:
 
         self.progress=k
         self.global_profiler.start()
-        while self.progress < self.total_duration and self.running:
+        while self.progress <= self.total_duration and self.running:
             self.cycle_profiler.start()
 
             if self.paused:
@@ -316,7 +316,13 @@ class EWHandler:
                 self.send_to_front({
                     'global_mem_info': global_memory_data
                 })
-                self.progress += j
+                 
+                if self.progress == self.total_duration:
+                    self.progress += j
+                elif self.progress + j > self.total_duration:
+                    self.progress = self.total_duration
+                else:
+                    self.progress += j
                 time.sleep(0.5)
 
         self.end_time=int((time.time() - self.init_time) * 1000)

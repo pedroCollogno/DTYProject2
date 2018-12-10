@@ -45,9 +45,10 @@
   margin: 0.5em;
   padding: 0.5em;
   font-size: 1.2em;
-  cursor: grab; }
+  cursor: grab;
+  background-color: rgba(238, 238, 238, 0.7); }
   #legend:hover {
-    background-color: #eeeeee; }
+    background-color: rgba(238, 238, 238, 0.7); }
   #legend .legend {
     display: flex; }
     #legend .legend .legend-column.is-next {
@@ -103,24 +104,5 @@
     color: black;
     top: 115px; }
   .widgets-tag span.icon {
-    height: 28px;
-    width: 28px; }
-
-.widgets-colors {
-  text-align: right;
-  position: absolute;
-  top: 150px;
-  right: 10px;
-  box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  bottom: auto;
-  left: auto;
-  background-color: #eeeeee;
-  height: 28px;
-  width: 28px; }
-  .widgets-colors a#colors-names-button {
-    color: black;
-    top: 150px; }
-  .widgets-colors span.icon {
     height: 28px;
     width: 28px; }
