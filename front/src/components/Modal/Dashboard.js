@@ -158,7 +158,7 @@ class Dashboard extends Component {
         // The duration of each emittor
         emittersDurations.push(networks[element][i]['duration'] / 1e6);
         // The id of each emittor
-        emittersIds.push(networks[element][i]['track_id']);
+        emittersIds.push(networks[element][i]['id']);
         // The Latitude of each emittor
         emitterLat.push(networks[element][i]['coordinates']['lat'])
         // The Longitude of each emittor
@@ -434,7 +434,7 @@ class Dashboard extends Component {
         callbacks: {
             label: function(tooltipItem, data) { 
                 var indice = tooltipItem.index;                 
-                return  data.labels[indice] +': '+data.datasets[0].data[indice] + 'seconds';
+                return  data.labels[indice] +': '+data.datasets[0].data[indice] + ' seconds';
             }
         }
       }
