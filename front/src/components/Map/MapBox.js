@@ -19,6 +19,8 @@ const Map = ReactMapboxGl({ // Only set in case internet is used, as an optional
 });
 
 const colorMapNames = ["jet", "hsv", "rainbow", "rainbow-soft"];
+const colorMapMins = [7, 12, 10, 12];
+
 let colorMapNumber = colorMapNames.length;
 let htmlRecImage = new Image(467, 314); // image for the reception stations
 htmlRecImage.src = recImage; // HTML format to render it in the canvas
@@ -29,13 +31,14 @@ class MapBox extends Component {
 
     constructor(props) {
         super(props);
+        let labels = Object.keys(props.emittors);
         this.state = {
             emittors: props.emittors,
 
-            networksLabels: Object.keys(props.emittors), // the networks labels
+            networksLabels: labels, // the networks labels
             colors: colormap({ // a colormap to set a different color for each network
                 colormap: 'jet',
-                nshades: Math.max(Object.keys(props.emittors).length, 11) // 11 is the minimum number of colors
+                nshades: Math.max(labels.length, 7) // 7 is the minimum number of colors
             }),
             colorMapType: 0,
             style: {
@@ -49,7 +52,7 @@ class MapBox extends Component {
             nameNets: false,
             legend: false
         };
-        for (let label of Object.keys(props.emittors)) {
+        for (let label of labels) {
             this.state.highlights[label] = 0; // at the beginning, networks are not hovered over (supposedly)
         }
         this.mouseEnter = this.mouseEnter.bind(this); // allows those functions to update the state of the component 
@@ -66,16 +69,18 @@ class MapBox extends Component {
      */
     componentWillReceiveProps(nextProps) {
         if (nextProps && nextProps !== this.props) { // little check, doesn't hurt
+            let colorMin = colorMapMins[this.state.colorMapType]; // the minimum number of colors
             let highlights = {};
-            for (let label of Object.keys(nextProps.emittors)) { // eventual new network, along with all the other ones, is not highlighted
+            let labels = Object.keys(nextProps.emittors);
+            for (let label of labels) { // eventual new network, along with all the other ones, is not highlighted
                 highlights[label] = 0;
             }
             this.setState({ // updates the state with the new props, thus re-rendering the component
                 emittors: nextProps.emittors,
-                networksLabels: Object.keys(nextProps.emittors),
+                networksLabels: labels,
                 colors: colormap({
                     colormap: colorMapNames[this.state.colorMapType],
-                    nshades: Math.max(Object.keys(nextProps.emittors).length, 11),
+                    nshades: Math.max(labels.length, colorMin),
                     alpha: 1
                 }),
                 highlights: highlights,
@@ -104,10 +109,11 @@ class MapBox extends Component {
             index -= colorMapNumber;
         }
         let colormapName = colorMapNames[index];
+        let colorMin = colorMapMins[index]; // the minimum number of colors
         this.setState({
             colors: colormap({
                 colormap: colormapName,
-                nshades: Math.max(this.state.networksLabels.length, 11), // 11 is the minimum number of colors
+                nshades: Math.max(this.state.networksLabels.length, colorMin),
                 alpha: 1 // opacity
             }),
             colorMapType: index
