@@ -3,6 +3,8 @@ import ReactMapboxGl, { Layer, Feature, ZoomControl, ScaleControl } from "react-
 import colormap from "colormap";
 import Stations from "./Stations.js";
 import recImage from "./EW_high.png";
+import lineImage from "./line.png";
+import dashImage from "./dashed_line.png";
 import centerImage from "./dashed-circle.png";
 import Lines from "./Lines.js";
 import PotentialLines from "./PotentialLines.js";
@@ -38,7 +40,8 @@ class MapBox extends Component {
             },
             highlights: { // the networks that are hovered over
             },
-            nameNets: false
+            nameNets: false,
+            legend: false
         };
         for (let label of Object.keys(props.emittors)) {
             this.state.highlights[label] = 0; // at the beginning, networks are not hovered over (supposedly)
@@ -47,6 +50,7 @@ class MapBox extends Component {
         this.mouseExit = this.mouseExit.bind(this); // (here, we want to update highlights)
         this.center = this.center.bind(this);
         this.nameNetworks = this.nameNetworks.bind(this);
+        this.toggle_legend = this.toggle_legend.bind(this);
     }
 
     /**
@@ -148,6 +152,14 @@ class MapBox extends Component {
         this.setState({ nameNets: !this.state.nameNets });
     }
 
+    toggle_legend() {
+        if (this.state.legend == true) {
+            this.setState({ legend: false });
+        } else {
+            this.setState({ legend: true });
+        }
+    }
+
     render() {
         let htmlRecImage = new Image(467, 314); // image for the reception stations
         htmlRecImage.src = recImage; // HTML format to render it in the canvas
@@ -181,25 +193,63 @@ class MapBox extends Component {
                             </label>
                             </div>
                             <div className="field">
-                                <input className="is-checkradio is-block" type="checkbox" id="hide_checkbox" name="hide_checkbox" checked={this.props.hideVal} onChange={this.props.changeHideVal} onClick={() => this.props.switchAll(false)} />
+                                <input className="is-checkradio is-block" type="checkbox" id="hide_checkbox" name="hide_checkbox" onClick={() => this.toggle_legend()} />
                                 <label htmlFor="hide_checkbox">
-                                    <span> </span>Hide all
+                                    <span> </span>Legend
                             </label>
                             </div>
                         </div>
-                        <div className="legend-box">
-                            <div className="legend-item">
-                                <p><img src={recImage} alt="Station symbol" />
-                                    Recording station
-                                </p>
+                        {
+                            this.state.legend &&
+                            <div className="legend">
+                                <div className="legend-column">
+                                    <div className="legend-item">
+                                        <p><img src={recImage} alt="Station symbol" />
+                                            Recording station
+                                        </p>
+                                    </div>
+                                    <div className="legend-item">
+                                        <p><img src={centerImage} alt="Network centroid" />
+                                            Network centroid
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="legend-column is-next">
+                                    <div className="legend-item">
+                                        <p>
+                                            <span className="legend-icon">
+                                                <FontAwesomeIcon icon="circle" />
+                                            </span>
+                                            Emittor
+                                        </p>
+                                    </div>
+                                    <div className="legend-item">
+                                        <p>
+                                            <span className="legend-icon">
+                                                <FontAwesomeIcon icon="circle-notch" />
+                                            </span>
+                                            Lone emittor
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="legend-column is-next">
+                                    <div className="legend-item">
+                                        <p><img src={lineImage} alt="Station symbol" />
+                                            Link emittor to network
+                                        </p>
+                                    </div>
+                                    <div className="legend-item">
+                                        <p><img src={dashImage} alt="Network centroid" />
+                                            Network correction suggestion
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="legend-item">
-                                <p><img src={centerImage} alt="Network centroid" />
-                                    Network centroid
-                                </p>
-                            </div>
+                        }
 
-                        </div>
+
+
+
                     </div>
 
                     <Layer id="recStations" key="recStations" type="symbol" layout={{
