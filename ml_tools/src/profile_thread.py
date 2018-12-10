@@ -34,8 +34,9 @@ class ProfilerThread(threading.Thread):
             try:
                 pinfo = proc.as_dict(
                     attrs=['pid', 'name', 'username'])
-                if 'Python' in pinfo['name'] or 'python' in pinfo['name'] : # Monitor all Python processes
-                    processes.append(proc)
+                if pinfo['name'] is not None:
+                    if 'Python' in pinfo['name'] or 'python' in pinfo['name'] : # Monitor all Python processes
+                        processes.append(proc)
             except psutil.NoSuchProcess as err:
                 logger.error(err)
         return processes
