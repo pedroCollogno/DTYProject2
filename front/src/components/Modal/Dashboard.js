@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import Modal from './Modal.js';
 import './Dashboard.css';
 
-import { Bar, Pie, Bubble, Polar, Doughnut, Line } from 'react-chartjs-2';
+import { Bar, Doughnut, Line } from 'react-chartjs-2';
 import 'chartjs-plugin-labels';
 
 
@@ -31,7 +31,6 @@ class Dashboard extends Component {
       return { modalState: newState };
     });
   }
-
 
   degToDms(deg) {
     let d = Math.floor(deg);
@@ -138,7 +137,13 @@ class Dashboard extends Component {
     stats.cycle.clusterDuration = cycle_mem_info['cluster_duration']
     stats.global.clusterDurationList = global_mem_info['cluster_duration_list']
     // Cumulative CPU usage
-    stats.global.CPUUsageList = global_mem_info['cpu_usage_list']
+    stats.global.CPUUsageList = global_mem_info['cpu_usage_list'] || []
+    // Set the max value at 100% ...
+    for (var i=0; i<stats.global.CPUUsageList.length;i++){
+      if (stats.global.CPUUsageList[i] > 100) {
+        stats.global.CPUUsageList[i] = 100
+      }
+    }
     // Cumulative memory usage
     stats.global.memoryUsageList = global_mem_info['mem_usage_list']
     // Progress list since start
@@ -191,15 +196,15 @@ class Dashboard extends Component {
       labels: stats.global.progressList || [],
       datasets:[{
         label: "Memory",
-        borderColor: 'rgba(185, 24, 24, 1)',
-        backgroundColor: 'rgba(185, 24, 24, 0.5)',
+        borderColor: 'rgba(135,206,250,1)',
+        backgroundColor: 'rgba(135,206,250,0.5)',
         data: stats.global.memoryUsageList || [],
         yAxisID: 'memory'
       },
       {
         label: "CPU",
-        borderColor: 'rgba(24, 51, 185, 1)',
-        backgroundColor: 'rgba(24, 51, 185, 0.5)',
+        borderColor: 'rgba(106,90,205,1)',
+        backgroundColor: 'rgba(106,90,205,0.5)',
         data: stats.global.CPUUsageList || [],
         yAxisID: 'CPU'
       }]
@@ -244,15 +249,15 @@ class Dashboard extends Component {
       labels: stats.global.progressList || [],
       datasets:[{
         label: "Processing",
-        borderColor: 'rgba(185, 24, 24, 1)',
-        backgroundColor: 'rgba(185, 24, 24, 0.5)',
+        borderColor: 'rgba(255,99,71,1)',
+        backgroundColor: 'rgba(255,99,71,0.5)',
         data: stats.global.readDurationList || [],
         yAxisID: 'processing'
       },
       {
         label: "Clustering",
-        borderColor: 'rgba(24, 51, 185, 1)',
-        backgroundColor: 'rgba(24, 51, 185, 0.5)',
+        borderColor: 'rgba(255,165,0,1)',
+        backgroundColor: 'rgba(255,165,0,0.5)',
         data: stats.global.clusterDurationList || [],
         yAxisID: 'clustering'
       }]
@@ -277,7 +282,10 @@ class Dashboard extends Component {
           },
           display: true,
           id: 'processing',
-          position: 'left'
+          position: 'left',
+          ticks:{
+            max : Math.max(...(stats.global.readDurationList || [1]))*1.5
+          }
         },
         {
           scaleLabel: {
@@ -444,6 +452,44 @@ class Dashboard extends Component {
 
     return (
       <div className="column">
+        <div class="level">
+          <div class="level-item has-text-centered">
+            <div>
+              <p class="dashboard subtitle">Method</p>
+              <p class="dashboard title">{(this.props.simulationMode) || 'No method selected'}</p>
+            </div>
+          </div>
+          <div class="level-item has-text-centered">
+            <div>
+              <p class="dashboard subtitle">Time</p>
+              <p class="dashboard title">{(this.props.cycle_mem_info['progress']) || 0} sec</p>
+            </div>
+          </div>
+          <div class="level-item has-text-centered">
+            <div>
+              <p class="dashboard subtitle">Number of Emittors</p>
+              <p class="dashboard title">{emittersIds.length}</p>
+            </div>
+          </div>
+          <div class="level-item has-text-centered">
+            <div>
+              <p class="dashboard subtitle">EVF Networks</p>
+              <p class="dashboard title">{stats.networks.numberEVF}</p>
+            </div>
+          </div>
+          <div class="level-item has-text-centered">
+            <div>
+              <p class="dashboard subtitle">FF Networks</p>
+              <p class="dashboard title">{stats.networks.numberFF}</p>
+            </div>
+          </div>
+          <div class="level-item has-text-centered">
+            <div>
+              <p class="dashboard subtitle">Burst Networks</p>
+              <p class="dashboard title">{stats.networks.numberBurst}</p>
+            </div>
+          </div>
+        </div>
         <div className="columns is-multiline">
           <div className="column is-half">
             <div className="box">
@@ -485,29 +531,6 @@ class Dashboard extends Component {
             </div>
           </div>
         </div>
-
-        {/* <div className="columns is-multiline">
-          <div className="column is-6">
-            <div className="panel">
-              <p className="panel-heading">
-                All Networks
-                      </p>
-              <div className="panel-block">
-                < Bar ref='barchart' data={barData} options={barOptions} getElementAtEvent={dataset => this.setState({ networkSelected: dataset[0]._index })} />
-              </div>
-            </div>
-          </div>
-          <div className="column is-6">
-            <div className="panel">
-              <p className="panel-heading">
-                Network #{this.state.networkSelected} : speaking times
-              </p>
-              <div className="panel-block">
-                < Doughnut data={pieData} options={pieOptions} getElementAtEvent={dataset => this.setState({ emittorSelected: dataset[0]._model.label })} />
-              </div>
-            </div>
-          </div>
-        </div> */}
       </div>
     )
   }
@@ -525,8 +548,7 @@ class Dashboard extends Component {
         <Modal
           closeModal={this.toggleModal}
           modalState={this.state.modalState}
-          title="Dashboard"
-        >
+          title='Dashboard'>
           <p>
             {this.getEmittorList()}
           </p>

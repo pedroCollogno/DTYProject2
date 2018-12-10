@@ -94,3 +94,6 @@ article.tile {
     width: 256px;
     height: 256px;
     opacity: 0; } }
+
+.tooltip:hover::before, .tooltip.is-tooltip-active::before {
+  background: rgba(74, 74, 74, 0.99); }
