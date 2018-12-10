@@ -340,7 +340,8 @@ class Dashboard extends Component {
     const barOptions = {
       plugins: {
         labels:{
-          render: 'value'
+          render: 'value',
+          fontColor: 'rgba(0, 0, 0, 0)'
         }
       },
       scales: {
