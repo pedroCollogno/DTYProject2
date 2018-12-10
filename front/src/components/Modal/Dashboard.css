@@ -8,5 +8,8 @@
 .dashboard.title {
   color: black !important; }
 
+.dashboard.subtitle {
+  color: black !important; }
+
 .dashboard-button {
   padding-left: 2em; }
