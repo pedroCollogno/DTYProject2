@@ -18,7 +18,8 @@ const Map = ReactMapboxGl({ // Only set in case internet is used, as an optional
     accessToken: "pk.eyJ1IjoicGllcnJvdGNvIiwiYSI6ImNqbzc5YjVqODB0Z2Mzd3FxYjVsNHNtYm8ifQ.S_87byMcZ0YDwJzTdloBvw"
 });
 
-const colorMapNames = ["jet", "hsv", "rainbow"];
+const colorMapNames = ["jet", "hsv", "rainbow", "rainbow-soft"];
+let colorMapNumber = colorMapNames.length;
 let htmlRecImage = new Image(467, 314); // image for the reception stations
 htmlRecImage.src = recImage; // HTML format to render it in the canvas
 let htmlCenterImage = new Image(256, 256); // image for the network centers 
@@ -34,8 +35,7 @@ class MapBox extends Component {
             networksLabels: Object.keys(props.emittors), // the networks labels
             colors: colormap({ // a colormap to set a different color for each network
                 colormap: 'jet',
-                nshades: Math.max(Object.keys(props.emittors).length, 10), // 10 is the minimum number of colors
-                alpha: 1 // opacity
+                nshades: Math.max(Object.keys(props.emittors).length, 11) // 11 is the minimum number of colors
             }),
             colorMapType: 0,
             style: {
@@ -75,7 +75,7 @@ class MapBox extends Component {
                 networksLabels: Object.keys(nextProps.emittors),
                 colors: colormap({
                     colormap: colorMapNames[this.state.colorMapType],
-                    nshades: Math.max(Object.keys(nextProps.emittors).length, 10),
+                    nshades: Math.max(Object.keys(nextProps.emittors).length, 11),
                     alpha: 1
                 }),
                 highlights: highlights,
@@ -100,14 +100,14 @@ class MapBox extends Component {
     switchColorMap() {
         let index = this.state.colorMapType;
         index += 1;
-        if (index > 3) {
-            index -= 3;
+        if (index > colorMapNumber) {
+            index -= colorMapNumber;
         }
         let colormapName = colorMapNames[index];
         this.setState({
             colors: colormap({
                 colormap: colormapName,
-                nshades: Math.max(this.state.networksLabels.length, 10), // 10 is the minimum number of colors
+                nshades: Math.max(this.state.networksLabels.length, 11), // 11 is the minimum number of colors
                 alpha: 1 // opacity
             }),
             colorMapType: index
