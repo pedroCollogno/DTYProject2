@@ -158,7 +158,7 @@ class Dashboard extends Component {
         // The duration of each emittor
         emittersDurations.push(networks[element][i]['duration'] / 1e6);
         // The id of each emittor
-        emittersIds.push(networks[element][i]['track_id']);
+        emittersIds.push(networks[element][i]['id']);
         // The Latitude of each emittor
         emitterLat.push(networks[element][i]['coordinates']['lat'])
         // The Longitude of each emittor
@@ -206,6 +206,10 @@ class Dashboard extends Component {
     }
     
     const lineOptions = {
+      title:{
+        display: true,
+        text: 'Computer ressources usage'
+      },
       scales: {
         xAxes: [{
           scaleLabel: {
@@ -255,6 +259,10 @@ class Dashboard extends Component {
     }
     
     const lineOptions2 = {
+      title:{
+        display: true,
+        text: 'Process execution time'
+      },
       scales: {
         xAxes: [{
           scaleLabel: {
@@ -274,7 +282,7 @@ class Dashboard extends Component {
         {
           scaleLabel: {
             display: true,
-            labelString: 'Clustering Duration (ms)'
+            labelString: 'Clustering Time (ms)'
           },
           display: true,
           id: 'clustering',
@@ -338,6 +346,10 @@ class Dashboard extends Component {
     }
 
     const barOptions = {
+      title:{
+        display: true,
+        text: 'Number of emittors per Network'
+      },
       plugins: {
         labels:{
           render: 'value',
@@ -406,13 +418,25 @@ class Dashboard extends Component {
     }
 
     const pieOptions = {
+      title:{
+        display: true,
+        text: 'Speaking time of each emittor in Network ' + this.state.networkSelected
+      },
       plugins: { 
           labels: {
             render: 'percentage',
             fontColor: '#000',
             position: 'outside'
           }
-        
+      },
+      tooltips: {
+        mode: 'label',
+        callbacks: {
+            label: function(tooltipItem, data) { 
+                var indice = tooltipItem.index;                 
+                return  data.labels[indice] +': '+data.datasets[0].data[indice] + ' seconds';
+            }
+        }
       }
     }
 
@@ -421,16 +445,6 @@ class Dashboard extends Component {
     return (
       <div className="column">
         <div className="columns is-multiline">
-          {/* <div className="column is-3">
-              <div className="panel">
-                <p className="panel-heading">
-                  All Networks
-                        </p>
-                <div className="panel-block">
-                  < Line ref='linechart' data={lineData}/>
-                </div>
-              </div>
-            </div> */}
           <div className="column is-half">
             <div className="box">
               <div className="level">
@@ -449,35 +463,30 @@ class Dashboard extends Component {
               </div>
             </div>
           </div>
-          {/* <div className="column is-third">
-            <div className="box">
-              <div className="heading">Emittor</div>
-              <div className="dashboard title">#{stats.emittor.id}</div>
-              <div className="level">
-                <div className="level-item">
-                  <div className="">
-                    <div className="heading">Network</div>
-                    <div className="dashboard title is-5">#{stats.emittor.network}</div>
-                  </div>
-                </div>
-                <div className="level-item">
-                  <div className="">
-                    <div className="heading">Latitude</div>
-                    <div className="dashboard title is-5">{stats.emittor.lat}</div>
-                  </div>
-                </div>
-                <div className="level-item">
-                  <div className="">
-                    <div className="heading">Longitude</div>
-                    <div className="dashboard title is-5">{stats.emittor.lng}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div> */}
         </div>
 
         <div className="columns is-multiline">
+          <div className="column is-half">
+            <div className="box">
+              <div className="level">
+                <div className="level-item">
+                  < Bar ref='barchart' data={barData} options={barOptions} getElementAtEvent={dataset => this.setState({ networkSelected: dataset[0]._index })} />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="column is-half">
+            <div className="box">
+              <div className="level">
+                <div className="level-item">
+                  < Doughnut data={pieData} options={pieOptions} getElementAtEvent={dataset => this.setState({ emittorSelected: dataset[0]._model.label })} />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* <div className="columns is-multiline">
           <div className="column is-6">
             <div className="panel">
               <p className="panel-heading">
@@ -498,7 +507,7 @@ class Dashboard extends Component {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     )
   }
