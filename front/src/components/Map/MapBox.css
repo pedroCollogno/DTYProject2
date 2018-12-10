@@ -101,8 +101,25 @@
   height: 28px;
   width: 28px; }
   .widgets-tag a#network-names-button {
-    color: black;
-    top: 115px; }
+    color: black; }
   .widgets-tag span.icon {
+    height: 28px;
+    width: 28px; }
+
+.widgets-colors {
+  text-align: right;
+  position: absolute;
+  top: 150px;
+  right: 10px;
+  box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  bottom: auto;
+  left: auto;
+  background-color: #eeeeee;
+  height: 28px;
+  width: 28px; }
+  .widgets-colors a#colors-names-button {
+    color: black; }
+  .widgets-colors span.icon {
     height: 28px;
     width: 28px; }
