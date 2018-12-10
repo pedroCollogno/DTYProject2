@@ -149,11 +149,13 @@ def process_data(track_streams, file_name):
     :param track_streams: track stream to process
     :param file_name: file name of the pkl file in /pkl where data will be saved
     """
-    preds = predict_all_ids(track_streams)
+    ts = [track_stream.tracks for track_stream in track_streams]
+
+    preds = predict_all_ids(ts)
     test_ids = set(preds[1])
     #print("Number of emitters :", len(test_ids), len(preds[1]))
 
-    temporal_data = get_start_and_end(track_streams)
+    temporal_data = get_start_and_end(ts)
     start_date_ms = temporal_data[0]
     sequence_size = temporal_data[2]
 
@@ -167,8 +169,9 @@ def process_data(track_streams, file_name):
     for i in range(len(preds[0])):
         emitter_infos[preds[1][i]] = {
             "network": preds[0][i],
-            "steps": get_steps_track(track_streams, preds[1][i], sequence_size, start_date_ms)
+            "steps": get_steps_track(ts, preds[1][i], sequence_size, start_date_ms)
         }
+        print(get_steps_track(ts, preds[1][i], sequence_size, start_date_ms))
         progress += 1
         pbar.update(progress)
         pbar.finish()

@@ -94,7 +94,8 @@ class Dashboard extends Component {
         clusterDurationList: [],
         readDurationList: [],
         progressList: [],
-        memoryUsageList: []
+        memoryUsageList: [],
+        CPUUsageList: []
       },
       emittor: {
         id: null,
@@ -124,6 +125,8 @@ class Dashboard extends Component {
     var emitterLat = []
     var emitterLng = []
 
+    console.log(global_mem_info)
+
     // The total duration
     stats.cycle.progress = cycle_mem_info['progress']
     // The read duration 
@@ -132,6 +135,8 @@ class Dashboard extends Component {
     // The clustering duration
     stats.cycle.clusterDuration = cycle_mem_info['cluster_duration']
     stats.global.clusterDurationList = global_mem_info['cluster_duration_list']
+    // Cumulative CPU usage
+    stats.global.CPUUsageList = global_mem_info['cpu_usage_list']
     // Cumulative memory usage
     stats.global.memoryUsageList = global_mem_info['mem_usage_list']
     // Progress list since start
@@ -183,8 +188,18 @@ class Dashboard extends Component {
     const lineData = {
       labels: stats.global.progressList || [],
       datasets:[{
-        label: "Memory usage",
-        data: stats.global.memoryUsageList || []
+        label: "Memory",
+        borderColor: 'rgba(185, 24, 24, 1)',
+        backgroundColor: 'rgba(185, 24, 24, 0.5)',
+        data: stats.global.memoryUsageList || [],
+        yAxisID: 'memory'
+      },
+      {
+        label: "CPU",
+        borderColor: 'rgba(24, 51, 185, 1)',
+        backgroundColor: 'rgba(24, 51, 185, 0.5)',
+        data: stats.global.CPUUsageList || [],
+        yAxisID: 'CPU'
       }]
     }
     
@@ -201,9 +216,18 @@ class Dashboard extends Component {
             display: true,
             labelString: 'Memory Usage (MB)'
           },
-          ticks: {
-            beginAtZero: false
+          display: true,
+          id: 'memory',
+          position: 'left'
+        },
+        {
+          scaleLabel: {
+            display: true,
+            labelString: 'CPU Usage (%)'
           },
+          display: true,
+          id: 'CPU',
+          position: 'right'
         }]
       }
     }
