@@ -48,8 +48,12 @@ article.tile {
   .control-section .time-after, .control-section .time-before {
     background-color: #e1e1e1; }
 
-.simulation {
+.level {
   padding: 1em; }
+  .level .buttons:not(:last-child) {
+    margin-bottom: 0px; }
+  .level .buttons:last-child {
+    margin-bottom: 0px; }
 
 #spinner {
   position: absolute;

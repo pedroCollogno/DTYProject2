@@ -176,13 +176,12 @@ class Dashboard extends Component {
     // ---------------- LINE CHART DATA ----------------
 
     const lineData = {
-      labels: stats.cycle.progressList || [],
-      datasets:[{
+      labels: stats.cycle.progressList || [],
+      datasets: [{
         label: "Memory usage",
-        data: stats.cycle.memoryUsageList || []
+        data: stats.cycle.memoryUsageList || []
       }]
     }
-    console.log(lineData)
 
     // ---------------- BAR CHART DATA ----------------
 
@@ -307,9 +306,9 @@ class Dashboard extends Component {
             <div className="box">
               <div className="level">
                 <div className="level-item">
-                < Line ref='linechart' data={lineData}/>
+                  < Line ref='linechart' data={lineData} />
                 </div>
-          
+
               </div>
             </div>
           </div> */}

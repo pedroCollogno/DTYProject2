@@ -1,4 +1,3 @@
-
 import threading
 import psutil
 import time
@@ -26,6 +25,10 @@ class ProfilerThread(threading.Thread):
         threading.Thread.__init__(self)
 
     def get_python_processes(self):
+        """ Used to know about all processes that are running with Python
+
+        :return: A list, containing all Python processes running on this machine
+        """
         processes = []
         for proc in psutil.process_iter():
             try:
@@ -39,7 +42,7 @@ class ProfilerThread(threading.Thread):
 
     def measure(self):
         """
-        Make a measurement for the process
+        Make a measurement for the process, and send the results to the ProcessProfiler
         """
         total_mem_info = 0
         total_mem_percent = 0

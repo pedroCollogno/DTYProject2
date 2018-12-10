@@ -66,8 +66,14 @@ article.tile {
     }
 }
 
-.simulation {
+.level {
     padding: 1em;
+    .buttons:not(:last-child) {
+        margin-bottom: 0px;
+    }
+    .buttons:last-child {
+        margin-bottom: 0px;
+    }
 }
 
 #spinner {
