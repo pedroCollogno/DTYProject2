@@ -55,8 +55,9 @@
     padding: 0.5em;
     font-size: 1.2em;
     cursor: grab;
+    background-color: rgba( $grey, .7 );
     &:hover {
-        background-color: $grey;
+        background-color: rgba( $grey, .7 );
     }
     .legend {
         display: flex;
@@ -131,7 +132,31 @@
 
     a#network-names-button {
         color: black;     
-        top:    115px;
+    }
+
+    span.icon {
+        height: 28px;
+        width: 28px;
+    }
+}
+
+
+.widgets-colors {
+    text-align: right;
+    position: absolute; 
+    top: 150px; 
+    right: 10px; 
+    box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px; 
+    border: 1px solid rgba(0, 0, 0, 0.1); 
+    bottom: auto; 
+    left: auto;
+    background-color: $grey;
+
+    height: 28px;
+    width: 28px;
+
+    a#colors-names-button {
+        color: black;     
     }
 
     span.icon {

@@ -45,9 +45,10 @@
   margin: 0.5em;
   padding: 0.5em;
   font-size: 1.2em;
-  cursor: grab; }
+  cursor: grab;
+  background-color: rgba(238, 238, 238, 0.7); }
   #legend:hover {
-    background-color: #eeeeee; }
+    background-color: rgba(238, 238, 238, 0.7); }
   #legend .legend {
     display: flex; }
     #legend .legend .legend-column.is-next {
@@ -100,8 +101,7 @@
   height: 28px;
   width: 28px; }
   .widgets-tag a#network-names-button {
-    color: black;
-    top: 115px; }
+    color: black; }
   .widgets-tag span.icon {
     height: 28px;
     width: 28px; }
@@ -119,8 +119,7 @@
   height: 28px;
   width: 28px; }
   .widgets-colors a#colors-names-button {
-    color: black;
-    top: 150px; }
+    color: black; }
   .widgets-colors span.icon {
     height: 28px;
     width: 28px; }
