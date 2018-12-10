@@ -34,7 +34,7 @@ class MapBox extends Component {
             networksLabels: Object.keys(props.emittors), // the networks labels
             colors: colormap({ // a colormap to set a different color for each network
                 colormap: 'jet',
-                nshades: Math.max(Object.keys(props.emittors).length, 8), // 8 is the minimum number of colors
+                nshades: Math.max(Object.keys(props.emittors).length, 10), // 10 is the minimum number of colors
                 alpha: 1 // opacity
             }),
             colorMapType: 0,
@@ -75,7 +75,7 @@ class MapBox extends Component {
                 networksLabels: Object.keys(nextProps.emittors),
                 colors: colormap({
                     colormap: colorMapNames[this.state.colorMapType],
-                    nshades: Math.max(Object.keys(nextProps.emittors).length, 8),
+                    nshades: Math.max(Object.keys(nextProps.emittors).length, 10),
                     alpha: 1
                 }),
                 highlights: highlights,
@@ -107,7 +107,7 @@ class MapBox extends Component {
         this.setState({
             colors: colormap({
                 colormap: colormapName,
-                nshades: Math.max(this.state.networksLabels.length, 8), // 8 is the minimum number of colors
+                nshades: Math.max(this.state.networksLabels.length, 10), // 10 is the minimum number of colors
                 alpha: 1 // opacity
             }),
             colorMapType: index
