@@ -8,8 +8,8 @@ import Dashboard from '../Modal/Dashboard'
 
 // Set fontAwesome icons up -> Define all icons that will be used in the app.
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faUpload, faDownload, faUndo, faPlay, faPause, faStop, faLocationArrow, faCheck, faExclamationTriangle, faCircle, faCircleNotch, faTags, faInfo, faMagic } from '@fortawesome/free-solid-svg-icons'
-library.add(faUpload, faDownload, faUndo, faPlay, faPause, faStop, faLocationArrow, faCheck, faExclamationTriangle, faCircle, faCircleNotch, faTags, faInfo, faMagic)
+import { faUpload, faDownload, faUndo, faPalette, faPlay, faPause, faStop, faLocationArrow, faCheck, faExclamationTriangle, faCircle, faCircleNotch, faTags, faInfo, faMagic } from '@fortawesome/free-solid-svg-icons'
+library.add(faUpload, faDownload, faUndo, faPalette, faPlay, faPause, faStop, faLocationArrow, faCheck, faExclamationTriangle, faCircle, faCircleNotch, faTags, faInfo, faMagic)
 // Setup complete, import them
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
@@ -131,7 +131,6 @@ class App extends Component {
     this.getEmittorsPositions = this.getEmittorsPositions.bind(this);
     this.reset = this.reset.bind(this);
     this.changeShowVal = this.changeShowVal.bind(this);
-    this.changeHideVal = this.changeHideVal.bind(this);
     this.hoverIn = this.hoverIn.bind(this);
     this.hoverOut = this.hoverOut.bind(this);
     this.changeSimulationMode = this.changeSimulationMode.bind(this);

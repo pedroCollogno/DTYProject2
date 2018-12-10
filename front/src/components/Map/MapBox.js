@@ -18,6 +18,12 @@ const Map = ReactMapboxGl({ // Only set in case internet is used, as an optional
     accessToken: "pk.eyJ1IjoicGllcnJvdGNvIiwiYSI6ImNqbzc5YjVqODB0Z2Mzd3FxYjVsNHNtYm8ifQ.S_87byMcZ0YDwJzTdloBvw"
 });
 
+const colorMapNames = ["jet", "hsv", "rainbow"];
+let htmlRecImage = new Image(467, 314); // image for the reception stations
+htmlRecImage.src = recImage; // HTML format to render it in the canvas
+let htmlCenterImage = new Image(256, 256); // image for the network centers 
+htmlCenterImage.src = centerImage;
+
 class MapBox extends Component {
 
     constructor(props) {
@@ -29,9 +35,9 @@ class MapBox extends Component {
             colors: colormap({ // a colormap to set a different color for each network
                 colormap: 'jet',
                 nshades: Math.max(Object.keys(props.emittors).length, 8), // 8 is the minimum number of colors
-                format: 'hex',
                 alpha: 1 // opacity
             }),
+            colorMapType: 0,
             style: {
                 online: 'mapbox://styles/mapbox/streets-v9', // if "online" is toggled, renders map through the Web (OpenStreet Map)
                 offline: global // else, renders the local version of the map (pre-dowloaded tiles for different levels of zoom)
@@ -51,6 +57,7 @@ class MapBox extends Component {
         this.center = this.center.bind(this);
         this.nameNetworks = this.nameNetworks.bind(this);
         this.toggle_legend = this.toggle_legend.bind(this);
+        this.switchColorMap = this.switchColorMap.bind(this);
     }
 
     /**
@@ -67,9 +74,8 @@ class MapBox extends Component {
                 emittors: nextProps.emittors,
                 networksLabels: Object.keys(nextProps.emittors),
                 colors: colormap({
-                    colormap: 'jet',
+                    colormap: colorMapNames[this.state.colorMapType],
                     nshades: Math.max(Object.keys(nextProps.emittors).length, 8),
-                    format: 'hex',
                     alpha: 1
                 }),
                 highlights: highlights,
@@ -89,6 +95,23 @@ class MapBox extends Component {
         }
         let firstEmittor = Object.keys(this.props.emittors[keys[0]])[0]; // else, centered on the very first emittor received
         this.map.state.map.flyTo({ center: [this.props.emittors[keys[0]][firstEmittor].coordinates.lng, this.props.emittors[keys[0]][firstEmittor].coordinates.lat] });
+    }
+
+    switchColorMap() {
+        let index = this.state.colorMapType;
+        index += 1;
+        if (index > 3) {
+            index -= 3;
+        }
+        let colormapName = colorMapNames[index];
+        this.setState({
+            colors: colormap({
+                colormap: colormapName,
+                nshades: Math.max(this.state.networksLabels.length, 8), // 8 is the minimum number of colors
+                alpha: 1 // opacity
+            }),
+            colorMapType: index
+        });
     }
 
     /**
@@ -161,11 +184,6 @@ class MapBox extends Component {
     }
 
     render() {
-        let htmlRecImage = new Image(467, 314); // image for the reception stations
-        htmlRecImage.src = recImage; // HTML format to render it in the canvas
-        let htmlCenterImage = new Image(256, 256); // image for the network centers 
-        htmlCenterImage.src = centerImage;
-
         return (
             <div className="map-container">
                 {/* the map contains everything (because it implements the actual HTML canvas) */}
@@ -187,7 +205,8 @@ class MapBox extends Component {
                         <div id="showhide" >
                             {/* The checkboxes to hide/show everything */}
                             <div className="field">
-                                <input className="is-checkradio is-block" type="checkbox" id="show_checkbox" name="show_checkbox" checked={this.props.showVal} onChange={this.props.changeShowVal} onClick={() => this.props.switchAll(true)} />
+                                <input className="is-checkradio is-block" type="checkbox" id="show_checkbox"
+                                    name="show_checkbox" checked={this.props.showVal} onChange={this.props.changeShowVal} onClick={this.props.switchAll} />
                                 <label htmlFor="show_checkbox">
                                     <span> </span>Show all
                             </label>
@@ -276,9 +295,9 @@ class MapBox extends Component {
                             let emittorsNumber = Object.keys(emittors).length;
                             let toggled = this.state.networksToggled[network];
                             toggled = !(toggled == undefined || !toggled);
-                            toggled = !this.props.hideAll && (toggled || this.props.showAll);
+                            toggled = toggled || this.props.showAll;
                             toggled = (emittorsNumber == 1) || toggled;
-                            // toggled is True if it's defined, not manually de-toggled (= False) and hideAll is not active
+                            // toggled is True if it's defined, not manually de-toggled (= False)
                             // or simply if showAll is active. Single emittors are always displayed.
 
                             let lines = toggled && (network != "-1000"); // We show the lines if the network is toggled.
@@ -386,6 +405,13 @@ class MapBox extends Component {
                             </span>
                         </a>
                     </div>
+                    <div className="widgets-colors">
+                        <a id="colors-names-button" onClick={this.switchColorMap}>
+                            <span className="icon">
+                                <FontAwesomeIcon icon='palette' />
+                            </span>
+                        </a>
+                    </div>
 
                 </Map >
             </div >
@@ -423,12 +449,7 @@ MapBox.propTypes = {
      */
     showAll: PropTypes.bool.isRequired,
     /**
-     * is the hideAll button checked ?
-     */
-    hideAll: PropTypes.bool.isRequired,
-    /**
-     * the function to toggle showAll (if called with True) or hideAll (if called with False)
-* @param : {Boolean} all Whether to change showAll of hideAll
+     * the function to toggle showAll
     */
     switchAll: PropTypes.func.isRequired,
     /**
