@@ -32,8 +32,8 @@ class Stations extends Component {
                     key={"circles" + this.props.network}
                     paint={{
                         "circle-color": ["get", "color"],
-                        "circle-radius": 5,
-                        "circle-stroke-width": 2,
+                        "circle-radius": 6,
+                        "circle-stroke-width": 4,
                         "circle-stroke-color": ["get", "border"],
                     }}>
                     {
@@ -52,8 +52,8 @@ class Stations extends Component {
                 key={"circles" + this.props.network}
                 paint={{
                     "circle-stroke-color": ["get", "color"],
-                    "circle-radius": 4,
-                    "circle-stroke-width": 3,
+                    "circle-radius": 5,
+                    "circle-stroke-width": 4,
                     "circle-color": ["get", "border"]
                 }}>
                 {

@@ -5,33 +5,54 @@ import './PostHandler.css';
 import PropTypes from "prop-types";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
+window.onunload = () => {
+    var request = new XMLHttpRequest();
+    request.open('GET', 'http://localhost:8000/stopsimulation', false);  // `false` makes the request synchronous
+    request.send(null);
+}
+
+
 class HttpRequestHandler extends Component {
 
     constructor(props) {
         super(props);
         this.state = {
             files: [], // Contains all the uploaded files
+            savedFiles: [], // copy of the uploaded files to easily switch simulation modes
             fileNames: {}, // Contains all the uploaded files names (useful to avoid posting the same file twice)
-            loaded: false, // Did the posting of the files go well ?
+            loaded: undefined, // Did the posting of the files go well ?
             dropText: "Or drop your .PRP files here !", // Text to display in the drop zone
             inputFiles: [],
             progress: 0,
-            total_duration: 0
+            total_duration: 0,
+            network_num: 0,
+            playing: true
         };
-        this.onFormSubmit = this.onFormSubmit.bind(this); // functions allowed to update the state of the component
+        this.postFiles = this.postFiles.bind(this); // functions allowed to update the state of the component
         this.onChange = this.onChange.bind(this);
         this.fileUpload = this.fileUpload.bind(this);
         this.onDrop = this.onDrop.bind(this);
         this.reset = this.reset.bind(this);
+        this.play = this.play.bind(this);
+        this.pause = this.pause.bind(this);
+        this.stop = this.stop.bind(this);
+        this.onStart = this.onStart.bind(this);
+        this.onStartML = this.onStartML.bind(this);
+        this.onStartDL = this.onStartDL.bind(this);
+        this.onStartMix = this.onStartMix.bind(this);
     }
 
     /**
-     * Called when the from is submitted. Posts the data and checks the response of the backend
+     * Called when the form is submitted. Posts the data and checks the response of the backend
      * @param {*} e 
      */
     onFormSubmit(e) {
         e.preventDefault() // Stops form submit
-        this.fileUpload(this.state.files).then((res1) => {
+        this.postFiles(this.state.files);
+    }
+
+    postFiles(files) {
+        this.fileUpload(files).then((res1) => {
             console.log(res1.data); // Should be "POST ok !"
             if (res1.data === "POST ok !") {
                 axios.get("http://localhost:8000/getstations") // GETs the locations of the reception stations...
@@ -71,7 +92,10 @@ class HttpRequestHandler extends Component {
      */
     onStart(e) {
         axios.get("http://localhost:8000/startsimulation")
-            .then((res) => console.log("Simulation started !"));
+            .then((res) => {
+                console.log("Simulation started !");
+                this.props.changeSimulationMode("Running simulation");
+            });
     }
 
     /**
@@ -80,7 +104,10 @@ class HttpRequestHandler extends Component {
      */
     onStartMix(e) {
         axios.get("http://localhost:8000/startsimulationMix")
-            .then((res) => console.log("Simulation started !"));
+            .then((res) => {
+                console.log("Simulation started !");
+                this.props.changeSimulationMode("Clustering + Emittor-to-Cluster DL");
+            });
     }
 
     /**
@@ -89,7 +116,10 @@ class HttpRequestHandler extends Component {
      */
     onStartML(e) {
         axios.get("http://localhost:8000/startsimulationML")
-            .then((res) => console.log("Simulation started using only DB_SCAN for clustering !"));
+            .then((res) => {
+                console.log("Simulation started using only DB_SCAN for clustering !");
+                this.props.changeSimulationMode("Clustering");
+            });
     }
 
     /**
@@ -98,7 +128,10 @@ class HttpRequestHandler extends Component {
      */
     onStartDL(e) {
         axios.get("http://localhost:8000/startsimulationDL")
-            .then((res) => console.log("Simulation started using only Deep Learning for clustering !"));
+            .then((res) => {
+                console.log("Simulation started using only Deep Learning for clustering !");
+                this.props.changeSimulationMode("Emittor-to-Emittor DL");
+            });
     }
 
     /**
@@ -109,9 +142,11 @@ class HttpRequestHandler extends Component {
     fileUpload(files) {
         return this.reset()
             .then((res) => {
+                this.setState({ loaded: false });
                 const url = 'http://localhost:8000/upload'; // server route to POST request
                 const formData = new FormData();
                 let i = 0;
+                console.log("FILES", files)
                 for (let file of files) {
                     formData.append("File" + i, file, file.name); // standardized name for formData entry : "File{i}" (Django)
                     i += 1;
@@ -121,6 +156,7 @@ class HttpRequestHandler extends Component {
                         'content-type': 'multipart/form-data'
                     }
                 }
+
                 return axios.post(url, formData, config) // sends POST request
             })
 
@@ -146,7 +182,10 @@ class HttpRequestHandler extends Component {
         }
     }
 
-
+    /**
+     * Handles any error that might happen when resetting the simulation.
+     * @param {*} error 
+     */
     handleResetError(error) {
         // Error
         if (error.response) {
@@ -155,7 +194,7 @@ class HttpRequestHandler extends Component {
                 this.setState({
                     files: [],
                     fileNames: {},
-                    loaded: false,
+                    loaded: undefined,
                     dropText: "Or drop your .PRP files here !",
                     inputFiles: []
                 });
@@ -170,29 +209,32 @@ class HttpRequestHandler extends Component {
             this.setState({
                 files: [],
                 fileNames: {},
-                loaded: false,
+                loaded: undefined,
                 dropText: "Or drop your .PRP files here !",
                 inputFiles: []
             });
             this.props.reset();
         } else {
             // Something happened in setting up the request that triggered an Error
-            console.log('Error', error.message);
+            console.error('Error', error.message);
         }
-        // console.log(error.config);
     }
 
     /**
      * Resets the environment. (stops backends processing of data)
      */
     reset() {
+        this.props.changeSimulationMode("");
         return axios.get("http://localhost:8000/stopsimulation")
             .then((res) => {
                 console.log("Simulation stopped !");
+                if (this.state.savedFiles.length == 0) {
+                    this.setState({ savedFiles: this.state.files });
+                }
                 this.setState({
                     files: [],
                     fileNames: {},
-                    loaded: false,
+                    loaded: undefined,
                     dropText: "Or drop your .PRP files here !",
                     inputFiles: []
                 });
@@ -203,7 +245,9 @@ class HttpRequestHandler extends Component {
             });
     }
 
+
     play() {
+        this.setState({ playing: true });
         axios.get("http://localhost:8000/playsimulation")
             .then((res) => {
                 console.log("Simulation restarting after pause !");
@@ -211,20 +255,31 @@ class HttpRequestHandler extends Component {
     }
 
     pause() {
+        this.setState({ playing: false });
         axios.get("http://localhost:8000/pausesimulation")
             .then((res) => {
                 console.log("Simulation paused !");
             });
     }
 
+    stop() {
+        this.postFiles(this.state.savedFiles);
+    }
+
+    /**
+     * Updates the progress bar.
+     * @param {*} nextProps 
+     */
     componentWillReceiveProps(nextProps) {
         if (nextProps != this.props) {
             this.setState({
                 progress: nextProps.cycle_mem_info.progress,
-                total_duration: nextProps.cycle_mem_info.total_duration
+                total_duration: nextProps.cycle_mem_info.total_duration,
+                network_num: nextProps.network_num
             })
         }
     }
+
 
     getProgressStart() {
         let delta = "0:00"
@@ -254,6 +309,17 @@ class HttpRequestHandler extends Component {
         return delta
     }
 
+    loading_spinner() {
+        if (this.state.network_num == 0 && this.state.loaded != undefined) {
+            return (
+                <div id='spinner'>
+                    <div class="lds-ripple"><div></div><div></div></div>
+                </div>
+            )
+        } else {
+            return
+        }
+    }
 
     getProgressEnd() {
         let delta = "0:00"
@@ -286,7 +352,8 @@ class HttpRequestHandler extends Component {
     render() {
         return (
             <div>
-                <form onSubmit={this.onFormSubmit}>
+                {this.loading_spinner()}
+                <form onSubmit={(e) => this.onFormSubmit(e)}>
                     <div className="tile is-ancestor is-vertical">
                         <div className="tile">
                             <div className="tile is-parent" id="upload-tile">
@@ -339,18 +406,24 @@ class HttpRequestHandler extends Component {
                                     </div>
                                 </article>
                             </div>
+
                         </div>
                     </div>
                 </form>
                 <section className="control-section">
-                    <a className="button item" onClick={this.play}>
-                        <span className="icon is-small">
+                    <a className="button item" onClick={this.play} disabled={this.state.playing || !this.state.loaded}>
+                        <span className="icon is-small" >
                             <FontAwesomeIcon icon='play' />
                         </span>
                     </a>
-                    <a className="button item" onClick={this.pause}>
+                    <a className="button item" onClick={this.pause} disabled={!this.state.playing || !this.state.loaded}>
                         <span className="icon is-small">
                             <FontAwesomeIcon icon='pause' />
+                        </span>
+                    </a>
+                    <a className="button item" onClick={this.stop} disabled={!this.state.loaded}>
+                        <span className="icon is-small">
+                            <FontAwesomeIcon icon='stop' />
                         </span>
                     </a>
                     <span className="button time-before">{this.getProgressStart()}</span>
@@ -358,60 +431,58 @@ class HttpRequestHandler extends Component {
                     <span className="button time-after">{this.getProgressEnd()}</span>
                 </section>
                 {/* "Start simulation" button, active if the posting of the files went ok */}
-                <section className="simulation">
-                    <div className="columns">
-                        <div className="buttons has-addons column">
-                            <span className="button" id="start-sim-ml-button" disabled={!this.state.loaded} onClick={this.onStart}>
-                                <span className="file-icon">
-                                    <FontAwesomeIcon icon='magic' />
-                                </span>
-                                Just Run
+                <section className="level">
+                    <div className="buttons has-addons">
+                        <span className="button" id="start-sim-button" disabled={!this.state.loaded} onClick={this.onStart}>
+                            <span className="file-icon">
+                                <FontAwesomeIcon icon='magic' />
                             </span>
-                            <span className="button">
-                                <span className="icon is-small">
-                                    <FontAwesomeIcon icon='info' />
-                                </span>
+                            Just Run
                             </span>
-                        </div>
-                        <div className="buttons has-addons column">
-                            <span className="button" id="start-sim-ml-button" disabled={!this.state.loaded} onClick={this.onStartML}>
-                                <span className="file-icon">
-                                    <FontAwesomeIcon icon='magic' />
-                                </span>
-                                Clustering
+                        <span className="button">
+                            <span className="icon is-small">
+                                <FontAwesomeIcon icon='info' />
                             </span>
-                            <span className="button">
-                                <span className="icon is-small">
-                                    <FontAwesomeIcon icon='info' />
-                                </span>
+                        </span>
+                    </div>
+                    <div className="buttons has-addons">
+                        <span className="button" id="start-sim-ml-button" disabled={!this.state.loaded} onClick={this.onStartML}>
+                            <span className="file-icon">
+                                <FontAwesomeIcon icon='magic' />
                             </span>
-                        </div>
-                        <div className="buttons has-addons column">
-                            <span className="button" id="start-sim-dl-button" disabled={!this.state.loaded} onClick={this.onStartDL}>
-                                <span className="file-icon">
-                                    <FontAwesomeIcon icon='magic' />
-                                </span>
-                                Emittor-to-Emittor DL
-                                </span>
-                            <span className="button">
-                                <span className="icon is-small">
-                                    <FontAwesomeIcon icon='info' />
-                                </span>
+                            Clustering
                             </span>
-                        </div>
-                        <div className="buttons has-addons column">
-                            <span className="button" id="start-sim-button" disabled={!this.state.loaded} onClick={this.onStartMix}>
-                                <span className="file-icon">
-                                    <FontAwesomeIcon icon='magic' />
-                                </span>
-                                Clustering + Emittor-to-Cluster DL
-                                </span>
-                            <span className="button">
-                                <span className="icon is-small">
-                                    <FontAwesomeIcon icon='info' />
-                                </span>
+                        <span className="button">
+                            <span className="icon is-small">
+                                <FontAwesomeIcon icon='info' />
                             </span>
-                        </div>
+                        </span>
+                    </div>
+                    <div className="buttons has-addons">
+                        <span className="button" id="start-sim-dl-button" disabled={!this.state.loaded} onClick={this.onStartDL}>
+                            <span className="file-icon">
+                                <FontAwesomeIcon icon='magic' />
+                            </span>
+                            Emittor-to-Emittor DL
+                                </span>
+                        <span className="button">
+                            <span className="icon is-small">
+                                <FontAwesomeIcon icon='info' />
+                            </span>
+                        </span>
+                    </div>
+                    <div className="buttons has-addons">
+                        <span className="button" id="start-sim-mix-button" disabled={!this.state.loaded} onClick={this.onStartMix}>
+                            <span className="file-icon">
+                                <FontAwesomeIcon icon='magic' />
+                            </span>
+                            Clustering + Emittor-to-Cluster DL
+                                </span>
+                        <span className="button">
+                            <span className="icon is-small">
+                                <FontAwesomeIcon icon='info' />
+                            </span>
+                        </span>
                     </div>
                 </section>
             </div>

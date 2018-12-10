@@ -3,6 +3,8 @@ import ReactMapboxGl, { Layer, Feature, ZoomControl, ScaleControl } from "react-
 import colormap from "colormap";
 import Stations from "./Stations.js";
 import recImage from "./EW_high.png";
+import lineImage from "./line.png";
+import dashImage from "./dashed_line.png";
 import centerImage from "./dashed-circle.png";
 import Lines from "./Lines.js";
 import PotentialLines from "./PotentialLines.js";
@@ -38,7 +40,8 @@ class MapBox extends Component {
             },
             highlights: { // the networks that are hovered over
             },
-            nameNets: false
+            nameNets: false,
+            legend: false
         };
         for (let label of Object.keys(props.emittors)) {
             this.state.highlights[label] = 0; // at the beginning, networks are not hovered over (supposedly)
@@ -47,6 +50,7 @@ class MapBox extends Component {
         this.mouseExit = this.mouseExit.bind(this); // (here, we want to update highlights)
         this.center = this.center.bind(this);
         this.nameNetworks = this.nameNetworks.bind(this);
+        this.toggle_legend = this.toggle_legend.bind(this);
     }
 
     /**
@@ -75,6 +79,9 @@ class MapBox extends Component {
         }
     }
 
+    /**
+     * Centers the map on a "relevant" point (Paris by default, the first emittor if .PRP files have already been uploaded)
+     */
     center() {
         let keys = this.state.networksLabels;
         if (keys.length === 0) {
@@ -85,8 +92,8 @@ class MapBox extends Component {
     }
 
     /**
-     * returns the geometric center of all the points of the network, for simpler rendering
-     * @param {*} network 
+     * Returns the geometric center of all the points of the network, for simpler rendering
+     * @param {String} network 
      */
     clusterCenter(network) {
         let x = 0;
@@ -102,8 +109,8 @@ class MapBox extends Component {
     }
 
     /**
-     * when hovering over a network center, highlights it
-     * @param {*} network 
+     * When hovering over a network center, highlights it
+     * @param {String} network 
      */
     mouseEnter(network) {
         let highlights = JSON.parse(JSON.stringify(this.state.highlights));
@@ -113,7 +120,7 @@ class MapBox extends Component {
 
     /**
      * when the pointer leaves, removes the highlight
-     * @param {*} network 
+     * @param {String} network 
      */
     mouseExit(network) {
         let highlights = JSON.parse(JSON.stringify(this.state.highlights));
@@ -123,7 +130,7 @@ class MapBox extends Component {
 
     /**
      * gets the color of each network (white if null)
-     * @param {*} network 
+     * @param {String} network 
      */
     getColor(network) {
         let networkNumber = parseInt(network);
@@ -138,12 +145,23 @@ class MapBox extends Component {
         return "#ffffff";
     }
 
+    /**
+     * Toggles between the network names and their emittors numbers (triggered when clicking the "labels" button)
+     */
     nameNetworks() {
         this.setState({ nameNets: !this.state.nameNets });
     }
 
+    toggle_legend() {
+        if (this.state.legend == true) {
+            this.setState({ legend: false });
+        } else {
+            this.setState({ legend: true });
+        }
+    }
+
     render() {
-        let htmlRecImage = new Image(934, 1321); // image for the reception stations
+        let htmlRecImage = new Image(467, 314); // image for the reception stations
         htmlRecImage.src = recImage; // HTML format to render it in the canvas
         let htmlCenterImage = new Image(256, 256); // image for the network centers 
         htmlCenterImage.src = centerImage;
@@ -158,31 +176,85 @@ class MapBox extends Component {
                         height: "100%",
                         width: "100%"
                     }}
-                    ref={(e) => { this.map = e; }}
-                    onStyleLoad={(map) => {
-                        map.addImage("recStation", htmlRecImage);
+                    ref={(e) => { this.map = e; }} // Allows direct references to the map (and thus direct actions e.g. "map.flyTo()")
+                    onStyleLoad={(map) => { // Adds the HTML images as sources for later use in Layer components
+                        map.addImage("recStation", htmlRecImage); // The reference name for this image
                         map.addImage("networkCenter", htmlCenterImage);
                     }}
                 >
 
-                    <div id="showhide">
-                        {/* The checkboxes to hide/show everything */}
-                        <div className="field">
-                            <input className="is-checkradio is-block" type="checkbox" id="show_checkbox" name="show_checkbox" checked={this.props.showVal} onChange={this.props.changeShowVal} onClick={() => this.props.switchAll(true)} />
-                            <label htmlFor="show_checkbox">
-                                <span> </span>Show all
+                    <div id="legend" className="button is-grey">
+                        <div id="showhide" >
+                            {/* The checkboxes to hide/show everything */}
+                            <div className="field">
+                                <input className="is-checkradio is-block" type="checkbox" id="show_checkbox" name="show_checkbox" checked={this.props.showVal} onChange={this.props.changeShowVal} onClick={() => this.props.switchAll(true)} />
+                                <label htmlFor="show_checkbox">
+                                    <span> </span>Show all
                             </label>
-                        </div>
-                        <div className="field">
-                            <input className="is-checkradio is-block" type="checkbox" id="hide_checkbox" name="hide_checkbox" checked={this.props.hideVal} onChange={this.props.changeHideVal} onClick={() => this.props.switchAll(false)} />
-                            <label htmlFor="hide_checkbox">
-                                <span> </span>Hide all
+                            </div>
+                            <div className="field">
+                                <input className="is-checkradio is-block" type="checkbox" id="hide_checkbox" name="hide_checkbox" onClick={() => this.toggle_legend()} />
+                                <label htmlFor="hide_checkbox">
+                                    <span> </span>Legend
                             </label>
+                            </div>
                         </div>
+                        {
+                            this.state.legend &&
+                            <div className="legend">
+                                <div className="legend-column">
+                                    <div className="legend-item">
+                                        <p><img src={recImage} alt="Station symbol" />
+                                            Recording station
+                                        </p>
+                                    </div>
+                                    <div className="legend-item">
+                                        <p><img src={centerImage} alt="Network centroid" />
+                                            Network centroid
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="legend-column is-next">
+                                    <div className="legend-item">
+                                        <p>
+                                            <span className="legend-icon">
+                                                <FontAwesomeIcon icon="circle" />
+                                            </span>
+                                            Emittor
+                                        </p>
+                                    </div>
+                                    <div className="legend-item">
+                                        <p>
+                                            <span className="legend-icon">
+                                                <FontAwesomeIcon icon="circle-notch" />
+                                            </span>
+                                            Lone emittor
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="legend-column is-next">
+                                    <div className="legend-item">
+                                        <p><img src={lineImage} alt="Station symbol" />
+                                            Link emittor to network
+                                        </p>
+                                    </div>
+                                    <div className="legend-item">
+                                        <p><img src={dashImage} alt="Network centroid" />
+                                            Network correction suggestion
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+
+
+
                     </div>
+
                     <Layer id="recStations" key="recStations" type="symbol" layout={{
                         "icon-image": "recStation",
-                        "icon-size": 0.03
+                        "icon-size": 0.06
                     }}>
                         {/* Displays the reception stations as images using the previously defined source image */}
                         {
@@ -191,32 +263,37 @@ class MapBox extends Component {
                             )
                         }
                     </Layer>
+
                     {
                         this.state.networksLabels.map((network, k) => {
                             // Displays every network using 3 Layers : "center" which contains only the center of the
                             // network, Stations which contains all the actual emittors of the network and Lines which
                             // contains the connections between each node of the network.
                             // Those last 2 are rendered uniquely when toggled or if showAll is active.
-                            let clusterCenter = this.clusterCenter(network);
-                            let color = this.getColor(network);
-                            let emittors = this.state.emittors[network];
+                            let clusterCenter = this.clusterCenter(network); // the center coordinates
+                            let color = this.getColor(network); // the color of the network
+                            let emittors = this.state.emittors[network]; // al the emittors in this network
                             let emittorsNumber = Object.keys(emittors).length;
                             let toggled = this.state.networksToggled[network];
                             toggled = !(toggled == undefined || !toggled);
                             toggled = !this.props.hideAll && (toggled || this.props.showAll);
                             toggled = (emittorsNumber == 1) || toggled;
                             // toggled is True if it's defined, not manually de-toggled (= False) and hideAll is not active
-                            // or simply if showAll is active. Single emittors are always displayed. 
-                            let lines = toggled && (network != "-1000");
-                            let potentialLinks = [];
+                            // or simply if showAll is active. Single emittors are always displayed.
+
+                            let lines = toggled && (network != "-1000"); // We show the lines if the network is toggled.
+                            // At the beginning, no line should be shown (the emittors are shown as a cloud of unconnected points).
+
+                            let potentialLinks = []; // When using both ML and DL : list of all the corrected potential links given by the DL
                             Object.keys(emittors).map((track_id, keyy) => {
                                 let potentialNetwork = emittors[track_id]["possible_network"];
-                                if (potentialNetwork != undefined && potentialNetwork != network) {
+                                if (potentialNetwork != undefined && potentialNetwork != network) { // If there was a match with another network...
                                     potentialLinks.push([[emittors[track_id]["coordinates"]["lng"], emittors[track_id]["coordinates"]["lat"]],
-                                    this.clusterCenter(potentialNetwork)]);
+                                    this.clusterCenter(potentialNetwork)]); // ...the link between the emittors coordinates and the other network's center's coordiantes is saved.
                                 }
                             });
-                            let showPotential = (toggled && potentialLinks.length != 0);
+
+                            let showPotential = (toggled && potentialLinks.length != 0); // We only
                             let textCenter = "" + emittorsNumber;
                             if (this.state.nameNets) {
                                 textCenter = "" + (parseInt(network) + 1);
@@ -236,9 +313,9 @@ class MapBox extends Component {
                                             onClick={() => { this.props.toggleNetwork(network) }}
                                             layout={{
                                                 "text-field": textCenter,
-                                                "text-size": 15,
+                                                "text-size": 19,
                                                 "icon-image": "networkCenter",
-                                                "icon-size": 0.08,
+                                                "icon-size": 0.1,
                                                 "icon-allow-overlap": true,
                                                 "text-allow-overlap": true,
                                                 "text-font": ["Open Sans Regular"],

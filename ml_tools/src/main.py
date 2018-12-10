@@ -28,6 +28,7 @@ import logging
 logger = logging.getLogger('backend')
 
 cycles_per_batch = config['VARS']['cycles_per_batch']
+cycles_per_batch_mix_method = config['VARS']['cycles_per_batch_mix_method']
 LOGS_DIR = config['PATH']['logs']
 
 
@@ -44,7 +45,6 @@ class ProcessProfiler:
         self.memory_info = []
         self.memory_percent = []
         self.cpu_percent = []
-        self.cpu_times = []
         self.profiler_thread = None
 
     def start(self):
@@ -100,13 +100,6 @@ class ProcessProfiler:
         """
         self.cpu_percent.append(cpu_percent)
 
-    def add_cpu_times(self, cpu_times):
-        """ Adds the time spent by normal processes executing in user mode
-
-        :param cpu_times: the measure that was taken
-        """
-        self.cpu_times.append(cpu_times)
-
     def get_memory_info(self):
         """ Gets the amount of memory used
         
@@ -128,45 +121,34 @@ class ProcessProfiler:
         """
         return self.cpu_percent
 
-    def get_cpu_times(self):
-        """ Gets the time spent by normal processes executing in user mode
-
-        :return: the time spend by CPU in user mode for this process
-        """
-        return self.cpu_times
-
     def get_mean_info(self):
         """ Gets the a summary of the process' CPU and memory usage
         
         :return: A dictionnary, containing the mean values for memory and CPU usage
         """
-        if (len(self.memory_info) > 0) and (len(self.memory_percent) > 0) and (len(self.cpu_percent) > 0) and (len(self.cpu_times) > 0) :
+        if (len(self.memory_info) > 0) and (len(self.memory_percent) > 0) and (len(self.cpu_percent) > 0):
             return ({
                 'memory_info': sum(self.memory_info)/len(self.memory_info),
                 'memory_percent': sum(self.memory_percent)/len(self.memory_percent),
                 'cpu_percent': sum(self.cpu_percent)/len(self.cpu_percent),
-                'cpu_times': sum(self.cpu_times)/len(self.cpu_times)
             })
         else:
             return({
-                'memory_info': -1,
-                'memory_percent': -1,
-                'cpu_percent': -1,
-                'cpu_times': -1
+                'memory_info': sum(self.memory_info),
+                'memory_percent': sum(self.memory_percent),
+                'cpu_percent': sum(self.cpu_percent),
             })
 
     def log(self):
         """
         Logs the last measured metrics
         """
-        logger.warning('For process %s - memory_info: %.1f' %
-                       (self.pid, sum(self.memory_info)/len(self.memory_info)))
-        logger.warning('For process %s - memory_percent: %s' %
-                       (self.pid, sum(self.memory_percent)/len(self.memory_percent)))
-        logger.warning('For process %s - cpu_percent: %s' %
-                       (self.pid, sum(self.cpu_percent)/len(self.cpu_percent)))
-        logger.warning('For process %s - cpu_times: %s' %
-                       (self.pid, sum(self.cpu_times)/len(self.cpu_times)))
+        logger.warning('For Python processes - memory_info: %.1f' %
+                       (sum(self.memory_info)/len(self.memory_info)))
+        logger.warning('For Python processes - memory_percent: %s' %
+                       (sum(self.memory_percent)/len(self.memory_percent)))
+        logger.warning('For Python processes - cpu_percent: %s' %
+                       (sum(self.cpu_percent)/len(self.cpu_percent)))
 
 
 class EWHandler:
@@ -243,13 +225,13 @@ class EWHandler:
         all_tracks_data={}
         self.total_duration=len(args[0])
 
-        j=cycles_per_batch
+        j=cycles_per_batch # usual amount of cycles read at once
         k=1
         if use_deep and not mix:
-            k=self.total_duration-1
+            k=self.total_duration-1 # Read all cycles to have as much temporal data as possible
             j=1
         elif mix:
-            j=100
+            j=cycles_per_batch_mix_method # Read cycles at a given rate. Faster than normal clustering
             self.model_handler=ModelHandler()
 
         self.progress=k
@@ -264,7 +246,7 @@ class EWHandler:
             while self.paused:
                 time.sleep(0.5)  # Empty loop while paused
 
-            self.global_profiler.play()
+            self.global_profiler.play() # Start profiler threads, to profile CPU activiry and Memory usage
             self.cycle_profiler.play()
 
             self.current_time=time.time()
@@ -300,7 +282,6 @@ class EWHandler:
             
             if self.running:
                 self.send_to_front(all_tracks_data)
-
             
             self.cycle_profiler.stop()
             memory_data=self.cycle_profiler.get_mean_info()
@@ -322,11 +303,11 @@ class EWHandler:
             self.cycle_profiler.reset_profiler()
 
             global_memory_data=self.global_profiler.get_mean_info()
-            global_memory_data['mem_usage_list'] = self.mem_usage_list
-            global_memory_data['cpu_usage_list'] = self.cpu_usage_list
             global_memory_data['progress'] = self.progress
             global_memory_data['progress_list'] = self.progress_list
             global_memory_data['total_duration'] = self.total_duration
+            global_memory_data['mem_usage_list'] = self.mem_usage_list
+            global_memory_data['cpu_usage_list'] = self.cpu_usage_list
             global_memory_data['time_since_init'] = self.end_time
             global_memory_data['read_duration_list'] = self.read_duration_list
             global_memory_data['cluster_duration_list'] = self.cluster_duration_list
@@ -335,16 +316,14 @@ class EWHandler:
                 self.send_to_front({
                     'global_mem_info': global_memory_data
                 })
+                self.progress += j
+                time.sleep(0.5)
 
-            self.progress += j
-            time.sleep(0.5)
-
-        # Clear keras backend session, in order to be able to restart once done with a simulation
         self.end_time=int((time.time() - self.init_time) * 1000)
         logger.info("Simulation finished in %s ms !" % self.end_time)
         
+        # Clear keras backend session, in order to be able to restart once done with a simulation
         K.clear_session()
-
         self.global_profiler.stop()
         self.global_profiler.reset_profiler()
 
@@ -431,7 +410,7 @@ class EWHandler:
             logger.info("Found %s networks on the field in %s ms.\n" % (
                 n_cluster, self.cluster_duration))
 
-        if debug:
+        if debug: # Write data from all_tracks_data to a JSON file in the LOFS directory
             create_new_folder('tracks_json', LOGS_DIR)
             name='all_tracks_%s.json' % len(
                 global_track_streams)

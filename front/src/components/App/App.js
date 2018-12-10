@@ -8,11 +8,10 @@ import Dashboard from '../Modal/Dashboard'
 
 // Set fontAwesome icons up -> Define all icons that will be used in the app.
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faUpload, faDownload, faUndo, faPlay, faPause, faLocationArrow, faCheck, faExclamationTriangle, faCircle, faCircleNotch, faTags, faInfo, faMagic } from '@fortawesome/free-solid-svg-icons'
-library.add(faUpload, faDownload, faUndo, faPlay, faPause, faLocationArrow, faCheck, faExclamationTriangle, faCircle, faCircleNotch, faTags, faInfo, faMagic)
+import { faUpload, faDownload, faUndo, faPlay, faPause, faStop, faLocationArrow, faCheck, faExclamationTriangle, faCircle, faCircleNotch, faTags, faInfo, faMagic } from '@fortawesome/free-solid-svg-icons'
+library.add(faUpload, faDownload, faUndo, faPlay, faPause, faStop, faLocationArrow, faCheck, faExclamationTriangle, faCircle, faCircleNotch, faTags, faInfo, faMagic)
 // Setup complete, import them
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-
 
 function deg_to_dms(deg) {
   let d = Math.floor(deg);
@@ -63,13 +62,17 @@ function round_frequency(freq) {
   return MHz
 }
 
+/**
+ * Displays an emittor's important characteristics in the table (returns an HTML "row");
+ * @param {*} emittor 
+ */
 function show_network(emittor) {
   let network = emittor.network_id
   let icon = "check"
   let possible_network = -1000
   if (Object.keys(emittor).includes('possible_network')) {
     possible_network = emittor.possible_network
-    if (possible_network != network) {
+    if (possible_network != network) { // Displays an exclamation triangle if the likeliest network is not the DBScan one
       icon = "exclamation-triangle"
     }
   }
@@ -80,6 +83,10 @@ function show_network(emittor) {
   )
 }
 
+/**
+ * Returns an icon indicating the state of the emittor (emitting/silent).
+ * @param {*} emittor 
+ */
 function show_talking(emittor) {
   let icon = "circle";
   let clss = "not-talking";
@@ -112,7 +119,8 @@ class App extends Component {
       hideAll: false,
       hideVal: false,
       showVal: false,
-      white: ""
+      white: "",
+      simulationMode: ""
     };
     // functions that are allowed to update the state of the component
     this.newEmittors = this.newEmittors.bind(this);
@@ -126,6 +134,7 @@ class App extends Component {
     this.changeHideVal = this.changeHideVal.bind(this);
     this.hoverIn = this.hoverIn.bind(this);
     this.hoverOut = this.hoverOut.bind(this);
+    this.changeSimulationMode = this.changeSimulationMode.bind(this);
   }
 
 
@@ -153,6 +162,10 @@ class App extends Component {
     return "online";
   }
 
+  /**
+   * Gets all emittors positions after the prps upload. Displays them without prediction on their networks.
+   * @param {*} response 
+   */
   getEmittorsPositions(response) {
     let dic = {};
     let data = response.data;
@@ -190,24 +203,26 @@ class App extends Component {
                 if (longitude < -180) {
                   emit.coordinates.lng = longitude + 360;
                 }
-                if (dic["" + emit.network_id]) {
+                if (dic["" + emit.network_id] && dic["" + emit.network_id][emit.track_id] == undefined) {
+                  let id = "" + (emit.network_id + 1) + "_" + (Object.keys(dic["" + emit.network_id]).length + 1);
                   dic["" + emit.network_id][emit.track_id] = emit;
-                  // let em_number = parseInt(dic["" + emit.network_id][emit.track_id]["id"].slice(-1)) + 1
+                  dic["" + emit.network_id][emit.track_id]["id"] = id;
+
                 }
                 else {
                   dic["" + emit.network_id] = {};
                   dic["" + emit.network_id][emit.track_id] = emit;
-                  // dic["" + emit.network_id][emit.track_id]["id"] = "" + emit.network_id + "_1"
+                  dic["" + emit.network_id][emit.track_id]["id"] = "" + (emit.network_id + 1) + "_1";
                 }
               }
             }
             this.setState({ emittors: dic });
+          } else if (Object.keys(d)[0].includes("cycle_mem_info")) {
+            this.setState({ cycle_mem_info: d[Object.keys(d)[0]] });
+          } else if (Object.keys(d)[0].includes("global_mem_info")) {
+            this.setState({ global_mem_info: d[Object.keys(d)[0]] });
           }
         }
-      } else if (Object.keys(d)[0].includes("cycle_mem_info")) {
-        this.setState({ cycle_mem_info: d[Object.keys(d)[0]] });
-      } else if (Object.keys(d)[0].includes("global_mem_info")) {
-        this.setState({ global_mem_info: d[Object.keys(d)[0]] });
       }
     }
   }
@@ -226,7 +241,7 @@ class App extends Component {
 
   /**
    * Updates the state of the component (and thus the rendering) whenever a network is manually toggled
-   * @param {*} network 
+   * @param {String} network 
    */
   toggleNetwork(network) {
     if (network == null) {
@@ -247,7 +262,7 @@ class App extends Component {
 
   /**
    * Gets the display mode (highlighted or not) of the given network in the rendered list
-   * @param {*} network 
+   * @param {String} network 
    */
   getBorderStyle(network) {
     let toggled = this.state.networksToggled[network];
@@ -260,7 +275,7 @@ class App extends Component {
 
   /**
    * Gets the display color of the given network in the rendered list
-   * @param {*} network 
+   * @param {String} network 
    */
   getBorderColor(network) {
     let colors = colormap({ // a colormap to set a different color for each network
@@ -275,7 +290,7 @@ class App extends Component {
   /**
    * Called by pressing the showAll or hideAll buttons. Updates the state accordingly.
    * The param "all" is a boolean : True if showAll was pressed, False if hideAll was pressed.
-   * @param {*} all 
+   * @param {Boolean} all 
    */
   switchAll(all) {
     if (all) {
@@ -290,19 +305,19 @@ class App extends Component {
     }
   }
 
+  /**
+   * Resets the state of the component (called by pressing the "reset" button in the PostHandler component)
+   */
   reset() {
     console.log("Resetting App.js.");
     this.setState({
-      emittors: {}, // list of all the detected stations so far in the form :
-      // { network_id : 
-      //        { track_id : {coordinates: { lat: int, lng: int }, ... }
-      // }
-      stations: {}, // list of the reception stations
-      cycle_mem_info: {}, // 
-      global_mem_info: {}, //
-      connection: "offline", // selcects the style of the map (to be fetched from the Web or locally)
-      networksToggled: {}, // the networks toggled : used to highlight them in the list and display them on the map
-      showAll: false, // the state of the checkbuttons of the map (combined with networksToggled)
+      emittors: {},
+      stations: {},
+      cycle_mem_info: {},
+      global_mem_info: {},
+      connection: "offline",
+      networksToggled: {},
+      showAll: false,
       hideAll: false,
       hideVal: false,
       showVal: false,
@@ -310,27 +325,44 @@ class App extends Component {
     });
   }
 
+  /**
+   * Changes the "show all" checkbox value (in the MapBox component)
+   */
   changeShowVal() {
     this.setState({ showVal: !this.state.showVal });
   }
 
+  /**
+ * Changes the "hide all" checkbox value (in the MapBox component)
+ */
   changeHideVal() {
     this.setState({ hideVal: !this.state.hideVal });
   }
 
+  /**
+   * Highlights (in white) the emittor corresponding to the row hovered over by the mouse if its network is toggled
+   * @param {String} network 
+   * @param {*} emittor 
+   */
   hoverIn(network, emittor) {
     if (this.state.networksToggled[network] == true) {
       this.setState({ white: emittor });
     }
   }
 
+  /**
+   * Removes the highlighting (white) effect (if there was any) when the mouse leaves the row.
+   * @param {*} emittor 
+   */
   hoverOut(emittor) {
     if (this.state.white == emittor) {
       this.setState({ white: "" });
     }
   }
 
-
+  changeSimulationMode(simulMode) {
+    this.setState({ simulationMode: simulMode });
+  }
 
   render() {
     return (
@@ -345,6 +377,11 @@ class App extends Component {
                 <h2 className="subtitle">
                   AI demonstrator
                 </h2>
+
+                <h2 className="subtitle">
+                  {this.state.simulationMode}
+                </h2>
+
               </div>
               <div className="field switch-container">
                 <input id="switchRoundedOutlinedInfo" type="checkbox" name="switchRoundedOutlinedInfo" className="switch is-rtl is-rounded is-outlined is-info" onChange={this.handleChange} />
@@ -444,7 +481,8 @@ class App extends Component {
         </div>
 
         {/* Handles the HTTP requests and their responses from the backend */}
-        <PostHandler getStations={this.getStations} reset={this.reset} getEmittorsPositions={this.getEmittorsPositions} cycle_mem_info={this.state.cycle_mem_info} />
+        <PostHandler getStations={this.getStations} reset={this.reset} changeSimulationMode={this.changeSimulationMode}
+          getEmittorsPositions={this.getEmittorsPositions} cycle_mem_info={this.state.cycle_mem_info} network_num={Object.keys(this.state.emittors).length} />
 
       </div >
     );
