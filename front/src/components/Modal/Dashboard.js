@@ -117,6 +117,7 @@ class Dashboard extends Component {
     var networksLengths = []
     var networksTypes = []
     var networksFrequenciesMHz = []
+    var networksDurations = []
 
     var emittersNetworksIds = []
     var emittersDurations = []
@@ -227,7 +228,10 @@ class Dashboard extends Component {
           },
           display: true,
           id: 'memory',
-          position: 'left'
+          position: 'left',
+          ticks: {
+            min: 0
+          }
         },
         {
           scaleLabel: {
@@ -236,7 +240,11 @@ class Dashboard extends Component {
           },
           display: true,
           id: 'CPU',
-          position: 'right'
+          position: 'right',
+          ticks: {
+            min: 0,
+            max: 100
+          }
         }]
       }
     }
@@ -391,7 +399,8 @@ class Dashboard extends Component {
       !(emittersNetworksIds[i] in dataEmittors) && (dataEmittors[emittersNetworksIds[i]] = {
         //'pos': [],
         'ids': [],
-        'durations': []
+        'durations': [],
+        'totalDuration': 0
       });
       // dataEmittors[emittersNetworksIds[i]]['pos'].push(
       //   {
@@ -402,6 +411,7 @@ class Dashboard extends Component {
       // );
       dataEmittors[emittersNetworksIds[i]]['ids'].push(emittersIds[i]);
       dataEmittors[emittersNetworksIds[i]]['durations'].push(emittersDurations[i])
+      dataEmittors[emittersNetworksIds[i]]['totalDuration'] += emittersDurations[i]
     }
 
 
@@ -426,7 +436,7 @@ class Dashboard extends Component {
     const pieOptions = {
       title: {
         display: true,
-        text: 'Speaking time of each emittor in Network ' + this.state.networkSelected
+        text: 'Speaking time of each emittor in Network ' + this.state.networkSelected + ' - Total spoken time : ' + Math.round((dataEmittors[this.state.networkSelected] || {'totalDuration': 0})['totalDuration']) + ' seconds'
       },
       plugins: {
         labels: {
