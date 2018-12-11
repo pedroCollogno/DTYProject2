@@ -121,5 +121,6 @@ article.tile {
   }
 
 .tooltip:hover::before, .tooltip.is-tooltip-active::before {
-    background: rgba(74,74,74,0.99)
+    background: rgba(40,40,40,0.99);
+    font-size: 100%;
 }
