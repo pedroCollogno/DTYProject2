@@ -275,7 +275,6 @@ class MapBox extends Component {
 
 
                     </div>
-
                     <Layer id="recStations" key="recStations" type="symbol" layout={{
                         "icon-image": "recStation",
                         "icon-size": 0.06
