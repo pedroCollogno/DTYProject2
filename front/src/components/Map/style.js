@@ -263,5 +263,12 @@ exports.global = {
         "id": "satellite",
         "type": "raster",
         "source": "countries",
+    },
+    {
+        "id": "filter-area",
+        "type": "background",
+        "paint": {
+            "background-color": "rgba(112, 66, 20, 0.3)"
+        }
     }]
 };

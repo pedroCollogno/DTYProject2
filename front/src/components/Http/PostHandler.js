@@ -38,6 +38,7 @@ class HttpRequestHandler extends Component {
         this.onChange = this.onChange.bind(this);
         this.fileUpload = this.fileUpload.bind(this);
         this.onDrop = this.onDrop.bind(this);
+        this.hardReset = this.hardReset.bind(this);
         this.reset = this.reset.bind(this);
         this.play = this.play.bind(this);
         this.pause = this.pause.bind(this);
@@ -262,6 +263,10 @@ class HttpRequestHandler extends Component {
         }
     }
 
+    hardReset() {
+        this.setState({ savedFiles: [] });
+        this.reset();
+    }
     /**
      * Resets the environment. (stops backends processing of data)
      */
@@ -414,6 +419,13 @@ class HttpRequestHandler extends Component {
         return delta
     }
 
+    isRunningColor(mode) {
+        if (this.state.runningSimulation[mode]) {
+            return { "color": "red" };
+        }
+        return { "color": "black" };
+    }
+
     render() {
         return (
             <div>
@@ -460,7 +472,7 @@ class HttpRequestHandler extends Component {
                                 <article className="tile is-child">
                                     <div className="file has-name is-boxed is-centered is-fullwidth right-buttons" >
                                         <label className="file-label" >
-                                            <button type="button" className="button is-danger" onClick={this.reset}>
+                                            <button type="button" className="button is-danger" onClick={this.hardReset}>
                                                 <span className="file-icon">
                                                     <FontAwesomeIcon icon='undo' />
                                                 </span>
@@ -498,7 +510,8 @@ class HttpRequestHandler extends Component {
                 {/* "Start simulation" button, active if the posting of the files went ok */}
                 <section className="level">
                     <div className="buttons has-addons">
-                        <span className="button tooltip is-tooltip-right" id="start-sim-button" data-tooltip="Runs the scenario without any processing" disabled={!this.state.loaded} onClick={this.onStart}>
+                        <span className="button tooltip is-tooltip-right" id="start-sim-button" data-tooltip="Runs the scenario without any processing"
+                            disabled={!this.state.loaded} onClick={this.onStart} style={this.isRunningColor("run")}>
                             <span className="file-icon">
                                 <FontAwesomeIcon icon='magic' />
                             </span>
@@ -506,7 +519,8 @@ class HttpRequestHandler extends Component {
                         </span>
                     </div>
                     <div className="buttons has-addons">
-                        <span className="button tooltip is-tooltip-bottom" id="start-sim-ml-button" data-tooltip="Runs the scenario and uses the DBSCAN clustering method" disabled={!this.state.loaded} onClick={this.onStartML}>
+                        <span className="button tooltip is-tooltip-bottom" id="start-sim-ml-button" data-tooltip="Runs the scenario and uses the DBSCAN clustering method"
+                            disabled={!this.state.loaded} onClick={this.onStartML} style={this.isRunningColor("ML")}>
                             <span className="file-icon">
                                 <FontAwesomeIcon icon='magic' />
                             </span>
@@ -514,7 +528,8 @@ class HttpRequestHandler extends Component {
                         </span>
                     </div>
                     <div className="buttons has-addons">
-                        <span className="button tooltip is-tooltip-bottom is-tooltip-multiline" id="start-sim-dl-button" data-tooltip="Runs the scenario and uses a Deep Learning method comparing emittor to emittor temproal data" disabled={!this.state.loaded} onClick={this.onStartDL}>
+                        <span className="button tooltip is-tooltip-bottom is-tooltip-multiline" id="start-sim-dl-button" data-tooltip="Runs the scenario and uses a Deep Learning method comparing emittor to emittor temproal data"
+                            disabled={!this.state.loaded} onClick={this.onStartDL} style={this.isRunningColor("DL")}>
                             <span className="file-icon">
                                 <FontAwesomeIcon icon='magic' />
                             </span>
@@ -522,7 +537,8 @@ class HttpRequestHandler extends Component {
                         </span>
                     </div>
                     <div className="buttons has-addons">
-                        <span className="button tooltip is-tooltip-left is-tooltip-multiline" id="start-sim-mix-button" data-tooltip="Runs the scenario and uses the DBSCAN clustering method, suggesting adjustments with a Deep Learning method comparing emittor to previously established networks" disabled={!this.state.loaded} onClick={this.onStartMix}>
+                        <span className="button tooltip is-tooltip-left is-tooltip-multiline" id="start-sim-mix-button" data-tooltip="Runs the scenario and uses the DBSCAN clustering method, suggesting adjustments with a Deep Learning method comparing emittor to previously established networks"
+                            disabled={!this.state.loaded} onClick={this.onStartMix} style={this.isRunningColor("both")}>
                             <span className="file-icon">
                                 <FontAwesomeIcon icon='magic' />
                             </span>

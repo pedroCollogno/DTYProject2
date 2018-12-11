@@ -71,7 +71,9 @@
                 background-color: whitesmoke;
     
                 border-radius: 4px;
-                margin-bottom: 0.75em;
+                &.is-first {
+                    margin-bottom: 0.75em;
+                }
                 padding-right: 0.75em;
                 padding-left: 0.5em;
                 height: 24.38px;
