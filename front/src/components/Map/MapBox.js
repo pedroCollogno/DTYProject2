@@ -227,7 +227,7 @@ class MapBox extends Component {
                             this.state.legend &&
                             <div className="legend">
                                 <div className="legend-column">
-                                    <div className="legend-item">
+                                    <div className="legend-item is-first">
                                         <p><img src={recImage} alt="Station symbol" />
                                             Recording station
                                         </p>
@@ -239,7 +239,7 @@ class MapBox extends Component {
                                     </div>
                                 </div>
                                 <div className="legend-column is-next">
-                                    <div className="legend-item">
+                                    <div className="legend-item is-first">
                                         <p>
                                             <span className="legend-icon">
                                                 <FontAwesomeIcon icon="circle" />
@@ -257,7 +257,7 @@ class MapBox extends Component {
                                     </div>
                                 </div>
                                 <div className="legend-column is-next">
-                                    <div className="legend-item">
+                                    <div className="legend-item is-first">
                                         <p><img src={lineImage} alt="Station symbol" />
                                             Link emittor to network
                                         </p>
@@ -275,7 +275,6 @@ class MapBox extends Component {
 
 
                     </div>
-
                     <Layer id="recStations" key="recStations" type="symbol" layout={{
                         "icon-image": "recStation",
                         "icon-size": 0.06

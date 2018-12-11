@@ -154,7 +154,7 @@ def test():
     progress2 = 0
     pbar2 = ProgressBar(maxval=len(X))
     pbar2.start()
-    print("Passing some data in the first network...")
+    logger.info("Passing some data in the first network...")
     #random_indexs = random.sample(range(0, len(X)), 50)
 
     for itemindex in range(len(X)):

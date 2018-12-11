@@ -149,7 +149,10 @@ def process_data(track_streams, file_name):
     :param track_streams: track stream to process
     :param file_name: file name of the pkl file in /pkl where data will be saved
     """
-    ts = [track_stream.tracks for track_stream in track_streams]
+    if isinstance(track_streams[0], list):
+        ts = track_streams
+    else:
+        ts = [track_stream.tracks for track_stream in track_streams]
 
     preds = predict_all_ids(ts)
     test_ids = set(preds[1])
@@ -171,14 +174,10 @@ def process_data(track_streams, file_name):
             "network": preds[0][i],
             "steps": get_steps_track(ts, preds[1][i], sequence_size, start_date_ms)
         }
-        print(get_steps_track(ts, preds[1][i], sequence_size, start_date_ms))
         progress += 1
         pbar.update(progress)
         pbar.finish()
 
-    for k in emitter_infos:
-        j += 1
-    print(j)
     X = []
     Y = []
     id_Couple = []
@@ -315,7 +314,6 @@ def create_emittor_comparison_with_cluster(real_clusters, ei):
     """
     labels = []
     real_data = []
-    print(real_clusters)
     for cluster in real_clusters:
         for emittor in real_clusters[cluster]:
             step_nb = len(ei[emittor]['steps']) - \
@@ -337,7 +335,7 @@ def create_emittor_comparison_with_cluster(real_clusters, ei):
                                           cluster_secondary_cumulated[sequence_iterator*50:(sequence_iterator+1)*50]])
                         labels.append(label)
                 else:
-                    print("1 emittor cluster comparing with itself")
+                    logger.info("1 emittor cluster comparing with itself")
     return(real_data, labels, step_nb)
 
 
@@ -350,12 +348,10 @@ def create_cheat_comparison_with_cluster(real_clusters, ei):
     """
     labels = []
     real_data = []
-    print(real_clusters)
     for cluster in real_clusters:
         for emittor in real_clusters[cluster]:
             step_nb = len(ei[emittor]['steps']) - \
                 (len(ei[emittor]['steps']) % 50)
-            print(step_nb)
 
             for cluster_secondary in real_clusters:
                 cluster_secondary_cumulated = [0 for k in range(step_nb)]
@@ -375,7 +371,7 @@ def create_cheat_comparison_with_cluster(real_clusters, ei):
                                           cluster_secondary_cumulated[sequence_iterator*50:(sequence_iterator+1)*50]])
                         labels.append(label)
                 else:
-                    print("1 emittor cluster comparing with itself")
+                    logger.info("1 emittor cluster comparing with itself")
     return(real_data, labels, step_nb)
 
 
