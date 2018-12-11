@@ -29,24 +29,24 @@ class Info extends Component {
   render() {
 
     return (
-      <div className="dashboard-button">
-        <div className="has-text-centered content">
-          <a className="button is-info" onClick={this.toggleModal}>
-            <FontAwesomeIcon icon='info' />
-          </a>
-
-        </div>
+      <div>
+        <span className="button" onClick={this.toggleModal}>
+          <span className="icon is-small">
+              <FontAwesomeIcon icon='info' />
+          </span>
+        </span>
 
         <Modal
           closeModal={this.toggleModal}
           modalState={this.state.modalState}
-          title='Help'>
+          title={this.props.title}>
           <div className="column">
           <figure class="image is-16x9">
-                <img src="https://placehold.it/1280x720"/>
+                <img src={"../../assets/" + this.props.simulationMode + ".jpg"}/>
               </figure>
           </div>
         </Modal>
+
       </div>
     );
   }
