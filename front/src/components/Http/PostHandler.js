@@ -23,10 +23,16 @@ class HttpRequestHandler extends Component {
             loaded: undefined, // Did the posting of the files go well ?
             dropText: "Or drop your .PRP files here !", // Text to display in the drop zone
             inputFiles: [],
-            progress: 0,
-            total_duration: 0,
-            network_num: 0,
-            playing: true
+            progress: 0, // how far through the simulation are we ?
+            total_duration: 0, // how long will it take ?
+            network_num: 0, // how many networks are there ?
+            playing: true, // is the simulation playing or paused ?
+            runningSimulation: { // what kind of simulation is currently running (exclusive)
+                run: false,
+                ML: false,
+                DL: false,
+                both: false
+            }
         };
         this.postFiles = this.postFiles.bind(this); // functions allowed to update the state of the component
         this.onChange = this.onChange.bind(this);
@@ -51,6 +57,10 @@ class HttpRequestHandler extends Component {
         this.postFiles(this.state.files);
     }
 
+    /**
+     * POSTs the files to the backend and sends the response data (hopefully, emittors) to the App.js component.
+     * @param {*} files 
+     */
     postFiles(files) {
         this.fileUpload(files).then((res1) => {
             console.log(res1.data); // Should be "POST ok !"
@@ -91,6 +101,14 @@ class HttpRequestHandler extends Component {
      * @param {*} e 
      */
     onStart(e) {
+        this.setState({
+            runningSimulation: {
+                run: true,
+                ML: false,
+                DL: false,
+                both: false
+            }
+        });
         axios.get("http://localhost:8000/startsimulation")
             .then((res) => {
                 console.log("Simulation started !");
@@ -103,6 +121,14 @@ class HttpRequestHandler extends Component {
      * @param {*} e 
      */
     onStartMix(e) {
+        this.setState({
+            runningSimulation: {
+                run: false,
+                ML: false,
+                DL: false,
+                both: true
+            }
+        });
         axios.get("http://localhost:8000/startsimulationMix")
             .then((res) => {
                 console.log("Simulation started !");
@@ -115,6 +141,14 @@ class HttpRequestHandler extends Component {
      * @param {*} e 
      */
     onStartML(e) {
+        this.setState({
+            runningSimulation: {
+                run: false,
+                ML: true,
+                DL: false,
+                both: false
+            }
+        });
         axios.get("http://localhost:8000/startsimulationML")
             .then((res) => {
                 console.log("Simulation started using only DB_SCAN for clustering !");
@@ -127,6 +161,14 @@ class HttpRequestHandler extends Component {
      * @param {*} e 
      */
     onStartDL(e) {
+        this.setState({
+            runningSimulation: {
+                run: false,
+                ML: false,
+                DL: true,
+                both: false
+            }
+        });
         axios.get("http://localhost:8000/startsimulationDL")
             .then((res) => {
                 console.log("Simulation started using only Deep Learning for clustering !");
@@ -157,7 +199,7 @@ class HttpRequestHandler extends Component {
                     }
                 }
 
-                return axios.post(url, formData, config) // sends POST request
+                return axios.post(url, formData, config) // sends POST request (Promise)
             })
 
     }
@@ -236,7 +278,14 @@ class HttpRequestHandler extends Component {
                     fileNames: {},
                     loaded: undefined,
                     dropText: "Or drop your .PRP files here !",
-                    inputFiles: []
+                    inputFiles: [],
+                    playing: true,
+                    runningSimulation: {
+                        run: false,
+                        ML: false,
+                        DL: false,
+                        both: false
+                    }
                 });
                 this.props.reset();
             })
@@ -245,7 +294,9 @@ class HttpRequestHandler extends Component {
             });
     }
 
-
+    /**
+     * Sends a "play simulation" request to the backend (starts/resumes the thread)
+     */
     play() {
         this.setState({ playing: true });
         axios.get("http://localhost:8000/playsimulation")
@@ -254,6 +305,9 @@ class HttpRequestHandler extends Component {
             });
     }
 
+    /**
+     * Sends a "pause simulation" request to the backend (pauses the thread)
+     */
     pause() {
         this.setState({ playing: false });
         axios.get("http://localhost:8000/pausesimulation")
@@ -262,6 +316,9 @@ class HttpRequestHandler extends Component {
             });
     }
 
+    /**
+     * Resets the component and reposts the last entered .PRP files.
+     */
     stop() {
         this.postFiles(this.state.savedFiles);
     }
@@ -280,7 +337,9 @@ class HttpRequestHandler extends Component {
         }
     }
 
-
+    /**
+     * ProgressBar stuff
+     */
     getProgressStart() {
         let delta = "0:00"
         let hour_append = "";
@@ -309,6 +368,9 @@ class HttpRequestHandler extends Component {
         return delta
     }
 
+    /**
+     * Nice rippling animation when waiting for the backend response after POSTing the .PRP files
+     */
     loading_spinner() {
         if (this.state.network_num == 0 && this.state.loaded != undefined) {
             return (
@@ -321,6 +383,9 @@ class HttpRequestHandler extends Component {
         }
     }
 
+    /**
+     * ProgressBar stuff
+     */
     getProgressEnd() {
         let delta = "0:00"
         let hour_append = "";

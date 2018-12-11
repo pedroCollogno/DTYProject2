@@ -64,7 +64,7 @@ class MapBox extends Component {
     }
 
     /**
-     * re-renders the map each time it received a new prop (emittor or network toggling)
+     * Re-renders the map each time it received a new prop (emittor or network toggling)
      * @param {*} nextProps 
      */
     componentWillReceiveProps(nextProps) {
@@ -148,7 +148,7 @@ class MapBox extends Component {
     }
 
     /**
-     * when the pointer leaves, removes the highlight
+     * When the pointer leaves, removes the highlight
      * @param {String} network 
      */
     mouseExit(network) {
@@ -158,7 +158,7 @@ class MapBox extends Component {
     }
 
     /**
-     * gets the color of each network (white if null)
+     * Gets the color of each network (white if null)
      * @param {String} network 
      */
     getColor(network) {
@@ -181,12 +181,11 @@ class MapBox extends Component {
         this.setState({ nameNets: !this.state.nameNets });
     }
 
+    /**
+     * Toggles the legend of the Map
+     */
     toggle_legend() {
-        if (this.state.legend == true) {
-            this.setState({ legend: false });
-        } else {
-            this.setState({ legend: true });
-        }
+        this.setState({ legend: !this.state.legend });
     }
 
     render() {

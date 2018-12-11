@@ -52,9 +52,7 @@ class Dashboard extends Component {
   }
 
   rainbow(numOfSteps, step) {
-    // This function generates vibrant, "evenly spaced" colours (i.e. no clustering). This is ideal for creating easily distinguishable vibrant markers in Google Maps and other apps.
-    // Adam Cole, 2011-Sept-14
-    // HSV to RBG adapted from: http://mjijackson.com/2008/02/rgb-to-hsl-and-rgb-to-hsv-color-model-conversion-algorithms-in-javascript
+    // This function generates vibrant, "evenly spaced" colors (i.e. no clustering).
     var r, g, b;
     var h = step / numOfSteps;
     var i = ~~(h * 6);
@@ -91,7 +89,7 @@ class Dashboard extends Component {
         clusterDuration: 0,
         readDuration: 0
       },
-      global : {
+      global: {
         clusterDurationList: [],
         readDurationList: [],
         progressList: [],
@@ -137,9 +135,9 @@ class Dashboard extends Component {
     stats.cycle.clusterDuration = cycle_mem_info['cluster_duration']
     stats.global.clusterDurationList = global_mem_info['cluster_duration_list']
     // Cumulative CPU usage
-    stats.global.CPUUsageList = global_mem_info['cpu_usage_list'] || []
+    stats.global.CPUUsageList = global_mem_info['cpu_usage_list'] || []
     // Set the max value at 100% ...
-    for (var i=0; i<stats.global.CPUUsageList.length;i++){
+    for (var i = 0; i < stats.global.CPUUsageList.length; i++) {
       if (stats.global.CPUUsageList[i] > 100) {
         stats.global.CPUUsageList[i] = 100
       }
@@ -193,25 +191,25 @@ class Dashboard extends Component {
     // ---------------- LINE CHART DATA ----------------
 
     const lineData = {
-      labels: stats.global.progressList || [],
-      datasets:[{
+      labels: stats.global.progressList || [],
+      datasets: [{
         label: "Memory",
         borderColor: 'rgba(135,206,250,1)',
         backgroundColor: 'rgba(135,206,250,0.5)',
-        data: stats.global.memoryUsageList || [],
+        data: stats.global.memoryUsageList || [],
         yAxisID: 'memory'
       },
       {
         label: "CPU",
         borderColor: 'rgba(106,90,205,1)',
         backgroundColor: 'rgba(106,90,205,0.5)',
-        data: stats.global.CPUUsageList || [],
+        data: stats.global.CPUUsageList || [],
         yAxisID: 'CPU'
       }]
     }
-    
+
     const lineOptions = {
-      title:{
+      title: {
         display: true,
         text: 'Computer ressources usage'
       },
@@ -220,7 +218,7 @@ class Dashboard extends Component {
           scaleLabel: {
             display: true,
             labelString: 'Cycle'
-          } 
+          }
         }],
         yAxes: [{
           scaleLabel: {
@@ -246,25 +244,25 @@ class Dashboard extends Component {
     // ---------------- LINE CHART 2 DATA ----------------
 
     const lineData2 = {
-      labels: stats.global.progressList || [],
-      datasets:[{
+      labels: stats.global.progressList || [],
+      datasets: [{
         label: "Processing",
         borderColor: 'rgba(255,99,71,1)',
         backgroundColor: 'rgba(255,99,71,0.5)',
-        data: stats.global.readDurationList || [],
+        data: stats.global.readDurationList || [],
         yAxisID: 'processing'
       },
       {
         label: "Clustering",
         borderColor: 'rgba(255,165,0,1)',
         backgroundColor: 'rgba(255,165,0,0.5)',
-        data: stats.global.clusterDurationList || [],
+        data: stats.global.clusterDurationList || [],
         yAxisID: 'clustering'
       }]
     }
-    
+
     const lineOptions2 = {
-      title:{
+      title: {
         display: true,
         text: 'Process execution time'
       },
@@ -273,7 +271,7 @@ class Dashboard extends Component {
           scaleLabel: {
             display: true,
             labelString: 'Cycle'
-          } 
+          }
         }],
         yAxes: [{
           scaleLabel: {
@@ -283,8 +281,8 @@ class Dashboard extends Component {
           display: true,
           id: 'processing',
           position: 'left',
-          ticks:{
-            max : Math.max(...(stats.global.readDurationList || [1]))*1.5
+          ticks: {
+            max: Math.max(...(stats.global.readDurationList || [1])) * 1.5
           }
         },
         {
@@ -296,7 +294,7 @@ class Dashboard extends Component {
           id: 'clustering',
           position: 'right'
         }
-      ]
+        ]
       }
     }
 
@@ -354,12 +352,12 @@ class Dashboard extends Component {
     }
 
     const barOptions = {
-      title:{
+      title: {
         display: true,
         text: 'Number of emittors per Network'
       },
       plugins: {
-        labels:{
+        labels: {
           render: 'value',
           fontColor: 'rgba(0, 0, 0, 0)'
         }
@@ -370,7 +368,7 @@ class Dashboard extends Component {
           scaleLabel: {
             display: true,
             labelString: 'Network ID'
-          } 
+          }
         }],
         yAxes: [{
           scaleLabel: {
@@ -426,24 +424,24 @@ class Dashboard extends Component {
     }
 
     const pieOptions = {
-      title:{
+      title: {
         display: true,
         text: 'Speaking time of each emittor in Network ' + this.state.networkSelected
       },
-      plugins: { 
-          labels: {
-            render: 'percentage',
-            fontColor: '#000',
-            position: 'outside'
-          }
+      plugins: {
+        labels: {
+          render: 'percentage',
+          fontColor: '#000',
+          position: 'outside'
+        }
       },
       tooltips: {
         mode: 'label',
         callbacks: {
-            label: function(tooltipItem, data) { 
-                var indice = tooltipItem.index;                 
-                return  data.labels[indice] +': '+data.datasets[0].data[indice] + ' seconds';
-            }
+          label: function (tooltipItem, data) {
+            var indice = tooltipItem.index;
+            return data.labels[indice] + ': ' + data.datasets[0].data[indice] + ' seconds';
+          }
         }
       }
     }
@@ -456,13 +454,13 @@ class Dashboard extends Component {
           <div class="level-item has-text-centered">
             <div>
               <p class="dashboard subtitle">Method</p>
-              <p class="dashboard title">{(this.props.simulationMode) || 'No method selected'}</p>
+              <p class="dashboard title">{(this.props.simulationMode) || 'No method selected'}</p>
             </div>
           </div>
           <div class="level-item has-text-centered">
             <div>
               <p class="dashboard subtitle">Time</p>
-              <p class="dashboard title">{(this.props.cycle_mem_info['progress']) || 0} sec</p>
+              <p class="dashboard title">{(this.props.cycle_mem_info['progress']) || 0} sec</p>
             </div>
           </div>
           <div class="level-item has-text-centered">
@@ -495,7 +493,7 @@ class Dashboard extends Component {
             <div className="box">
               <div className="level">
                 <div className="level-item">
-                < Line ref='linechart' data={lineData} options={lineOptions}/>
+                  < Line ref='linechart' data={lineData} options={lineOptions} />
                 </div>
               </div>
             </div>
@@ -504,7 +502,7 @@ class Dashboard extends Component {
             <div className="box">
               <div className="level">
                 <div className="level-item">
-                < Line ref='linechart' data={lineData2} options={lineOptions2}/>
+                  < Line ref='linechart' data={lineData2} options={lineOptions2} />
                 </div>
               </div>
             </div>
