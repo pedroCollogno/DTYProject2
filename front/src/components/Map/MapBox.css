@@ -57,10 +57,11 @@
       display: flex;
       background-color: whitesmoke;
       border-radius: 4px;
-      margin-bottom: 0.75em;
       padding-right: 0.75em;
       padding-left: 0.5em;
       height: 24.38px; }
+      #legend .legend .legend-column .legend-item.is-first {
+        margin-bottom: 0.75em; }
       #legend .legend .legend-column .legend-item img, #legend .legend .legend-column .legend-item .legend-icon {
         width: 22px;
         height: 22px;

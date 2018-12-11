@@ -75,7 +75,6 @@ def fake_data(sequence_size, all=True, n_samples=1000, equalize=False):
         for k in range(n_samples):
             fakeX.append([random.choices(items, weights=[50, 10, 10, 1])[0]
                           for i in range(sequence_size)])
-        logger.info(fakeX[0])
         fakeY = [1]*len(fakeX)
         for i in range(len(fakeX)):
             for couple in fakeX[i]:
@@ -164,7 +163,6 @@ def test(file_name):
     X = np.array(list(df['X'].values))
     Y = np.array(list(df['Y'].values))
     id_Couple = (list(df['id_Couple'].values))
-    logger.info(id_Couple)
 
     model = Sequential()
     model.add(LSTM(units=128, input_shape=(None, 2)))
@@ -248,7 +246,6 @@ def train2(file_name):
     # Optional : Balances the 0 and 1
 
     nb_ones = np.count_nonzero(Y == 1)
-    print(np.where(Y == 0)[0])
     zeros_index = np.where(Y == 0)[0]
     df = df.drop(df.index[zeros_index[nb_ones:]])
 
