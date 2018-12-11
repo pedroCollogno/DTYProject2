@@ -71,13 +71,6 @@
         justify-content: center;
         height: 24.38px; }
 
-#filter-layer {
-  filter: sepia(1);
-  -webkit-filter: sepia(1);
-  -moz-filter: sepia(1);
-  -o-filter: sepia(1);
-  -ms-filter: sepia(1); }
-
 .widgets {
   text-align: right;
   position: absolute;
