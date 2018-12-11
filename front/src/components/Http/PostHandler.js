@@ -38,6 +38,7 @@ class HttpRequestHandler extends Component {
         this.onChange = this.onChange.bind(this);
         this.fileUpload = this.fileUpload.bind(this);
         this.onDrop = this.onDrop.bind(this);
+        this.hardReset = this.hardReset.bind(this);
         this.reset = this.reset.bind(this);
         this.play = this.play.bind(this);
         this.pause = this.pause.bind(this);
@@ -262,6 +263,10 @@ class HttpRequestHandler extends Component {
         }
     }
 
+    hardReset() {
+        this.setState({ savedFiles: [] });
+        this.reset();
+    }
     /**
      * Resets the environment. (stops backends processing of data)
      */
@@ -460,7 +465,7 @@ class HttpRequestHandler extends Component {
                                 <article className="tile is-child">
                                     <div className="file has-name is-boxed is-centered is-fullwidth right-buttons" >
                                         <label className="file-label" >
-                                            <button type="button" className="button is-danger" onClick={this.reset}>
+                                            <button type="button" className="button is-danger" onClick={this.hardReset}>
                                                 <span className="file-icon">
                                                     <FontAwesomeIcon icon='undo' />
                                                 </span>
