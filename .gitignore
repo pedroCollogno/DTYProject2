@@ -14,6 +14,7 @@
 /ml_tools/py36_ml_env
 
 #data
+installers/
 prod/
 data/
 .vscode/
