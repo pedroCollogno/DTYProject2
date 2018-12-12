@@ -14,6 +14,12 @@ library.add(faUpload, faDownload, faUndo, faPalette, faPlay, faPause, faStop, fa
 // Setup complete, import them
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
+
+
+const colorMapNames = ["jet", "hsv", "rainbow", "rainbow-soft"];
+const colorMapMins = [7, 12, 10, 12];
+const colorMapNumber = colorMapNames.length;
+
 function deg_to_dms(deg) {
   let d = Math.floor(deg);
   let minfloat = (deg - d) * 60;
@@ -103,6 +109,7 @@ function show_talking(emittor) {
   )
 }
 
+
 class App extends Component {
   constructor() {
     super();
@@ -121,7 +128,12 @@ class App extends Component {
       hideVal: false,
       showVal: false,
       white: "",
-      simulationMode: ""
+      simulationMode: "",
+      colors: colormap({ // a colormap to set a different color for each network
+        colormap: "jet",
+        nshades: 7 // 7 is the minimum number of colors for "jet"
+      }),
+      colorMapType: 0
     };
     // functions that are allowed to update the state of the component
     this.newEmittors = this.newEmittors.bind(this);
@@ -135,6 +147,7 @@ class App extends Component {
     this.hoverIn = this.hoverIn.bind(this);
     this.hoverOut = this.hoverOut.bind(this);
     this.changeSimulationMode = this.changeSimulationMode.bind(this);
+    this.switchColorMap = this.switchColorMap.bind(this);
   }
 
 
@@ -188,6 +201,7 @@ class App extends Component {
    */
   newEmittors(data) {
     if (data) {
+      let colorMin = colorMapMins[this.state.colorMapType]; // the minimum number of colors
       let d = JSON.parse(data);
       let dic = JSON.parse(JSON.stringify(this.state.emittors));
       if (dic["-1000"] != undefined) {
@@ -216,7 +230,14 @@ class App extends Component {
                 }
               }
             }
-            this.setState({ emittors: dic });
+
+            let colorMap = colormap({
+              colormap: colorMapNames[this.state.colorMapType],
+              nshades: Math.max(Object.keys(dic).length, colorMin),
+              alpha: 1
+            });
+            this.setState({ emittors: dic, colors: colorMap });
+
           } else if (Object.keys(d)[0].includes("cycle_mem_info")) {
             this.setState({ cycle_mem_info: d[Object.keys(d)[0]] });
           } else if (Object.keys(d)[0].includes("global_mem_info")) {
@@ -225,6 +246,26 @@ class App extends Component {
         }
       }
     }
+  }
+
+  switchColorMap() {
+    let index = this.state.colorMapType;
+    index += 1;
+    if (index > colorMapNumber) {
+      index -= colorMapNumber;
+    }
+    let colormapName = colorMapNames[index];
+    let colorMin = colorMapMins[index]; // the minimum number of colors
+    let totalNetworksNumber = Object.keys(this.state.emittors).length;
+    let colorMap = colormap({
+      colormap: colormapName,
+      nshades: Math.max(totalNetworksNumber, colorMin),
+      alpha: 1 // opacity
+    });
+    this.setState({
+      colors: colorMap,
+      colorMapType: index
+    });
   }
 
   /**
@@ -273,13 +314,11 @@ class App extends Component {
    * @param {String} network 
    */
   getBorderColor(network) {
-    let colors = colormap({ // a colormap to set a different color for each network
-      colormap: 'jet',
-      nshades: Math.max(Object.keys(this.state.emittors).length, 8), // 8 is the minimum number of colors
-      format: 'hex',
-      alpha: 1 // opacity
-    })
-    return colors[network]
+    let networkNumber = parseInt(network);
+    if (networkNumber < 0) {
+      return "#5c5c5c";
+    }
+    return this.state.colors[networkNumber];
   }
 
   /**
@@ -316,7 +355,12 @@ class App extends Component {
       hideAll: false,
       hideVal: false,
       showVal: false,
-      white: ""
+      white: "",
+      colors: colormap({ // a colormap to set a different color for each network
+        colormap: "jet",
+        nshades: 7 // 7 is the minimum number of colors for "jet"
+      }),
+      colorMapType: 0
     });
   }
 
@@ -326,6 +370,8 @@ class App extends Component {
   changeShowVal() {
     this.setState({ showVal: !this.state.showVal });
   }
+
+
 
   /**
  * Changes the "hide all" checkbox value (in the MapBox component)
@@ -385,8 +431,8 @@ class App extends Component {
               <div className="field switch-container">
                 <input id="switchRoundedOutlinedInfo" type="checkbox" name="switchRoundedOutlinedInfo" className="switch is-rtl is-rounded is-outlined is-info" onChange={this.handleChange} />
                 <label htmlFor="switchRoundedOutlinedInfo"><strong>Switch to {this.getConnection()} map</strong></label>
-                <Dashboard emittors={this.state.emittors} cycle_mem_info={this.state.cycle_mem_info} global_mem_info={this.state.global_mem_info} simulationMode={this.state.simulationMode}/>
-                <Info/>
+                <Dashboard emittors={this.state.emittors} cycle_mem_info={this.state.cycle_mem_info} global_mem_info={this.state.global_mem_info} simulationMode={this.state.simulationMode} />
+                <Info />
               </div>
             </div>
           </div>
@@ -401,7 +447,7 @@ class App extends Component {
             toggleNetwork={this.toggleNetwork} switchAll={this.switchAll}
             hideAll={this.state.hideAll} showAll={this.state.showAll} networksToggled={this.state.networksToggled}
             changeHideVal={this.changeHideVal} changeShowVal={this.changeShowVal} hideVal={this.state.hideVal} showVal={this.state.showVal}
-            white={this.state.white} />
+            white={this.state.white} colors={this.state.colors} switchColorMap={this.switchColorMap} />
           {
             <div id="tabletile">
               <table className='table is-hoverable'>

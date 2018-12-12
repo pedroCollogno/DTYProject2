@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import ReactMapboxGl, { Layer, Feature, ZoomControl, ScaleControl } from "react-mapbox-gl";
-import colormap from "colormap";
 import Stations from "./Stations.js";
 import recImage from "./EW_high.png";
 import lineImage from "./line.png";
@@ -18,10 +17,6 @@ const Map = ReactMapboxGl({ // Only set in case internet is used, as an optional
     accessToken: "pk.eyJ1IjoicGllcnJvdGNvIiwiYSI6ImNqbzc5YjVqODB0Z2Mzd3FxYjVsNHNtYm8ifQ.S_87byMcZ0YDwJzTdloBvw"
 });
 
-const colorMapNames = ["jet", "hsv", "rainbow", "rainbow-soft"];
-const colorMapMins = [7, 12, 10, 12];
-
-let colorMapNumber = colorMapNames.length;
 let htmlRecImage = new Image(467, 314); // image for the reception stations
 htmlRecImage.src = recImage; // HTML format to render it in the canvas
 let htmlCenterImage = new Image(256, 256); // image for the network centers 
@@ -36,11 +31,6 @@ class MapBox extends Component {
             emittors: props.emittors,
 
             networksLabels: labels, // the networks labels
-            colors: colormap({ // a colormap to set a different color for each network
-                colormap: 'jet',
-                nshades: Math.max(labels.length, 7) // 7 is the minimum number of colors
-            }),
-            colorMapType: 0,
             style: {
                 online: 'mapbox://styles/mapbox/streets-v9', // if "online" is toggled, renders map through the Web (OpenStreet Map)
                 offline: global // else, renders the local version of the map (pre-dowloaded tiles for different levels of zoom)
@@ -60,7 +50,6 @@ class MapBox extends Component {
         this.center = this.center.bind(this);
         this.nameNetworks = this.nameNetworks.bind(this);
         this.toggle_legend = this.toggle_legend.bind(this);
-        this.switchColorMap = this.switchColorMap.bind(this);
     }
 
     /**
@@ -69,23 +58,19 @@ class MapBox extends Component {
      */
     componentWillReceiveProps(nextProps) {
         if (nextProps && nextProps !== this.props) { // little check, doesn't hurt
-            let colorMin = colorMapMins[this.state.colorMapType]; // the minimum number of colors
             let highlights = {};
             let labels = Object.keys(nextProps.emittors);
             for (let label of labels) { // eventual new network, along with all the other ones, is not highlighted
                 highlights[label] = 0;
             }
+
             this.setState({ // updates the state with the new props, thus re-rendering the component
                 emittors: nextProps.emittors,
                 networksLabels: labels,
-                colors: colormap({
-                    colormap: colorMapNames[this.state.colorMapType],
-                    nshades: Math.max(labels.length, colorMin),
-                    alpha: 1
-                }),
                 highlights: highlights,
                 networksToggled: nextProps.networksToggled,
-                white: nextProps.white
+                white: nextProps.white,
+                colors: nextProps.colors
             });
         }
     }
@@ -102,23 +87,6 @@ class MapBox extends Component {
         this.map.state.map.flyTo({ center: [this.props.emittors[keys[0]][firstEmittor].coordinates.lng, this.props.emittors[keys[0]][firstEmittor].coordinates.lat] });
     }
 
-    switchColorMap() {
-        let index = this.state.colorMapType;
-        index += 1;
-        if (index > colorMapNumber) {
-            index -= colorMapNumber;
-        }
-        let colormapName = colorMapNames[index];
-        let colorMin = colorMapMins[index]; // the minimum number of colors
-        this.setState({
-            colors: colormap({
-                colormap: colormapName,
-                nshades: Math.max(this.state.networksLabels.length, colorMin),
-                alpha: 1 // opacity
-            }),
-            colorMapType: index
-        });
-    }
 
     /**
      * Returns the geometric center of all the points of the network, for simpler rendering
@@ -410,7 +378,7 @@ class MapBox extends Component {
                         </a>
                     </div>
                     <div className="widgets-colors">
-                        <a id="colors-names-button" onClick={this.switchColorMap}>
+                        <a id="colors-names-button" onClick={this.props.switchColorMap}>
                             <span className="icon">
                                 <FontAwesomeIcon icon='palette' />
                             </span>
