@@ -3,7 +3,9 @@ import axios from "axios";
 import DropZone from "./Drag&Drop";
 import './PostHandler.css';
 import PropTypes from "prop-types";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import Info from '../Modal/Info';
+
 
 window.onunload = () => {
     var request = new XMLHttpRequest();
@@ -510,7 +512,7 @@ class HttpRequestHandler extends Component {
                 {/* "Start simulation" button, active if the posting of the files went ok */}
                 <section className="level">
                     <div className="buttons has-addons">
-                        <span className="button tooltip is-tooltip-right" id="start-sim-button" data-tooltip="Runs the scenario without any processing"
+                        <span className="button tooltip is-tooltip-right is-tooltip-multiline" id="start-sim-button" data-tooltip="Runs the scenario without any processing"
                             disabled={!this.state.loaded} onClick={this.onStart} style={this.isRunningColor("run")}>
                             <span className="file-icon">
                                 <FontAwesomeIcon icon='magic' />
@@ -519,13 +521,14 @@ class HttpRequestHandler extends Component {
                         </span>
                     </div>
                     <div className="buttons has-addons">
-                        <span className="button tooltip is-tooltip-bottom" id="start-sim-ml-button" data-tooltip="Runs the scenario and uses the DBSCAN clustering method"
+                        <span className="button tooltip is-tooltip-bottom is-tooltip-multiline" id="start-sim-ml-button" data-tooltip="Runs the scenario and uses the DBSCAN clustering method"
                             disabled={!this.state.loaded} onClick={this.onStartML} style={this.isRunningColor("ML")}>
                             <span className="file-icon">
                                 <FontAwesomeIcon icon='magic' />
                             </span>
                             Clustering
                         </span>
+                        <Info simulationMode='1' title='Clustering'/>
                     </div>
                     <div className="buttons has-addons">
                         <span className="button tooltip is-tooltip-bottom is-tooltip-multiline" id="start-sim-dl-button" data-tooltip="Runs the scenario and uses a Deep Learning method comparing emittor to emittor temproal data"
@@ -535,6 +538,7 @@ class HttpRequestHandler extends Component {
                             </span>
                             Emittor-to-Emittor DL
                         </span>
+                        <Info simulationMode='2' title='Emittor-to-Emittor DL'/>
                     </div>
                     <div className="buttons has-addons">
                         <span className="button tooltip is-tooltip-left is-tooltip-multiline" id="start-sim-mix-button" data-tooltip="Runs the scenario and uses the DBSCAN clustering method, suggesting adjustments with a Deep Learning method comparing emittor to previously established networks"
@@ -544,6 +548,7 @@ class HttpRequestHandler extends Component {
                             </span>
                             Clustering + Emittor-to-Cluster DL
                         </span>
+                        <Info simulationMode='3' title='Clustering + Emittor-to-Cluster DL'/>
                     </div>
                 </section>
             </div>

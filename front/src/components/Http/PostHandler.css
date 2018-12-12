@@ -97,5 +97,4 @@ article.tile {
 
 .tooltip:hover::before, .tooltip.is-tooltip-active::before {
   background: rgba(40, 40, 40, 0.99);
-  font-size: 90%;;
- }
+  font-size: 100%; }
