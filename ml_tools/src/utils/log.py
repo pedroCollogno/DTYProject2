@@ -9,11 +9,11 @@ def set_logger_up():
 
     :return: the logger
     """
-    logger = logging.getLogger()
+    logger = logging.getLogger('backend')
     logger.setLevel(logging.DEBUG)
 
     fh_formatter = logging.Formatter(
-        '%(asctime)s - %(levelname)s - %(message)s')
+        '%(asctime)s - %(name)% - %(levelname)s - %(message)s')
 
     logs_file = os.path.join(config['PATH']['logs'], "logs.txt")
     fh = logging.FileHandler(logs_file)
@@ -28,7 +28,14 @@ def set_logger_up():
     logger.addHandler(ch)
 
     logger.info('Initiated logger.')
-    return(logger)
+
+    # Adding filehandler to server and worker loggers.
+    # These are loggers created by the project's Django backend
+    server_logger = logging.getLogger('server')
+    server_logger.addHandler(fh)
+
+    worker_logger = logging.getLogger('worker')
+    worker_logger.addHandler(fh)
 
 
 def create_new_folder(name, path):
@@ -43,4 +50,4 @@ def create_new_folder(name, path):
         os.makedirs(os.path.join(path, name))
 
 
-logger = set_logger_up()
+set_logger_up()

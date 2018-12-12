@@ -1,8 +1,6 @@
 import numpy as np
 from sklearn.cluster import DBSCAN
 
-from utils.log import logger
-
 
 def get_dbscan_prediction_min(data):
     """ Function that clusters data from TrackStream objects

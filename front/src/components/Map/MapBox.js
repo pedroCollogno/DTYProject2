@@ -1,181 +1,422 @@
 import React, { Component } from "react";
-import ReactMapboxGl, { Layer, Marker, Feature, ZoomControl, ScaleControl } from "react-mapbox-gl";
+import ReactMapboxGl, { Layer, Feature, ZoomControl, ScaleControl } from "react-mapbox-gl";
 import colormap from "colormap";
 import Stations from "./Stations.js";
-import stationImage from "./satellite.png";
+import recImage from "./EW_high.png";
+import lineImage from "./line.png";
+import dashImage from "./dashed_line.png";
+import centerImage from "./dashed-circle.png";
 import Lines from "./Lines.js";
-import { countries, global } from "./style";
+import PotentialLines from "./PotentialLines.js";
+import { global } from "./style";
+import PropTypes from "prop-types";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+
 import "./MapBox.css";
 
 const Map = ReactMapboxGl({ // Only set in case internet is used, as an optional feature.
     accessToken: "pk.eyJ1IjoicGllcnJvdGNvIiwiYSI6ImNqbzc5YjVqODB0Z2Mzd3FxYjVsNHNtYm8ifQ.S_87byMcZ0YDwJzTdloBvw"
 });
 
+const colorMapNames = ["jet", "hsv", "rainbow", "rainbow-soft"];
+const colorMapMins = [7, 12, 10, 12];
+
+let colorMapNumber = colorMapNames.length;
+let htmlRecImage = new Image(467, 314); // image for the reception stations
+htmlRecImage.src = recImage; // HTML format to render it in the canvas
+let htmlCenterImage = new Image(256, 256); // image for the network centers 
+htmlCenterImage.src = centerImage;
+
 class MapBox extends Component {
 
     constructor(props) {
         super(props);
+        let labels = Object.keys(props.emittors);
         this.state = {
-            zoom: 4,
-            stations: this.props.stations,
-            networksLabels: Object.keys(this.props.stations),
-            colors: colormap({
-                colormap: 'jet',
-                nshades: Math.max(Object.keys(this.props.stations).length, 8),
-                format: 'hex',
-                alpha: 1
-            }),
-            style: {
-                online: 'mapbox://styles/mapbox/streets-v9',
-                offline: countries
-            },
-            networksToggled: {
-            },
-            highlights: {
-            }
-        };
-        for (let label of Object.keys(this.props.stations)) {
-            this.state.networksToggled[label] = false;
-            this.state.highlights[label] = 0;
-        }
-        this.toggleNetwork = this.toggleNetwork.bind(this);
-        this.mouseEnter = this.mouseEnter.bind(this);
-        this.mouseExit = this.mouseExit.bind(this);
+            emittors: props.emittors,
 
+            networksLabels: labels, // the networks labels
+            colors: colormap({ // a colormap to set a different color for each network
+                colormap: 'jet',
+                nshades: Math.max(labels.length, 7) // 7 is the minimum number of colors
+            }),
+            colorMapType: 0,
+            style: {
+                online: 'mapbox://styles/mapbox/streets-v9', // if "online" is toggled, renders map through the Web (OpenStreet Map)
+                offline: global // else, renders the local version of the map (pre-dowloaded tiles for different levels of zoom)
+            },
+            networksToggled: { // the networks to display (by default, only one "center" is displayed for better visualization)
+            },
+            highlights: { // the networks that are hovered over
+            },
+            nameNets: false,
+            legend: false
+        };
+        for (let label of labels) {
+            this.state.highlights[label] = 0; // at the beginning, networks are not hovered over (supposedly)
+        }
+        this.mouseEnter = this.mouseEnter.bind(this); // allows those functions to update the state of the component 
+        this.mouseExit = this.mouseExit.bind(this); // (here, we want to update highlights)
+        this.center = this.center.bind(this);
+        this.nameNetworks = this.nameNetworks.bind(this);
+        this.toggle_legend = this.toggle_legend.bind(this);
+        this.switchColorMap = this.switchColorMap.bind(this);
     }
 
+    /**
+     * Re-renders the map each time it received a new prop (emittor or network toggling)
+     * @param {*} nextProps 
+     */
     componentWillReceiveProps(nextProps) {
-        if (nextProps.stations !== this.props.stations) {
+        if (nextProps && nextProps !== this.props) { // little check, doesn't hurt
+            let colorMin = colorMapMins[this.state.colorMapType]; // the minimum number of colors
             let highlights = {};
-            for (let label of Object.keys(nextProps.stations)) {
+            let labels = Object.keys(nextProps.emittors);
+            for (let label of labels) { // eventual new network, along with all the other ones, is not highlighted
                 highlights[label] = 0;
             }
-            this.setState({
-                stations: nextProps.stations,
-                networksLabels: Object.keys(nextProps.stations),
+            this.setState({ // updates the state with the new props, thus re-rendering the component
+                emittors: nextProps.emittors,
+                networksLabels: labels,
                 colors: colormap({
-                    colormap: 'jet',
-                    nshades: Math.max(Object.keys(nextProps.stations).length, 8),
-                    format: 'hex',
+                    colormap: colorMapNames[this.state.colorMapType],
+                    nshades: Math.max(labels.length, colorMin),
                     alpha: 1
-                }), // once component received new props and has set its state, render component anew with new state.
-                highlights: highlights
+                }),
+                highlights: highlights,
+                networksToggled: nextProps.networksToggled,
+                white: nextProps.white
             });
         }
     }
 
+    /**
+     * Centers the map on a "relevant" point (Paris by default, the first emittor if .PRP files have already been uploaded)
+     */
     center() {
         let keys = this.state.networksLabels;
         if (keys.length === 0) {
-            return [2.33, 48.86]; // centered on Paris
+            this.map.state.map.flyTo({ center: [2.33, 48.86] }); // centered on Paris if no emittor to display
         }
-        return [this.props.stations[keys[0]][0].coordinates.lng, this.props.stations[keys[0]][0].coordinates.lat];
+        let firstEmittor = Object.keys(this.props.emittors[keys[0]])[0]; // else, centered on the very first emittor received
+        this.map.state.map.flyTo({ center: [this.props.emittors[keys[0]][firstEmittor].coordinates.lng, this.props.emittors[keys[0]][firstEmittor].coordinates.lat] });
     }
 
+    switchColorMap() {
+        let index = this.state.colorMapType;
+        index += 1;
+        if (index > colorMapNumber) {
+            index -= colorMapNumber;
+        }
+        let colormapName = colorMapNames[index];
+        let colorMin = colorMapMins[index]; // the minimum number of colors
+        this.setState({
+            colors: colormap({
+                colormap: colormapName,
+                nshades: Math.max(this.state.networksLabels.length, colorMin),
+                alpha: 1 // opacity
+            }),
+            colorMapType: index
+        });
+    }
+
+    /**
+     * Returns the geometric center of all the points of the network, for simpler rendering
+     * @param {String} network 
+     */
     clusterCenter(network) {
         let x = 0;
         let y = 0;
-        let count = 0;
-        for (let station of this.state.stations[network]) {
-            count += 1;
+        let stationLabels = Object.keys(this.state.emittors[network]);
+        let N = stationLabels.length;
+        for (let station_id of stationLabels) {
+            let station = this.state.emittors[network][station_id];
             x += station.coordinates.lng;
             y += station.coordinates.lat;
         }
-        return [x / count, y / count];
+        return [x / N, y / N]; // arithmetic means of the coordinates
     }
 
-    toggleNetwork(network) {
-        let toggled = this.state.networksToggled[network];
-        let networksToggledCopy = JSON.parse(JSON.stringify(this.state.networksToggled));
-        networksToggledCopy[network] = !toggled;
-        this.setState({ networksToggled: networksToggledCopy });
-        this.props.toggleNetwork(network);
-    }
-
+    /**
+     * When hovering over a network center, highlights it
+     * @param {String} network 
+     */
     mouseEnter(network) {
         let highlights = JSON.parse(JSON.stringify(this.state.highlights));
         highlights[network] = 2;
         this.setState({ highlights: highlights });
     }
 
+    /**
+     * When the pointer leaves, removes the highlight
+     * @param {String} network 
+     */
     mouseExit(network) {
         let highlights = JSON.parse(JSON.stringify(this.state.highlights));
         highlights[network] = 0;
         this.setState({ highlights: highlights });
     }
 
+    /**
+     * Gets the color of each network (white if null)
+     * @param {String} network 
+     */
     getColor(network) {
-        let i = parseInt(network);
-        if (this.state.colors[i] != undefined) {
-            return this.state.colors[i];
+        let networkNumber = parseInt(network);
+        if (networkNumber < 0) {
+            console.log("Unidentified network");
+            return "#5c5c5c";
         }
-        return "white";
+        if (this.state.colors[networkNumber] != undefined) {
+            return this.state.colors[networkNumber];
+        }
+        console.log("Color " + network + " is undefined");
+        return "#ffffff";
+    }
+
+    /**
+     * Toggles between the network names and their emittors numbers (triggered when clicking the "labels" button)
+     */
+    nameNetworks() {
+        this.setState({ nameNets: !this.state.nameNets });
+    }
+
+    /**
+     * Toggles the legend of the Map
+     */
+    toggle_legend() {
+        this.setState({ legend: !this.state.legend });
     }
 
     render() {
-        let image = new Image(512, 512);
-        image.src = stationImage;
-        let images = ["stationImage", image];
         return (
             <div className="map-container">
+                {/* the map contains everything (because it implements the actual HTML canvas) */}
                 <Map
                     style={this.state.style[this.props.connection]}
+                    // online or offline
                     containerStyle={{
                         height: "100%",
-                        width: "100%",
+                        width: "100%"
                     }}
-                    center={this.center()}>
-                    <Layer id="stations" type="symbol" layout={{
-                        "icon-image": "stationImage",
-                        "icon-size": 0.05
-                    }} images={images} >
+                    ref={(e) => { this.map = e; }} // Allows direct references to the map (and thus direct actions e.g. "map.flyTo()")
+                    onStyleLoad={(map) => { // Adds the HTML images as sources for later use in Layer components
+                        map.addImage("recStation", htmlRecImage); // The reference name for this image
+                        map.addImage("networkCenter", htmlCenterImage);
+                    }}
+                >
+
+                    <div id="legend" className="button is-grey">
+                        <div id="showhide" >
+                            {/* The checkboxes to hide/show everything */}
+                            <div className="field">
+                                <input className="is-checkradio is-block" type="checkbox" id="show_checkbox"
+                                    name="show_checkbox" checked={this.props.showVal} onChange={this.props.changeShowVal} onClick={this.props.switchAll} />
+                                <label htmlFor="show_checkbox">
+                                    <span> </span>Show all
+                            </label>
+                            </div>
+                            <div className="field">
+                                <input className="is-checkradio is-block" type="checkbox" id="hide_checkbox" name="hide_checkbox" onClick={() => this.toggle_legend()} />
+                                <label htmlFor="hide_checkbox">
+                                    <span> </span>Legend
+                            </label>
+                            </div>
+                        </div>
+                        {
+                            this.state.legend &&
+                            <div className="legend">
+                                <div className="legend-column">
+                                    <div className="legend-item is-first">
+                                        <p><img src={recImage} alt="Station symbol" />
+                                            Recording station
+                                        </p>
+                                    </div>
+                                    <div className="legend-item">
+                                        <p><img src={centerImage} alt="Network centroid" />
+                                            Network centroid
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="legend-column is-next">
+                                    <div className="legend-item is-first">
+                                        <p>
+                                            <span className="legend-icon">
+                                                <FontAwesomeIcon icon="circle" />
+                                            </span>
+                                            Emittor
+                                        </p>
+                                    </div>
+                                    <div className="legend-item">
+                                        <p>
+                                            <span className="legend-icon">
+                                                <FontAwesomeIcon icon="circle-notch" />
+                                            </span>
+                                            Lone emittor
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="legend-column is-next">
+                                    <div className="legend-item is-first">
+                                        <p><img src={lineImage} alt="Station symbol" />
+                                            Link emittor to network
+                                        </p>
+                                    </div>
+                                    <div className="legend-item">
+                                        <p><img src={dashImage} alt="Network centroid" />
+                                            Network correction suggestion
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+
+
+
+                    </div>
+                    <Layer id="recStations" key="recStations" type="symbol" layout={{
+                        "icon-image": "recStation",
+                        "icon-size": 0.06
+                    }}>
+                        {/* Displays the reception stations as images using the previously defined source image */}
                         {
                             Object.keys(this.props.recStations).map((station, k) =>
                                 <Feature coordinates={[this.props.recStations[station].coordinates.lng, this.props.recStations[station].coordinates.lat]} key={100 * this.props.recStations[station].coordinates.lng + this.props.recStations[station].coordinates.lat}></Feature>
                             )
                         }
-                    </Layer>                    {
+                    </Layer>
+
+                    {
                         this.state.networksLabels.map((network, k) => {
-                            let clusterCenter = this.clusterCenter(network);
-                            let color = this.getColor(network);
+                            // Displays every network using 3 Layers : "center" which contains only the center of the
+                            // network, Stations which contains all the actual emittors of the network and Lines which
+                            // contains the connections between each node of the network.
+                            // Those last 2 are rendered uniquely when toggled or if showAll is active.
+                            let clusterCenter = this.clusterCenter(network); // the center coordinates
+                            let color = this.getColor(network); // the color of the network
+                            let emittors = this.state.emittors[network]; // al the emittors in this network
+                            let emittorsNumber = Object.keys(emittors).length;
+                            let toggled = this.state.networksToggled[network];
+                            toggled = !(toggled == undefined || !toggled);
+                            toggled = toggled || this.props.showAll;
+                            toggled = (emittorsNumber == 1) || toggled;
+                            // toggled is True if it's defined, not manually de-toggled (= False)
+                            // or simply if showAll is active. Single emittors are always displayed.
+
+                            let lines = toggled && (network != "-1000"); // We show the lines if the network is toggled.
+                            // At the beginning, no line should be shown (the emittors are shown as a cloud of unconnected points).
+
+                            let potentialLinks = []; // When using both ML and DL : list of all the corrected potential links given by the DL
+                            Object.keys(emittors).map((track_id, keyy) => {
+                                let potentialNetwork = emittors[track_id]["possible_network"];
+                                if (potentialNetwork != undefined && potentialNetwork != network) { // If there was a match with another network...
+                                    potentialLinks.push([[emittors[track_id]["coordinates"]["lng"], emittors[track_id]["coordinates"]["lat"]],
+                                    this.clusterCenter(potentialNetwork)]); // ...the link between the emittors coordinates and the other network's center's coordiantes is saved.
+                                }
+                            });
+
+                            let showPotential = (toggled && potentialLinks.length != 0); // We only
+                            let textCenter = "" + emittorsNumber;
+                            if (this.state.nameNets) {
+                                textCenter = "" + (parseInt(network) + 1);
+                            }
                             return (
                                 <div id={"cluster" + k} key={"cluster" + k}>
-                                    {this.state.networksToggled[network] &&
+                                    {lines &&// conditionnal rendering
                                         <Lines
                                             clusterCenter={clusterCenter} color={color}
-                                            network={network} stations={this.state.stations[network]} />
+                                            network={network} stations={emittors} />
                                     }
-                                    <Layer
-                                        id={"center" + network}
-                                        type="circle"
-                                        onClick={() => { this.toggleNetwork(network) }}
-                                        paint={{
-                                            "circle-color": color,
-                                            "circle-radius": 6,
-                                            "circle-stroke-width": this.state.highlights["" + network]
-                                        }}>
-                                        <Feature coordinates={clusterCenter} onClick={() => this.toggleNetwork(network)}
-                                            onMouseEnter={() => {
-                                                if (this.state.stations[network].length > 1) {
-                                                    this.mouseEnter(network)
-                                                }
+                                    {network != "-1000" && emittorsNumber > 1 && !toggled && // always rendering when simulation has started
+                                        <Layer
+                                            id={"center" + network}
+                                            key={"center" + network}
+                                            type="symbol"
+                                            onClick={() => { this.props.toggleNetwork(network) }}
+                                            layout={{
+                                                "text-field": textCenter,
+                                                "text-size": 19,
+                                                "icon-image": "networkCenter",
+                                                "icon-size": 0.1,
+                                                "icon-allow-overlap": true,
+                                                "text-allow-overlap": true,
+                                                "text-font": ["Open Sans Regular"],
+                                            }} paint={{
+                                                "text-color": this.getColor(network),
+                                                "text-halo-color": "black",
+                                                "text-halo-width": 0.1 + this.state.highlights["" + network],
                                             }}
-                                            onMouseLeave={() => {
-                                                if (this.state.stations[network].length > 1) {
-                                                    this.mouseExit(network)
-                                                }
-                                            }}></Feature>
-                                    </Layer>
-                                    {this.state.networksToggled[network] &&
+
+                                        >
+                                            <Feature coordinates={clusterCenter} onClick={() => this.props.toggleNetwork(network)}
+                                                onMouseEnter={() => this.mouseEnter(network)}
+                                                onMouseLeave={() => this.mouseExit(network)}
+                                                key={"featureCenter" + network}
+                                            ></Feature>
+                                        </Layer>
+                                    }
+
+                                    {network != "-1000" && emittorsNumber > 1 && toggled && // always rendering when simulation has started
+                                        <Layer
+                                            id={"centerToggled" + network}
+                                            key={"centerToggled" + network}
+                                            type="circle"
+                                            onClick={() => { this.props.toggleNetwork(network) }}
+                                            paint={{
+                                                "circle-color": this.getColor(network),
+                                                "circle-radius": 3,
+                                                "circle-stroke-width": this.state.highlights["" + network]
+                                            }}
+
+                                        >
+                                            <Feature coordinates={clusterCenter} onClick={() => this.props.toggleNetwork(network)}
+                                                onMouseEnter={() => this.mouseEnter(network)}
+                                                onMouseLeave={() => this.mouseExit(network)}
+                                                key={"featureCenterToggled" + network}
+                                            ></Feature>
+                                        </Layer>
+                                    }
+
+                                    {toggled && // conditionnal rendering
                                         <Stations
-                                            stations={this.state.stations[network]} network={network}
-                                            color={color} />
+                                            stations={emittors} network={network}
+                                            color={color} multiple={emittorsNumber > 1}
+                                            white={this.props.white} />
+                                    }
+                                    {showPotential &&
+                                        <PotentialLines
+                                            links={potentialLinks}
+                                            network={network} />
                                     }
                                 </div>)
                         })
                     }
+                    {/* Widgets */}
+                    <div className="widgets">
+                        <a id="center-button" onClick={this.center}>
+                            <span className="icon">
+                                <FontAwesomeIcon icon='location-arrow' />
+                            </span>
+                        </a>
+                    </div>
                     <ZoomControl></ZoomControl>
                     <ScaleControl></ScaleControl>
+                    <div className="widgets-tag">
+                        <a id="network-names-button" onClick={this.nameNetworks}>
+                            <span className="icon">
+                                <FontAwesomeIcon icon='tags' />
+                            </span>
+                        </a>
+                    </div>
+                    <div className="widgets-colors">
+                        <a id="colors-names-button" onClick={this.switchColorMap}>
+                            <span className="icon">
+                                <FontAwesomeIcon icon='palette' />
+                            </span>
+                        </a>
+                    </div>
+
                 </Map >
             </div >
         )
@@ -183,4 +424,45 @@ class MapBox extends Component {
 
 
 }
+
+MapBox.propTypes = {
+    /**
+     * the emittors received from App.js, in the form :
+     *   {    network_id : {
+     *           emittor_id : {
+     *               coordinates : {lat : float, lng : float}, ...
+     *           }
+     *       }
+     *   }
+     */
+    emittors: PropTypes.objectOf(PropTypes.objectOf(PropTypes.object)).isRequired,
+    /**
+     * the list of the reception stations
+     */
+    recStations: PropTypes.objectOf(PropTypes.objectOf(PropTypes.object)).isRequired,
+    /**
+     * the connection status
+     */
+    connection: PropTypes.oneOf(["online", "offline"]).isRequired,
+    /**
+     * the function to call when toggling a network
+     */
+    toggleNetwork: PropTypes.func.isRequired,
+    /**
+     * is the showAll button checked ?
+     */
+    showAll: PropTypes.bool.isRequired,
+    /**
+     * the function to toggle showAll
+    */
+    switchAll: PropTypes.func.isRequired,
+    /**
+     * the networks toggled/de-toggled manually by the user so far
+     */
+    networksToggled: PropTypes.objectOf(PropTypes.bool).isRequired
+
+}
+
+
 export default MapBox;
+

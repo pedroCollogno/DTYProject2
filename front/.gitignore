@@ -5,8 +5,8 @@
 /node_modules
 
 # map tiles
-cholet-tiles/
-country-vectors/
+*-tiles/
+*-vectors/
 font/
 
 # production
@@ -26,5 +26,9 @@ yarn-error.log*
 *__pycache__
 *scenarios
 *logs
+
+font/
+cholet-tiles/
+country-vectors/
 
 package-lock.json

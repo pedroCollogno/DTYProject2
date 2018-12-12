@@ -1,7 +1,6 @@
 // 2. Set your own initial variables
 // Update blue
-$orange: rgba(255, 123, 0, 0.5);
-$blue: #72d0eb;
+$orange: rgba(255, 0, 0, 0.678);
 
 $grey: #eeeeee;
 $grey-invert: #363636;
@@ -9,6 +8,11 @@ $grey-invert: #363636;
 $dark-blue: #0B0D29;
 $dark-blue-invert: #fbfbfb;
 
-// Add pink and its invert
-$pink: #fca8a8;
-$pink-invert: #fff;
+$blue: rgba(0, 204, 170, 0.747);
+$blue-invert: findColorInvert($blue);
+
+$yellow: rgb(228, 187, 7);
+
+// Width of map
+$map-width: 60%;
+$map-height: 500px;

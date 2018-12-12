@@ -13,8 +13,9 @@ if __name__ == "__main__":
 from src import main, threads
 from utils import station_utils
 from utils import loading as load
-from utils.log import logger
-from utils.plotting import display_alternates
+
+import logging
+logger = logging.getLogger('backend')
 
 
 def mock_sender_function(json_obj):
@@ -30,5 +31,3 @@ if __name__ == '__main__':
     root.withdraw()
     file_paths = filedialog.askopenfilenames()
     root.update()
-
-    display_alternates(*file_paths)

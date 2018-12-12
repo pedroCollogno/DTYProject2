@@ -1,4 +1,5 @@
-from .log import logger
+import logging
+logger = logging.getLogger('backend')
 
 
 def get_track_info(track):
@@ -14,9 +15,23 @@ def get_track_info(track):
     info_from_track.append(track.itr_measurement.central_freq_hz)
     info_from_track.append(track.itr_measurement.bandwidth_hz)
     info_from_track.append(track.average_azimut_deg)
-    info_from_track.append(track.begin_date.date_ms)
+    # Rounded begin date to 100ms, to take into account signal propagation
+    info_from_track.append(int(track.begin_date.date_ms/100)*100)
     info_from_track.append(get_track_id(info_from_track))
     return info_from_track
+
+
+def is_in(batch, data):
+    """ Checks if a batch is in a data list, bu checking the ID (last position in batch)
+
+    :param batch: the batch containing track info
+    :param data: the list of data
+    """
+    _id = batch[-1]
+    for d in data:
+        if d[-1] == _id:
+            return True
+    return False
 
 
 def get_track_stream_info(track_stream, data=[]):
@@ -29,7 +44,7 @@ def get_track_stream_info(track_stream, data=[]):
     tracks = track_stream.tracks
     for track in tracks:
         batch = get_track_info(track)
-        if batch not in data:
+        if not is_in(batch, data):
             data.append(batch)
     return data
 
@@ -43,7 +58,7 @@ def get_track_list_info(tracks, data=[]):
     """
     for track in tracks:
         batch = get_track_info(track)
-        if batch not in data:
+        if not is_in(batch, data):
             data.append(batch)
     return data
 
@@ -59,14 +74,15 @@ def get_track_id(track):
         freq = track[1]
         track_begin_date = track[4]
     else:
-        track_begin_date = track.begin_date.date_ms
+        track_begin_date = int(track.begin_date.date_ms/100)*100
         freq = track.itr_measurement.central_freq_hz
         em_type = track.itr_measurement.type
 
-    track_begin_date = int(track_begin_date//100)*100
     #freq = int(freq/1000)*1000
 
-    track_id = track_begin_date*100**3 + freq/100 + em_type*10**1
+    track_id = track_begin_date*100**1 + freq * \
+        100**2 + em_type*100**3
+    track_id = track_id/1000 - 155000000000
     return(track_id)
 
 
@@ -161,7 +177,7 @@ def same_emittor(track_1, track_2):
     return bool_response, track_id
 
 
-def add_track_to_dict(track, track_dict, coords=None):
+def add_track_to_dict(track, track_dict, coords=None, prev_tracks_data={}):
     """ Adds a track to a dictionnary of tracks in the right format
 
     :param track: the track to add to the dict
@@ -174,12 +190,20 @@ def add_track_to_dict(track, track_dict, coords=None):
     em_type = track.itr_measurement.type
     track_info = get_track_info(track)
 
+    if track_id in prev_tracks_data.keys():
+        if 'duration' in prev_tracks_data[track_id].keys():
+            duration = prev_tracks_data[track_id]['duration']
+    else:
+        duration = track.cumulated_activity_us
+
     track_data = {
         'track_id': track_id,
         'coordinates': coords,
         'frequency': freq,
         'emission_type': em_type,
-        'network_id': None,
-        'track': track_info
+        'network_id': -1000,
+        'track': track_info,
+        'talking': False,
+        'duration': duration
     }
     track_dict[track_id] = track_data

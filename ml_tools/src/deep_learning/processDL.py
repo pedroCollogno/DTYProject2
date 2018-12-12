@@ -1,25 +1,22 @@
-from clustering.dbscan import get_dbscan_prediction_min
-from utils.track_utils import get_track_stream_info, get_track_info, get_track_id
-from utils.loading import get_track_streams_from_prp
-from utils.log import create_new_folder, logger
-from utils import config
 import itertools
 import argparse
 import shutil
 import sys
 import os
+
 import tkinter as tk
 import matplotlib
 matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+
 from tkinter import filedialog
 from sklearn.cluster import DBSCAN
 from progressbar import ProgressBar
 
-
-
+import matplotlib
+matplotlib.use("TkAgg")
 
 if __name__ == "__main__":
     # If launching this file as a file, enlarge the scope to see all of the src folder of ml_tools package
@@ -27,6 +24,14 @@ if __name__ == "__main__":
     sys.path.append(os.path.abspath(
         os.path.dirname(file_dir)))
 
+from ..utils import config
+from ..utils.log import create_new_folder
+from ..utils.loading import get_track_streams_from_prp
+from ..utils.track_utils import get_track_stream_info, get_track_info, get_track_id, get_track_list_info
+from ..clustering.dbscan import get_dbscan_prediction_min
+
+import logging
+logger = logging.getLogger('backend')
 
 time_step_ms = config['VARS']['time_step_ms']
 PKL_DIR = config['PATH']['pkl']
@@ -75,15 +80,13 @@ def get_track_info_with_alternates(track):
 def predict_all_ids(track_streams):
     """ Uses DBSCAN to label all the networks
 
-    :param station_1_track_stream: track stream for first station
+    :param track_streams: track stream for stations
     :return: a list of all the predictions and all the ids
     """
     raw_tracks = []
-    stations_data = []
     for track_stream in track_streams:
-        raw_tracks = get_track_stream_info(track_stream, raw_tracks)
+        raw_tracks = get_track_list_info(track_stream, raw_tracks)
     y_pred, ids = get_dbscan_prediction_min(raw_tracks)
-    stations_data.append([y_pred, ids])
     return [y_pred, ids]
 
 
@@ -96,8 +99,7 @@ def get_last_track_by_id(track_streams, id):
     """
     raw_tracks = []
     for track_stream in track_streams:
-        tracks = track_stream.tracks
-        for track in tracks:
+        for track in track_stream:
             if get_track_id(track) == id:
                 raw_tracks = get_track_info_with_alternates(track)
                 print(len(raw_tracks[6]))
@@ -115,8 +117,7 @@ def get_start_and_end(track_streams):
     """
     raw_tracks = []
     for track_stream in track_streams:
-        tracks = track_stream.tracks
-        for track in tracks:
+        for track in track_stream:
             raw_tracks.append(get_track_info_with_alternates(track))
     # raw_tracks : all the tracks with alternates info from a prp
     start_date = raw_tracks[0][6][0][0]
@@ -152,11 +153,16 @@ def process_data(track_streams, file_name):
     :param track_streams: track stream to process
     :param file_name: file name of the pkl file in /pkl where data will be saved
     """
-    preds = predict_all_ids(track_streams)
+    if isinstance(track_streams[0], list):
+        ts = track_streams
+    else:
+        ts = [track_stream.tracks for track_stream in track_streams]
+
+    preds = predict_all_ids(ts)
     test_ids = set(preds[1])
     #print("Number of emitters :", len(test_ids), len(preds[1]))
 
-    temporal_data = get_start_and_end(track_streams)
+    temporal_data = get_start_and_end(ts)
     start_date_ms = temporal_data[0]
     sequence_size = temporal_data[2]
 
@@ -170,15 +176,12 @@ def process_data(track_streams, file_name):
     for i in range(len(preds[0])):
         emitter_infos[preds[1][i]] = {
             "network": preds[0][i],
-            "steps": get_steps_track(track_streams, preds[1][i], sequence_size, start_date_ms)
+            "steps": get_steps_track(ts, preds[1][i], sequence_size, start_date_ms)
         }
         progress += 1
         pbar.update(progress)
         pbar.finish()
 
-    for k in emitter_infos:
-        j += 1
-    print(j)
     X = []
     Y = []
     id_Couple = []
@@ -235,30 +238,25 @@ def process_data(track_streams, file_name):
     pbar2.finish()
 
 
-def create_clusters(ei):
-    """
-    Creates an object indexed by cluster id from the object indexed by emittor_id. Lets the user choose the PRP to process
+def create_clusters(track_streams, y_pred=None, ids=None):
+    """ Creates an object indexed by cluster id from the object indexed by emittor_id. Lets the user choose the PRP to process
 
+    :param track_streams: the track streams to build into clusters
     :return: Object indexed by cluster_id containing list of emittor_id and object indexed by emittor_id containing steps
+    """
 
-    """
-    """
-    root = tk.Tk()
-    root.withdraw()
-    file_path = filedialog.askopenfilename()
-    root.update()
-    track_streams = get_track_streams_from_prp(file_path)
-    ei = process_data_clusters(track_streams, file_path)
-"""
+    ei = process_data_clusters(track_streams, preds=[y_pred, ids])
+
     i = 0
     for k in ei:
         if ei[k]['network'] >= i:
             i = ei[k]['network']
     clusters = {}
-    for k in range(i+1):
-        clusters[k] = []
     for k in ei:
+        if ei[k]['network'] not in clusters.keys():
+            clusters[ei[k]['network']] = []
         clusters[ei[k]['network']].append(k)
+
     return(clusters, ei)
 
 
@@ -276,30 +274,34 @@ def input_confirmation():
         return False
 
 
-def process_data_clusters(track_streams):
-    """ Process the data from the prp file into a dataframe that can be used in the deep learning models.
+def process_data_clusters(track_streams, preds=None):
+    """ Creates a dictionnary of emittors containing their network and the list of sampled emissions
 
     :param track_streams: track stream to process
+    :return: dictionnary of emittors containing their network and the list of sampled emissions
     """
-    preds = predict_all_ids(track_streams)
+    if preds is None:
+        preds = predict_all_ids(track_streams)
+
     test_ids = set(preds[1])
-    #print("Number of emitters :", len(test_ids), len(preds[1]))
+    logger.debug("Number of emitters :", len(test_ids), len(preds[1]))
 
     temporal_data = get_start_and_end(track_streams)
     start_date_ms = temporal_data[0]
     sequence_size = temporal_data[2]
 
     emitter_infos = {}
-    logger.info('Getting the steps from all the tracks')
+    logger.info('Getting the steps from all the tracks.')
     progress = 0
     pbar = ProgressBar(maxval=(len(preds[0])))
     pbar.start()
     for i in range(len(preds[0])):
-        emitter_infos[preds[1][i]] = {
-            "network": preds[0][i],
-            "steps": get_steps_track(track_streams, preds[1][i], sequence_size, start_date_ms)
-        }
-        #print(get_steps_track(track_streams, preds[1][i], sequence_size, start_date_ms)[:500])
+        track = get_last_track_by_id(track_streams, preds[1][i])
+        if track[0] != 3:  # Only work with track if it's not a BURST type.
+            emitter_infos[preds[1][i]] = {
+                "network": preds[0][i],
+                "steps": get_steps_track(track_streams, preds[1][i], sequence_size, start_date_ms)
+            }
         progress += 1
         pbar.update(progress)
         pbar.finish()
@@ -316,7 +318,6 @@ def create_emittor_comparison_with_cluster(real_clusters, ei):
     """
     labels = []
     real_data = []
-    print(real_clusters)
     for cluster in real_clusters:
         for emittor in real_clusters[cluster]:
             step_nb = len(ei[emittor]['steps']) - \
@@ -338,25 +339,24 @@ def create_emittor_comparison_with_cluster(real_clusters, ei):
                                           cluster_secondary_cumulated[sequence_iterator*50:(sequence_iterator+1)*50]])
                         labels.append(label)
                 else:
-                    print("1 emittor cluster comparing with itself")
+                    logger.info("1 emittor cluster comparing with itself")
     return(real_data, labels, step_nb)
 
 
 def create_cheat_comparison_with_cluster(real_clusters, ei):
-    """
-    Uses the clusters from simulator data to build comparison between emittor and clusters for every possible tuple
+    """ Uses the clusters from simulator data to build comparison between emittor and clusters for every possible tuple
+
     :param real_clusters: The clusters containing the emittor ids
     :param ei: The emittor infos, the vluster it belongs to and the steps of emissions
     :return: List of emissions of emittor and cluster and if the emittor belongs to the cluster
     """
     labels = []
     real_data = []
-    print(real_clusters)
     for cluster in real_clusters:
         for emittor in real_clusters[cluster]:
             step_nb = len(ei[emittor]['steps']) - \
                 (len(ei[emittor]['steps']) % 50)
-            print(step_nb)
+
             for cluster_secondary in real_clusters:
                 cluster_secondary_cumulated = [0 for k in range(step_nb)]
                 label = True
@@ -364,16 +364,18 @@ def create_cheat_comparison_with_cluster(real_clusters, ei):
                     if emittor != emittor_secondary:
                         cluster_secondary_cumulated = [int(
                             cluster_secondary_cumulated[k] or ei[emittor_secondary]['steps'][k]) for k in range(step_nb)]
+
                         for k in range(step_nb):
                             if ei[emittor]['steps'][k]+ei[emittor_secondary]['steps'][k] == 2:
                                 label = False
+
                 if not (len(real_clusters[cluster]) == 1 and cluster_secondary == cluster):
                     for sequence_iterator in range(step_nb//50):
                         real_data.append([ei[emittor]['steps'][sequence_iterator*50:(sequence_iterator+1)*50],
                                           cluster_secondary_cumulated[sequence_iterator*50:(sequence_iterator+1)*50]])
                         labels.append(label)
                 else:
-                    print("1 emittor cluster comparing with itself")
+                    logger.info("1 emittor cluster comparing with itself")
     return(real_data, labels, step_nb)
 
 
@@ -434,10 +436,11 @@ if __name__ == '__main__':
 
     root = tk.Tk()
     root.withdraw()
-    #file_path = filedialog.askopenfilename()
-    #tsexs = get_track_stream_exs_from_prp(file_path)
-    #process_data(tsexs, file_path)
-    create_clusters()
+    file_path = filedialog.askopenfilename()
+    root.update()
+    track_streams = get_track_streams_from_prp(file_path)
+
+    create_clusters(track_streams)
 
     # checkPkl(sys.argv[1])
     main(file_path, args.name)

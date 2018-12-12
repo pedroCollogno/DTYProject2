@@ -1,0 +1,15 @@
+.modal {
+  opacity: 1;
+  transition: opacity 300ms ease-in-out; }
+
+.modal-card {
+  width: 95%; }
+
+.dashboard.title {
+  color: black !important; }
+
+.dashboard.subtitle {
+  color: black !important; }
+
+.dashboard-button {
+  padding-left: 2em; }
