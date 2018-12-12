@@ -10,11 +10,11 @@ class Dashboard extends Component {
     this.state = {
       modalState: false,
       networkSelected: 0,
-      emittorSelected: null
+      emitterSelected: null
     };
 
     this.toggleModal = this.toggleModal.bind(this);
-    this.getEmittorList = this.getEmittorList.bind(this);
+    this.getEmitterList = this.getEmitterList.bind(this);
     this.rainbow = this.rainbow.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.clickEvent = this.clickEvent.bind(this);
@@ -32,7 +32,7 @@ class Dashboard extends Component {
   }
 
   toggleModal() {
-    console.log(this.props.emittors[0])
+    console.log(this.props.emitters[0])
     this.setState((prev, props) => {
       const newState = !prev.modalState;
 
@@ -87,7 +87,7 @@ class Dashboard extends Component {
     })
   }
 
-  getEmittorList() {
+  getEmitterList() {
     var stats = {
       networks: {
         numberEVF: 0,
@@ -100,14 +100,14 @@ class Dashboard extends Component {
         clusterDuration: 0,
         readDuration: 0
       },
-      emittor: {
+      emitter: {
         id: null,
         lat: 0,
         lng: 0,
         network: 0
       }
     }
-    var networks = this.props.emittors;
+    var networks = this.props.emitters;
     // The id of each network
     var networksIndex = Object.keys(networks).map((network, i) => (
       i
@@ -140,31 +140,31 @@ class Dashboard extends Component {
       networksFrequenciesMHz.push(Object.values(networks[element])[0]['frequency'] / 10e6)
 
       Object.keys(networks[element]).forEach(i => {
-        // The network id of each emittor
+        // The network id of each emitter
         emittersNetworksIds.push(networks[element][i]['network_id']);
-        // The duration of each emittor
+        // The duration of each emitter
         emittersDurations.push(networks[element][i]['duration'] / 1e6);
-        // The id of each emittor
+        // The id of each emitter
         emittersIds.push(networks[element][i]['track_id']);
-        // The Latitude of each emittor
+        // The Latitude of each emitter
         emitterLat.push(networks[element][i]['coordinates']['lat'])
-        // The Longitude of each emittor
+        // The Longitude of each emitter
         emitterLng.push(networks[element][i]['coordinates']['lng'])
       })
     });
 
-    // Set default index of emittor selected
-    var emittorIndex = emittersIds.indexOf(this.state.emittorSelected) || 0
-    stats.emittor.id = emittersIds[emittorIndex]
-    stats.emittor.lat = this.degToDms(emitterLat[emittorIndex])
-    stats.emittor.lng = this.degToDms(emitterLng[emittorIndex])
-    stats.emittor.network = emittersNetworksIds[emittorIndex]
+    // Set default index of emitter selected
+    var emitterIndex = emittersIds.indexOf(this.state.emitterSelected) || 0
+    stats.emitter.id = emittersIds[emitterIndex]
+    stats.emitter.lat = this.degToDms(emitterLat[emitterIndex])
+    stats.emitter.lng = this.degToDms(emitterLng[emitterIndex])
+    stats.emitter.network = emittersNetworksIds[emitterIndex]
 
-    // Gather the durations and ids of emittors, indexed by network id
-    // dataEmittors = {
+    // Gather the durations and ids of emitters, indexed by network id
+    // dataEmitters = {
     //   '0' : {
-    //     'durations': [firstEmittorDuration, secondEmittorDuration, ...],
-    //     'ids': [firstEmittorId, secondEmittorId, ...]
+    //     'durations': [firstEmitterDuration, secondEmitterDuration, ...],
+    //     'ids': [firstEmitterId, secondEmitterId, ...]
     //   },
     //   '1' : {
     //     ...
@@ -240,28 +240,28 @@ class Dashboard extends Component {
       }
     }
 
-    var dataEmittors = {}
+    var dataEmitters = {}
 
     for (var i in emittersNetworksIds) {
-      !(emittersNetworksIds[i] in dataEmittors) && (dataEmittors[emittersNetworksIds[i]] = {
+      !(emittersNetworksIds[i] in dataEmitters) && (dataEmitters[emittersNetworksIds[i]] = {
         //'pos': [],
         'ids': [],
         'durations': []
       });
-      // dataEmittors[emittersNetworksIds[i]]['pos'].push(
+      // dataEmitters[emittersNetworksIds[i]]['pos'].push(
       //   {
       //     x: emitterLng[i],
       //     y: emitterLat[i],
       //     r: emittersDurations[i] / (progressDuration*10e3)
       //   }
       // );
-      dataEmittors[emittersNetworksIds[i]]['ids'].push(emittersIds[i]);
-      dataEmittors[emittersNetworksIds[i]]['durations'].push(emittersDurations[i])
+      dataEmitters[emittersNetworksIds[i]]['ids'].push(emittersIds[i]);
+      dataEmitters[emittersNetworksIds[i]]['durations'].push(emittersDurations[i])
     }
 
 
-    var pieLabels = dataEmittors[this.state.networkSelected] || { 'ids': [] }
-    var pieValues = dataEmittors[this.state.networkSelected] || { 'durations': [] }
+    var pieLabels = dataEmitters[this.state.networkSelected] || { 'ids': [] }
+    var pieValues = dataEmitters[this.state.networkSelected] || { 'durations': [] }
     var pieColors = []
 
     for (var i = 0; i < pieLabels['ids'].length; i++) {
@@ -344,25 +344,25 @@ class Dashboard extends Component {
           </div>
           <div className="column is-6">
             <div className="box">
-              <div className="heading">Emittor</div>
-              <div className="dashboard title">#{stats.emittor.id}</div>
+              <div className="heading">Emitter</div>
+              <div className="dashboard title">#{stats.emitter.id}</div>
               <div className="level">
                 <div className="level-item">
                   <div className="">
                     <div className="heading">Network</div>
-                    <div className="dashboard title is-5">#{stats.emittor.network}</div>
+                    <div className="dashboard title is-5">#{stats.emitter.network}</div>
                   </div>
                 </div>
                 <div className="level-item">
                   <div className="">
                     <div className="heading">Latitude</div>
-                    <div className="dashboard title is-5">{stats.emittor.lat}</div>
+                    <div className="dashboard title is-5">{stats.emitter.lat}</div>
                   </div>
                 </div>
                 <div className="level-item">
                   <div className="">
                     <div className="heading">Longitude</div>
-                    <div className="dashboard title is-5">{stats.emittor.lng}</div>
+                    <div className="dashboard title is-5">{stats.emitter.lng}</div>
                   </div>
                 </div>
               </div>
@@ -387,7 +387,7 @@ class Dashboard extends Component {
                 Network #{this.state.networkSelected}
               </p>
               <div className="panel-block">
-                < Doughnut data={pieData} getElementAtEvent={dataset => this.setState({emittorSelected: dataset[0]._model.label})}/>
+                < Doughnut data={pieData} getElementAtEvent={dataset => this.setState({emitterSelected: dataset[0]._model.label})}/>
               </div>
             </div>
           </div>

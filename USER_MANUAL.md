@@ -14,11 +14,11 @@ There you go, you're ready to use the app. The app is divided into 5 sections.
 
 ### 1. The Map
 
-In this upper lefts section, the emittors which are discovered and located by the receiving stations will be displayed.
+In this upper lefts section, the emitters which are discovered and located by the receiving stations will be displayed.
  
 
 
-### 2. The list of tracked emittors
+### 2. The list of tracked emitters
 
 
 ### 3. The Upload section

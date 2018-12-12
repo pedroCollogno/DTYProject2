@@ -1,4 +1,4 @@
-""" This module is used to compute the location of emittors that are seen by stations
+""" This module is used to compute the location of emitters that are seen by stations
 """
 
 from pygeodesy import sphericalNvector

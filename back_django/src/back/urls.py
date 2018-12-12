@@ -17,7 +17,7 @@ urlpatterns = [
     url(r'^pausesimulation$', pause_simulation, name="pausesimulation"),
     url(r'^playsimulation$', play_simulation, name="playsimulation"),
     url(r'^getstations$', send_stations_positions, name="get_stations"),
-    url(r'^emittorspositions$', initiate_emittors_positions,
-        name="emittors_positions"),
+    url(r'^emitterspositions$', initiate_emitters_positions,
+        name="emitters_positions"),
     url(r'^upload', upload, name="upload")
 ]
