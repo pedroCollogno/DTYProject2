@@ -239,10 +239,10 @@ def process_data(track_streams, file_name):
 
 
 def create_clusters(track_streams, y_pred=None, ids=None):
-    """ Creates an object indexed by cluster id from the object indexed by emittor_id. Lets the user choose the PRP to process
+    """ Creates an object indexed by cluster id from the object indexed by emitter_id. Lets the user choose the PRP to process
 
     :param track_streams: the track streams to build into clusters
-    :return: Object indexed by cluster_id containing list of emittor_id and object indexed by emittor_id containing steps
+    :return: Object indexed by cluster_id containing list of emitter_id and object indexed by emitter_id containing steps
     """
 
     ei = process_data_clusters(track_streams, preds=[y_pred, ids])
@@ -275,10 +275,10 @@ def input_confirmation():
 
 
 def process_data_clusters(track_streams, preds=None):
-    """ Creates a dictionnary of emittors containing their network and the list of sampled emissions
+    """ Creates a dictionnary of emitters containing their network and the list of sampled emissions
 
     :param track_streams: track stream to process
-    :return: dictionnary of emittors containing their network and the list of sampled emissions
+    :return: dictionnary of emitters containing their network and the list of sampled emissions
     """
     if preds is None:
         preds = predict_all_ids(track_streams)
@@ -309,95 +309,95 @@ def process_data_clusters(track_streams, preds=None):
     return (emitter_infos)
 
 
-def create_emittor_comparison_with_cluster(real_clusters, ei):
+def create_emitter_comparison_with_cluster(real_clusters, ei):
     """
-    Uses the clusters from simulator data to build comparison between emittor and clusters for every possible tuple
-    :param real_clusters: The clusters containing the emittor ids
-    :param ei: The emittor infos, the vluster it belongs to and the steps of emissions
-    :return: List of emissions of emittor and cluster and if the emittor belongs to the cluster
+    Uses the clusters from simulator data to build comparison between emitter and clusters for every possible tuple
+    :param real_clusters: The clusters containing the emitter ids
+    :param ei: The emitter infos, the vluster it belongs to and the steps of emissions
+    :return: List of emissions of emitter and cluster and if the emitter belongs to the cluster
     """
     labels = []
     real_data = []
     for cluster in real_clusters:
-        for emittor in real_clusters[cluster]:
-            step_nb = len(ei[emittor]['steps']) - \
-                (len(ei[emittor]['steps']) % 50)
+        for emitter in real_clusters[cluster]:
+            step_nb = len(ei[emitter]['steps']) - \
+                (len(ei[emitter]['steps']) % 50)
             for cluster_secondary in real_clusters:
                 cluster_secondary_cumulated = [
-                    0 for k in range(len(ei[emittor]['steps']))]
+                    0 for k in range(len(ei[emitter]['steps']))]
                 if cluster == cluster_secondary:
                     label = True
                 else:
                     label = False
-                for emittor_secondary in real_clusters[cluster_secondary]:
-                    if emittor != emittor_secondary:
+                for emitter_secondary in real_clusters[cluster_secondary]:
+                    if emitter != emitter_secondary:
                         cluster_secondary_cumulated = [int(
-                            cluster_secondary_cumulated[k] or ei[emittor_secondary]['steps'][k]) for k in range(step_nb)]
+                            cluster_secondary_cumulated[k] or ei[emitter_secondary]['steps'][k]) for k in range(step_nb)]
                 if not (len(real_clusters[cluster]) == 1 and cluster_secondary == cluster):
                     for sequence_iterator in range(step_nb//50):
-                        real_data.append([ei[emittor]['steps'][sequence_iterator*50:(sequence_iterator+1)*50],
+                        real_data.append([ei[emitter]['steps'][sequence_iterator*50:(sequence_iterator+1)*50],
                                           cluster_secondary_cumulated[sequence_iterator*50:(sequence_iterator+1)*50]])
                         labels.append(label)
                 else:
-                    logger.info("1 emittor cluster comparing with itself")
+                    logger.info("1 emitter cluster comparing with itself")
     return(real_data, labels, step_nb)
 
 
 def create_cheat_comparison_with_cluster(real_clusters, ei):
-    """ Uses the clusters from simulator data to build comparison between emittor and clusters for every possible tuple
+    """ Uses the clusters from simulator data to build comparison between emitter and clusters for every possible tuple
 
-    :param real_clusters: The clusters containing the emittor ids
-    :param ei: The emittor infos, the vluster it belongs to and the steps of emissions
-    :return: List of emissions of emittor and cluster and if the emittor belongs to the cluster
+    :param real_clusters: The clusters containing the emitter ids
+    :param ei: The emitter infos, the vluster it belongs to and the steps of emissions
+    :return: List of emissions of emitter and cluster and if the emitter belongs to the cluster
     """
     labels = []
     real_data = []
     for cluster in real_clusters:
-        for emittor in real_clusters[cluster]:
-            step_nb = len(ei[emittor]['steps']) - \
-                (len(ei[emittor]['steps']) % 50)
+        for emitter in real_clusters[cluster]:
+            step_nb = len(ei[emitter]['steps']) - \
+                (len(ei[emitter]['steps']) % 50)
 
             for cluster_secondary in real_clusters:
                 cluster_secondary_cumulated = [0 for k in range(step_nb)]
                 label = True
-                for emittor_secondary in real_clusters[cluster_secondary]:
-                    if emittor != emittor_secondary:
+                for emitter_secondary in real_clusters[cluster_secondary]:
+                    if emitter != emitter_secondary:
                         cluster_secondary_cumulated = [int(
-                            cluster_secondary_cumulated[k] or ei[emittor_secondary]['steps'][k]) for k in range(step_nb)]
+                            cluster_secondary_cumulated[k] or ei[emitter_secondary]['steps'][k]) for k in range(step_nb)]
 
                         for k in range(step_nb):
-                            if ei[emittor]['steps'][k]+ei[emittor_secondary]['steps'][k] == 2:
+                            if ei[emitter]['steps'][k]+ei[emitter_secondary]['steps'][k] == 2:
                                 label = False
 
                 if not (len(real_clusters[cluster]) == 1 and cluster_secondary == cluster):
                     for sequence_iterator in range(step_nb//50):
-                        real_data.append([ei[emittor]['steps'][sequence_iterator*50:(sequence_iterator+1)*50],
+                        real_data.append([ei[emitter]['steps'][sequence_iterator*50:(sequence_iterator+1)*50],
                                           cluster_secondary_cumulated[sequence_iterator*50:(sequence_iterator+1)*50]])
                         labels.append(label)
                 else:
-                    logger.info("1 emittor cluster comparing with itself")
+                    logger.info("1 emitter cluster comparing with itself")
     return(real_data, labels, step_nb)
 
 
-def create_comparison_one_to_one(emittor_id,  emissions, ids_in_cluster, sequence_size):
+def create_comparison_one_to_one(emitter_id,  emissions, ids_in_cluster, sequence_size):
     """
-    Creates list of data to use the model's prediction (e.g: the emission activity of the cluster and the emittor's emission activity), 
+    Creates list of data to use the model's prediction (e.g: the emission activity of the cluster and the emitter's emission activity), 
     samples the emissions based on sequence_size.
-    :param emittor_id: The emittor's id to be compared with the cluster
-    :param emissions: The list of emissions of all the emittors
-    :param ids_in_cluster: List of emittors ids in the cluster you want to compare with the emittor
+    :param emitter_id: The emitter's id to be compared with the cluster
+    :param emissions: The list of emissions of all the emitters
+    :param ids_in_cluster: List of emitters ids in the cluster you want to compare with the emitter
     :param sequence_size: The size of the sequence you want to compare
     """
     list_of_data = []
-    step_nb = len(emissions[emittor_id]['steps']) - \
-        (len(emissions[emittor_id]['steps']) % sequence_size)
+    step_nb = len(emissions[emitter_id]['steps']) - \
+        (len(emissions[emitter_id]['steps']) % sequence_size)
     cluster_secondary_cumulated = [0 for k in range(step_nb)]
-    for emittor_secondary in ids_in_cluster:
-        if emittor_secondary != emittor_id:
+    for emitter_secondary in ids_in_cluster:
+        if emitter_secondary != emitter_id:
             cluster_secondary_cumulated = [int(
-                cluster_secondary_cumulated[k] or emissions[emittor_secondary]['steps'][k]) for k in range(step_nb)]
+                cluster_secondary_cumulated[k] or emissions[emitter_secondary]['steps'][k]) for k in range(step_nb)]
     for sequence_iterator in range(step_nb//sequence_size):
-        list_of_data.append([emissions[emittor_id]['steps'][sequence_iterator*sequence_size:(sequence_iterator+1)
+        list_of_data.append([emissions[emitter_id]['steps'][sequence_iterator*sequence_size:(sequence_iterator+1)
                                                             * sequence_size], cluster_secondary_cumulated[sequence_iterator*sequence_size:(sequence_iterator+1)*sequence_size]])
     return(list_of_data, step_nb)
 

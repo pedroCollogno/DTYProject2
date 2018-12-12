@@ -29,7 +29,7 @@ if __name__ == "__main__":
 
 from .metrics import *
 from .fake_data_clusters import multiple_fake_clusters
-from .processDL import create_clusters, create_emittor_comparison_with_cluster, create_cheat_comparison_with_cluster, create_comparison_one_to_one
+from .processDL import create_clusters, create_emitter_comparison_with_cluster, create_cheat_comparison_with_cluster, create_comparison_one_to_one
 from ..utils import config
 
 WEIGHTS_DIR = config['PATH']['weights']
@@ -71,7 +71,7 @@ def train():
 def train_real():
     """
     We train the model on a certain situation stored in a PRP file,
-    it creates clusters from the PRP file and compares every single emittor with every cluster
+    it creates clusters from the PRP file and compares every single emitter with every cluster
     We store the weights in a file to use them for testing
     """
     real_clusters, ei = create_clusters()
@@ -107,8 +107,8 @@ def train_real():
 def prediction_processing(predictions, labels, threshold, step_nb):
     """ Labels the total prediction on all sequences according to threshold
 
-    :param predictions: The predictions for every tuple (emittor, cluster, sequence)
-    :param labels: The real labels of every tuple (emittor, cluster, sequence)
+    :param predictions: The predictions for every tuple (emitter, cluster, sequence)
+    :param labels: The real labels of every tuple (emitter, cluster, sequence)
     :param threshold: The threshold defining from where we label as False
     :return: The scores (precision, recall) for both True and False
     """
@@ -139,7 +139,7 @@ def prediction_processing(predictions, labels, threshold, step_nb):
 
 def one_prediction(predictions, step_nb, threshold):
     """
-    Returns a prediction for a comparison emittor/cluster based on all comparisons of the sequences
+    Returns a prediction for a comparison emitter/cluster based on all comparisons of the sequences
     :param predictions: List of predictions for each sequence
     :param step_nb: Number of sequences of fixed sequence size
     :param threshold: The threshold used to deterine if a prediction is True of False
@@ -159,7 +159,7 @@ def test():
     We can choose the weights of the training on real data or on fake data generated
     """
     real_clusters, ei = create_clusters()
-    real_data, labels, step_nb = create_emittor_comparison_with_cluster(
+    real_data, labels, step_nb = create_emitter_comparison_with_cluster(
         real_clusters, ei)
     logger.info(labels)
 
@@ -214,18 +214,18 @@ class ModelHandler:
 
         self.threshold = 100
 
-    def are_in_same_cluster(self, id_emittor, id_cluster, ei, clusters):
-        """ Determines if an emittor is in a cluster by comparing the emittor emissions to the cluster emissions
+    def are_in_same_cluster(self, id_emitter, id_cluster, ei, clusters):
+        """ Determines if an emitter is in a cluster by comparing the emitter emissions to the cluster emissions
 
-        :param id_emittor: Id of the emittor to compare
+        :param id_emitter: Id of the emitter to compare
         :param id_cluster: Id of the cluster to compare
-        :param ei: List of the sampled emissions of all the emittors
-        :param clusters: List of the clusters containing emittors ids
-        :return: Boolean True if emittor is in cluster, False if not
+        :param ei: List of the sampled emissions of all the emitters
+        :param clusters: List of the clusters containing emitters ids
+        :return: Boolean True if emitter is in cluster, False if not
         """
 
         list_of_data, step_nb = create_comparison_one_to_one(
-            id_emittor, ei, clusters[id_cluster], 50)
+            id_emitter, ei, clusters[id_cluster], 50)
 
         to_predict = np.array(list_of_data)
 
@@ -239,6 +239,6 @@ if __name__ == '__main__':
     real_clusters, ei = create_clusters()  # will be given by backend in production
     for k in ei:
         for cluster in real_clusters:
-            logger.info("emittor %s in %s is %s" % (k, cluster,
+            logger.info("emitter %s in %s is %s" % (k, cluster,
                                                     are_in_same_cluster(k, cluster, ei, real_clusters)))
             logger.info('')
