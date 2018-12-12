@@ -69,6 +69,12 @@ def create_fake_sequences(n_clusters, full_sequence_size, silence_time):
     return(list_of_data, list_of_labels)
 
 def fake_hierarchy_emission(sequence_size, number_to_create):
+    """
+        Creates simple sequences to train the hierarchy model
+        :param sequence_size: Size of the sequences to be created
+        :param number_to_create: Number of train samples for the hierarchy
+        :return: List of emissions and importance labels
+    """
     created_emissions=[]
     created_labels=[]
     for j in range(number_to_create):
