@@ -58,7 +58,7 @@ def create_fake_sequences(n_clusters, full_sequence_size, silence_time):
     for k in range(n_clusters):
         network,talk_distribution=fake_terrorist_network(10,full_sequence_size, silence_time)
         for emittor in network[1:]:
-            emittor_emission=[[int(i==emittor)] for i in talk_distribution]
+            emittor_emission=[int(i==emittor) for i in talk_distribution]
             list_of_data.append(emittor_emission)
             if emittor==1:
                 list_of_labels.append(0)
@@ -67,5 +67,23 @@ def create_fake_sequences(n_clusters, full_sequence_size, silence_time):
             else:
                 list_of_labels.append(2)
     return(list_of_data, list_of_labels)
+
+def fake_terrorist_emission(sequence_size, number_to_create):
+    created_emissions=[]
+    created_labels=[]
+    for j in range(number_to_create):
+        i=random.randint(0,sequence_size-1)
+        list_of_emitting=random.sample(range(sequence_size), i)
+        list_of_emissions=[0 for k in range(sequence_size)]
+        for k in range(sequence_size):
+            if k in list_of_emitting:
+                list_of_emissions[k]=1
+        importance=(i-i%10)/10
+        created_emissions.append(list_of_emissions)
+        created_labels.append(importance)
+    return(created_emissions,created_labels)
+        
+
+
 
 

@@ -100,6 +100,8 @@ def get_last_track_by_id(track_streams, id):
         for track in tracks:
             if get_track_id(track) == id:
                 raw_tracks = get_track_info_with_alternates(track)
+                print(len(raw_tracks[6]))
+                print(raw_tracks[6][-1])
     return raw_tracks
 
 
@@ -129,7 +131,7 @@ def get_steps_track(track_streams, id, sequence_size, start_date_ms):
     :param track_streams: track stream to process
     :param id: id of the emitter
     :param sequence_size: number of time steps
-    :param start_date_ms: start date of recordingg
+    :param start_date_ms: start date of recording
     :return: a list of 0 or 1, 0 is the emitter was not emitting, 1 if it was
     """
     last_track_id = get_last_track_by_id(track_streams, id)
@@ -137,7 +139,7 @@ def get_steps_track(track_streams, id, sequence_size, start_date_ms):
     for i in range(int(sequence_size)):
         found = 0
         for alternate in last_track_id[6]:
-            if alternate[0] <= start_date_ms + i*time_step_ms <= alternate[1]:
+            if alternate[0] <= (start_date_ms + i*time_step_ms) and (start_date_ms + i*time_step_ms)  <= alternate[1]:
                 found = 1
                 break
         data.append(found)
@@ -297,6 +299,7 @@ def process_data_clusters(track_streams):
             "network": preds[0][i],
             "steps": get_steps_track(track_streams, preds[1][i], sequence_size, start_date_ms)
         }
+        #print(get_steps_track(track_streams, preds[1][i], sequence_size, start_date_ms)[:500])
         progress += 1
         pbar.update(progress)
         pbar.finish()

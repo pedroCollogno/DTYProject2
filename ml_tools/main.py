@@ -14,6 +14,7 @@ from src import main, threads
 from utils import station_utils
 from utils import loading as load
 from utils.log import logger
+from utils.plotting import display_alternates
 
 
 def mock_sender_function(json_obj):
@@ -30,8 +31,4 @@ if __name__ == '__main__':
     file_paths = filedialog.askopenfilenames()
     root.update()
 
-    track_streams = []
-    for path in file_paths:
-        if path is not None:
-            track_stream = load.get_track_streams_from_prp(path)
-            track_streams.append(track_stream)
+    display_alternates(*file_paths)
