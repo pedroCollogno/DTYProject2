@@ -510,7 +510,7 @@ class HttpRequestHandler extends Component {
                 {/* "Start simulation" button, active if the posting of the files went ok */}
                 <section className="level">
                     <div className="buttons has-addons">
-                        <span className="button tooltip is-tooltip-right" id="start-sim-button" data-tooltip="Runs the scenario without any processing"
+                        <span className="button tooltip is-tooltip-right is-tooltip-multiline" id="start-sim-button" data-tooltip="Runs the scenario without any processing"
                             disabled={!this.state.loaded} onClick={this.onStart} style={this.isRunningColor("run")}>
                             <span className="file-icon">
                                 <FontAwesomeIcon icon='magic' />
@@ -519,7 +519,7 @@ class HttpRequestHandler extends Component {
                         </span>
                     </div>
                     <div className="buttons has-addons">
-                        <span className="button tooltip is-tooltip-bottom" id="start-sim-ml-button" data-tooltip="Runs the scenario and uses the DBSCAN clustering method"
+                        <span className="button tooltip is-tooltip-bottom is-tooltip-multiline" id="start-sim-ml-button" data-tooltip="Runs the scenario and uses the DBSCAN clustering method"
                             disabled={!this.state.loaded} onClick={this.onStartML} style={this.isRunningColor("ML")}>
                             <span className="file-icon">
                                 <FontAwesomeIcon icon='magic' />
