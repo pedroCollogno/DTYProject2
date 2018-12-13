@@ -36,6 +36,8 @@ You just need to double-click the script file to do that.
 Now that you've installed everything, you're ready to go !
 To start the demonstrator, you have to run the `start` script corresponding to your OS (located in unix_scripts for unix systems, or win_scripts for Windows).
 
+To know more about the possibilities with the demonstrator, and how to use it, check the [USER MANUAL](./USER_MANUAL.md) out !
+
 ## Additional instructions
 
 ### Add Redis to PATH
