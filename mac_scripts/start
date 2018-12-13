@@ -1,6 +1,0 @@
-#!/bin/bash
-
-cd /home/arthur/Documents/thales-project/
-
-open ./start_back 
-open ./start_front

@@ -1,6 +1,0 @@
-#!/bin/bash
-
-cd /home/arthur/Documents/thales-project/
-
-cd front
-gulp

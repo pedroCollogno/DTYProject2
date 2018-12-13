@@ -22,30 +22,62 @@ This projects client side runs using `NodeJS` and `NPM`. If you haven't got thos
 ### Installing the project
 
 The first thing you will have to do, even before installing the project, is decide where you will want to save the data you collect and the models you compile.
-It can be anywhere you choose, you just have to specify the path to these folders in the `config.json` file, at the root of the project.
+It can be anywhere you choose, you just have to specify the path to these folders in the `config.json` file, at the very root of the project. If you have any trouble with that, refer to the [dedicated section](###writing-your-config-file) below.
 
-Then, you have to install our custom `ml_tools` package. To do that, you have two steps to follow:
+Once you've done that, execute the `ìnstall` script corresponding to your OS (located in unix_scripts for unix systems, or win_scripts for Windows).
+You just need to double-click the script file to do that. 
 
-- Update the `config.json` file in the `ml_tools/src` folder
-- Install the package
+> *Note* : If this is the first time you run the `install` script, make sure you have a working internet connection, as the script will have to download some packages. This might take a few minutes.
 
-For the second step, just go to the `ml_tools` folder in your terminal and run the following command :
+> *Unix* : On unix systems, you will have to edit all scripts to add the path to the project folder on the third line. Just replace `cd /path/to/project` by the path of your project. For example it could be `cd /Users/username/Documents/Thales/thales-project`.
+
+## Start the demonstrator
+
+Now that you've installed everything, you're ready to go !
+To start the demonstrator, you have to run the `start` script corresponding to your OS (located in unix_scripts for unix systems, or win_scripts for Windows).
+
+## Additional instructions
+### Add Redis to PATH
+
+To access it, press `WIN+R` and execute `sysdm.cpl`. Then, in Advanced System Properties check environment variables. Finally, in PATH variable, add a new path, being the path to redis. For example, add `C:\Program Files\Redis` to path if `redis-server.exe` is in this Redis folder
+
+### Writing your config file
+
+Making this config file is easy. You just have to copy the `config.example.json`, rename it to `config.json`, and then fill out the paths from the `PATH` section with your preferred paths.
+
+> *Windows* : On Windows, path will look like this : `"C:\\Program Files\\Thales\\Demo\\data"`
+
+> *Unix* : On unix systems (like mac or linux), path will look like this : `"/Users/username/Thales/Demo/data"`
+
+Here's an example of a filled out config file on OSX :
 
 ```
-python setup.py install
-# python3 setup.py install / if you're using python 3
+{
+    "PATH": {
+        "data": "/Users/username/Documents/Thales/thales-project/data",
+        "logs": "/Users/username/Documents/Thales/thales-project/logs",
+        "pkl": "/Users/username/Documents/Thales/thales-project/data/pkl",
+        "pkl2": "/Users/username/Documents/Thales/thales-project/data/pkl2",
+        "weights": "/Users/username/Documents/Thales/thales-project/data/weights"
+    },
+    "VARS": {
+        "cycles_per_batch": 5,
+        "cycles_per_batch_mix_method": 100,
+        "time_step_ms": 500
+    },
+    "URLS": {
+        "BASE": {
+            "back": "http://localhost:",
+            "front": "http://localhost:"
+        },
+        "PORT": {
+            "back": 8000,
+            "front": 4200
+        }
+    }
+}
 ```
 
-## Start the server up
+If you later want to modify your config file, to change the `cycles_per_batch` parameter for example, don't forget to run the `install` script once again.
 
-To start the server, simply run this in your terminal :
-
-```
-python src/manage.py runserver
-```
-
-You're ready to go !
-
-## Add Redis to PATH
-
-To access it, press `WIN+R` and execute `sysdm.cpl`. Then, in Advanced System Properties check environment variables. Finally, in PATH variable, add a new path, being the path to geckodriver. For example, add `C:\Program Files\Redis` to path if `redis-server.exe` is in this Redis folder
+> *Note* : This will copy the config file to the `back_django`, `front` and `ml_tools/src` folders, to make sure it is installed properly in every package. You do not need an internet connection to perform this.

@@ -1,0 +1,6 @@
+#!/bin/bash
+
+cd /Users/piaverous/Documents/DTY/Projet_Thales/thales-project
+
+cd front
+node ./node_modules/gulp/bin/gulp.js

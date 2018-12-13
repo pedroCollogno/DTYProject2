@@ -1,0 +1,6 @@
+#!/bin/bash
+
+cd /Users/piaverous/Documents/DTY/Projet_Thales/thales-project
+
+open ./unix_scripts/start_back 
+open ./unix_scripts/start_front
