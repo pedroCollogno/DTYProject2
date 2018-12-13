@@ -10,6 +10,7 @@ setup(
         'ml_tools',
         'ml_tools.clustering',
         'ml_tools.utils',
+        'ml_tools.deep_learning',
         'ml_tools.utils.gen',
         'ml_tools.utils.config',
     ],
@@ -17,6 +18,7 @@ setup(
         'ml_tools': 'src',
         'ml_tools.clustering': 'src/clustering',
         'ml_tools.utils': 'src/utils',
+        'ml_tools.deep_learning': 'src/deep_learning',
         'ml_tools.utils.gen': 'src/utils/gen',
         'ml_tools.utils.config': 'src/utils/config',
     },
@@ -26,6 +28,8 @@ setup(
         'scikit-learn',
         'progressbar',
         'PyGeodesy',
-        'protobuf'
+        'protobuf',
+        'psutil'
     ],  # external packages as dependencies
+    zip_safe=False,
 )

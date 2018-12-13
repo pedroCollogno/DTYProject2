@@ -1,10 +1,9 @@
 .map-container {
-  margin: 1em;
   padding: 0.2em;
   border: 1px solid #eeeeee;
   border-radius: 10px;
   height: 500px;
-  width: 100%; }
+  width: 60%; }
 
 .mapMarker {
   width: 0.7rem;
@@ -35,3 +34,93 @@
 
 .mapboxgl-ctrl-bottom-left {
   display: none; }
+
+#legend {
+  width: fit-content;
+  height: fit-content;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: flex-start;
+  margin: 0.5em;
+  padding: 0.5em;
+  font-size: 1.2em;
+  cursor: grab;
+  background-color: rgba(238, 238, 238, 0.7); }
+  #legend:hover {
+    background-color: rgba(238, 238, 238, 0.7); }
+  #legend .legend {
+    display: flex; }
+    #legend .legend .legend-column.is-next {
+      margin-left: 0.75em; }
+    #legend .legend .legend-column .legend-item {
+      display: flex;
+      background-color: whitesmoke;
+      border-radius: 4px;
+      padding-right: 0.75em;
+      padding-left: 0.5em;
+      height: 24.38px; }
+      #legend .legend .legend-column .legend-item.is-first {
+        margin-bottom: 0.75em; }
+      #legend .legend .legend-column .legend-item img, #legend .legend .legend-column .legend-item .legend-icon {
+        width: 22px;
+        height: 22px;
+        margin-right: 5px; }
+      #legend .legend .legend-column .legend-item p {
+        display: flex;
+        justify-content: center;
+        height: 24.38px; }
+
+.widgets {
+  text-align: right;
+  position: absolute;
+  top: 80px;
+  right: 10px;
+  box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  bottom: auto;
+  left: auto;
+  background-color: #eeeeee;
+  height: 28px;
+  width: 28px; }
+  .widgets a#center-button {
+    color: black; }
+  .widgets span.icon {
+    height: 28px;
+    width: 28px; }
+
+.widgets-tag {
+  text-align: right;
+  position: absolute;
+  top: 115px;
+  right: 10px;
+  box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  bottom: auto;
+  left: auto;
+  background-color: #eeeeee;
+  height: 28px;
+  width: 28px; }
+  .widgets-tag a#network-names-button {
+    color: black; }
+  .widgets-tag span.icon {
+    height: 28px;
+    width: 28px; }
+
+.widgets-colors {
+  text-align: right;
+  position: absolute;
+  top: 150px;
+  right: 10px;
+  box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  bottom: auto;
+  left: auto;
+  background-color: #eeeeee;
+  height: 28px;
+  width: 28px; }
+  .widgets-colors a#colors-names-button {
+    color: black; }
+  .widgets-colors span.icon {
+    height: 28px;
+    width: 28px; }

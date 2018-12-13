@@ -1,12 +1,11 @@
 @import '../../sass/mixins/variables';
 
 .map-container {
-    margin: 1em;
     padding: 0.2em;
     border: 1px solid $grey;
     border-radius: 10px;
-    height: 500px;
-    width: 100%;
+    height: $map-height;
+    width: $map-width;
 }
 
 .mapMarker {
@@ -41,4 +40,129 @@
 
 .mapboxgl-ctrl-bottom-left{
     display:none;
+}
+
+#legend{
+    width: fit-content;
+    height: fit-content;
+
+    display: flex; 
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: flex-start;
+
+    margin: 0.5em;
+    padding: 0.5em;
+    font-size: 1.2em;
+    cursor: grab;
+    background-color: rgba( $grey, .7 );
+    &:hover {
+        background-color: rgba( $grey, .7 );
+    }
+    .legend {
+        display: flex;
+        
+        .legend-column {
+            &.is-next {
+                margin-left: 0.75em;
+            }
+            .legend-item {
+                display: flex;
+                background-color: whitesmoke;
+    
+                border-radius: 4px;
+                &.is-first {
+                    margin-bottom: 0.75em;
+                }
+                padding-right: 0.75em;
+                padding-left: 0.5em;
+                height: 24.38px;
+    
+                img, .legend-icon {
+                    width: 22px;
+                    height: 22px;
+                    margin-right: 5px;
+                }
+                p {
+                    display: flex;
+                    justify-content: center;
+                    height: 24.38px;
+                }
+            }
+        }
+    }
+    
+}
+
+.widgets {
+    text-align: right;
+    position: absolute; 
+    top: 80px; 
+    right: 10px; 
+    box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px; 
+    border: 1px solid rgba(0, 0, 0, 0.1); 
+    bottom: auto; 
+    left: auto;
+    background-color: $grey;
+
+    height: 28px;
+    width: 28px;
+    
+    a#center-button {
+        color: black;
+    }
+
+    span.icon {
+        height: 28px;
+        width: 28px;
+    }
+}
+
+.widgets-tag {
+    text-align: right;
+    position: absolute; 
+    top: 115px; 
+    right: 10px; 
+    box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px; 
+    border: 1px solid rgba(0, 0, 0, 0.1); 
+    bottom: auto; 
+    left: auto;
+    background-color: $grey;
+
+    height: 28px;
+    width: 28px;
+
+    a#network-names-button {
+        color: black;     
+    }
+
+    span.icon {
+        height: 28px;
+        width: 28px;
+    }
+}
+
+
+.widgets-colors {
+    text-align: right;
+    position: absolute; 
+    top: 150px; 
+    right: 10px; 
+    box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px; 
+    border: 1px solid rgba(0, 0, 0, 0.1); 
+    bottom: auto; 
+    left: auto;
+    background-color: $grey;
+
+    height: 28px;
+    width: 28px;
+
+    a#colors-names-button {
+        color: black;     
+    }
+
+    span.icon {
+        height: 28px;
+        width: 28px;
+    }
 }

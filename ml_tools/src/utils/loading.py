@@ -2,7 +2,8 @@ import os
 from .gen import TrackstreamEx_pb2 as ts
 
 from progressbar import ProgressBar
-from .log import logger
+import logging
+logger = logging.getLogger('backend')
 
 
 def read_prp(filepath):
@@ -88,17 +89,6 @@ def get_track_streams_from_prp(filepath):
             TSEX = ts.TrackStreamEx()
             TSEX.ParseFromString(frame['data'])
             track_streams.append(TSEX.data)
-
-    if real_data:
-        for i in range(len(track_streams) - 1):
-            for old_track in track_streams[i].tracks:
-                for new_track in track_streams[i+1].tracks:
-                    if is_same_station_track(old_track, new_track):
-                        new_track.new_track = False
-                        new_track.begin_date.date_ms = old_track.begin_date.date_ms
-
-    for track in track_streams[15].tracks:
-        logger.info("New track : %s" % str(track.new_track))
 
     return(track_streams)
 

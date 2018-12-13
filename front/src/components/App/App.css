@@ -23,26 +23,16 @@
   to {
     transform: rotate(360deg); } }
 
-table {
-  width: 100%;
-  margin-top: 1em;
-  margin-bottom: 1em; }
-
-.table {
-  background-color: #eeeeee;
-  border-radius: 5px 5px 0px 0px; }
-
-#tabletile {
-  padding-left: 2%;
-  padding-right: 2%; }
-
 body {
-  padding-bottom: 2em; }
+  padding-bottom: 5em; }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: baseline; }
+
+.switch-container {
+  display: flex; }
 
 .switch-container, .switch {
   user-select: none;
@@ -50,3 +40,36 @@ body {
   -khtml-user-select: none;
   -webkit-user-select: none;
   -o-user-select: none; }
+
+.map-table-container {
+  display: flex;
+  flex-direction: row;
+  width: 100%; }
+  .map-table-container #tabletile {
+    font-size: 0.8em;
+    height: 500px;
+    padding-left: 1em;
+    padding-right: 1em;
+    overflow-y: scroll;
+    width: 40%; }
+    .map-table-container #tabletile .table {
+      width: 100%;
+      background-color: #eeeeee;
+      border-radius: 5px 5px 0px 0px; }
+      .map-table-container #tabletile .table td, .map-table-container #tabletile .table th {
+        text-align: center; }
+
+.network-display {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly; }
+  .network-display .check {
+    color: rgba(0, 204, 170, 0.747); }
+  .network-display .exclamation-triangle {
+    color: #e4bb07; }
+
+.talking {
+  color: rgba(0, 204, 170, 0.747); }
+
+.not-talking {
+  color: rgba(255, 0, 0, 0.678); }

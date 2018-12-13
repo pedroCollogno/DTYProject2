@@ -1,10 +1,10 @@
 #!/bin/bash
 
-cd /Users/piaverous/Documents/DTY/Projet_Thales/thales-project/
+cd /home/arthur/Documents/thales-project/
 
 cd back_django
-source py36_back_env/bin/activate
 cd ../ml_tools
+source activate py36
 python setup.py install > /dev/null
 cd ../back_django
 python src/manage.py runserver

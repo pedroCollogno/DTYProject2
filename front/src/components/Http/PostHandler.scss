@@ -5,21 +5,122 @@ p {
 }
 button {
     margin-top: 5px;
-    width: 100%;
+    width: 100%; 
+}
+.tile {
+    flex-basis: auto;
+    &.is-parent {
+       padding: 0;
+    }
+    &.is-child{
+        padding: 1em;
+    }
+    &.is-ancestor {
+        margin: 0;
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+    &#upload-tile {
+        width: $map-width;
+        flex-grow: 0;
+    }
 }
 
 article.tile {
-    width: 100%;
-    height: 100%;
     background-color: rgba(255, 255, 128, 0);
     color: $grey;
 }
 
-form {
-    padding-left: 2%;
-    padding-right: 2%;
+.right-buttons {
+    height: 100%;
+    button {
+        height: 100%;
+    }
 }
 
-#start-sim-button {
-    width: 96%;
+#upload-button {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;   
+}
+
+.control-section {
+    display: flex;
+    align-items: center;
+    align-content: center;
+    margin-left: 1em;
+    margin-right: 1em;
+    a, progress, span{
+        margin: 2px;
+    }
+    background-color: darken($grey, 50);
+    border-radius: 5px;
+    color: $grey;
+
+    .progress:not(:last-child) {
+        margin-bottom: 0px;
+    }
+
+    .time-after, .time-before {
+        background-color: darken($grey, 5)
+    }
+}
+
+.level {
+    padding: 1em;
+    .buttons:not(:last-child) {
+        margin-bottom: 0px;
+    }
+    .buttons:last-child {
+        margin-bottom: 0px;
+    }
+}
+
+#spinner {
+    position: absolute;
+    right: ((100% - $map-width) /2);
+    margin-right: -128px;
+    margin-top: (-128px - ($map-height/2));
+    opacity: 0.7;
+    z-index: 99;
+ }
+
+.lds-ripple {
+    display: inline-block;
+    position: relative;
+    width: 256px;
+    height: 256px;
+    padding-top: -5em;
+    border-radius: 50%;
+  }
+  .lds-ripple div {
+    position: absolute;
+    border: 4px solid #fff;
+    opacity: 1;
+    border-radius: 50%;
+    animation: lds-ripple 1s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+  }
+  .lds-ripple div:nth-child(2) {
+    animation-delay: -0.5s;
+  }
+  @keyframes lds-ripple {
+    0% {
+      top: 128px;
+      left: 128px;
+      width: 0;
+      height: 0;
+      opacity: 1;
+    }
+    100% {
+      top: -1px;
+      left: -1px;
+      width: 256px;
+      height: 256px;
+      opacity: 0;
+    }
+  }
+
+.tooltip:hover::before, .tooltip.is-tooltip-active::before {
+    background: rgba(40,40,40,0.99);
+    font-size: 100%;
 }
