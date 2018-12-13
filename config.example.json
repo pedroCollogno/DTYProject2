@@ -1,0 +1,24 @@
+{
+    "PATH": {
+        "data": "/path/to/data",
+        "logs": "/path/to/logs",
+        "pkl": "/path/to/data/pkl",
+        "pkl2": "/path/to/data/pkl2",
+        "weights": "/path/to/data/weights"
+    },
+    "VARS": {
+        "cycles_per_batch": 5,
+        "cycles_per_batch_mix_method": 100,
+        "time_step_ms": 500
+    },
+    "URLS": {
+        "BASE": {
+            "back": "http://localhost:",
+            "front": "http://localhost:"
+        },
+        "PORT": {
+            "back": 8000,
+            "front": 4200
+        }
+    }
+}
