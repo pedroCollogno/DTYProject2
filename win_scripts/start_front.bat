@@ -1,0 +1,2 @@
+cd ../front
+npm start

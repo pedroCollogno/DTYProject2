@@ -10,3 +10,8 @@ src/logs
 src/db.sqlite3
 tracks_json/
 scenarios
+*.rdb
+
+# Install files
+*.whl
+*.zip
