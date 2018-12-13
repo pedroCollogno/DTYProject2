@@ -1,8 +1,8 @@
-# Thales AI Demonstrator User Manual!
+# Thales AI Demonstrator User Manual
 
 ## Getting Started
 
-First of all, start up the app using the `start` script. Then, to get to the app, just open a browser on http://localhost:4200/
+First of all, start up the app using the `start` script. Then, to get to the app, just open a browser on http://localhost:4200/.
 
 You should get a view like this :
 

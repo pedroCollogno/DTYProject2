@@ -5,6 +5,7 @@ import SocketHandler from "../Socket/SocketHandler";
 import PostHandler from "../Http/PostHandler";
 import colormap from "colormap";
 import Dashboard from '../Modal/Dashboard';
+import thales_logo from './thales_logo.png'
 
 // Set fontAwesome icons up -> Define all icons that will be used in the app.
 import { library } from '@fortawesome/fontawesome-svg-core'
@@ -12,7 +13,6 @@ import { faUpload, faDownload, faUndo, faPalette, faPlay, faPause, faStop, faLoc
 library.add(faUpload, faDownload, faUndo, faPalette, faPlay, faPause, faStop, faLocationArrow, faCheck, faExclamationTriangle, faCircle, faCircleNotch, faTags, faInfo, faMagic)
 // Setup complete, import them
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-
 
 
 const colorMapNames = ["jet", "hsv", "rainbow", "rainbow-soft"];
@@ -416,7 +416,7 @@ class App extends Component {
             <div className="container header">
               <div className="titles">
                 <h1 className="title">
-                  Thales Project
+                  <img src={thales_logo} height="45" width="200" alt="Thales Logo"></img>
                 </h1>
                 <h2 className="subtitle">
                   AI demonstrator

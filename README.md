@@ -14,7 +14,7 @@ This project also uses WebSockets managed by the Django Framework. In order for 
 
 |                           Windows                           |                Mac (Or other UNIX OS)                |
 | :---------------------------------------------------------: | :--------------------------------------------------: |
-|  Using `Redis` on Windows is quite tricky, so you have to use a specific release for it to work with Django Channels. If you don't have it, download the archive from GitHub, it is available [HERE](https://github.com/MicrosoftArchive/redis/releases/tag/win-3.0.504). Then, extract the `Redis-x64-3.0.504.zip` archive in another folder located wherever you want. (In `C:\Program Files\Redis` for example). Once that is done, you can either add the folder path to the PATH environment variable ([instructions below](#add-redis-to-path)). If you do not want to add it to your path, you can modify the [start file](./win_scripts/start.bat) in any text editor, and the path to `Redis` folder to the last line. (Change from `redis-server` to `C:\"Program Files"\Redis\redis-server` for example) | Simply download Redis from here (https://redis.io/). Detailed installation instructions can be found at https://redis.io/download/#installation. |
+|  Using `Redis` on Windows is quite tricky, so you have to use a specific release for it to work with Django Channels. If you don't have it, download the archive from GitHub, it is available [HERE](https://github.com/MicrosoftArchive/redis/releases/tag/win-3.0.504). Then, extract the `Redis-x64-3.0.504.zip` archive in another folder located wherever you want. (In `C:\Program Files\Redis` for example). Once that is done, you can either add the folder path to the PATH environment variable ([instructions below](#add-redis-to-path)). If you do not want to add it to your path, you can modify the [start file](./win_scripts/start.bat) in any text editor, and add the path to `Redis` folder to the last line. (Change from `redis-server` to `C:\"Program Files"\Redis\redis-server` for example) | Simply download Redis from here (https://redis.io/). Detailed installation instructions can be found at https://redis.io/download/#installation. |
 
 This projects client side runs using `NodeJS` and `NPM`. If you haven't got those on your machine, install both of them ! 
 - Instructions to install both : https://www.npmjs.com/get-npm
@@ -35,6 +35,7 @@ You just need to double-click the script file to do that.
 
 Now that you've installed everything, you're ready to go !
 To start the demonstrator, you have to run the `start` script corresponding to your OS (located in unix_scripts for unix systems, or win_scripts for Windows).
+Then, to get to the app, just open a browser on http://localhost:4200/.
 
 To know more about the possibilities with the demonstrator, and how to use it, check the [USER MANUAL](./USER_MANUAL.md) out !
 
