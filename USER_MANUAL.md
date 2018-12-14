@@ -78,24 +78,6 @@ There you go, you're ready to use the app. The app is divided into 5 sections.
 
 22. This diagram shows the speaking distribution inside a network. 
 
-## Sections of the app
-
-### 1. The Map
-
-In this upper lefts section, the emitters which are discovered and located by the receiving stations will be displayed.
- 
-
-
-### 2. The list of tracked emitters
-
-
-### 3. The Upload section
-
-
-### 4. The Simulation control section
-
-
-### 5. The Live Dashboard
 
 
 
