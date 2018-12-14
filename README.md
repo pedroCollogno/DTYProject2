@@ -95,4 +95,4 @@ If you later want to modify your config file, to change the `cycles_per_batch` p
 
 ### Changing the map background
 
-Download tiles using MOBAC in OSM Tile format, then place them into the `front/src/mapbox-gl/cholet-tiles` folder, replacing the existing ones.
+Download tiles using MOBAC in OSM Tile format, then place them into the `front/src/mapbox-gl/tiles` folder, replacing the existing ones. If you wish to add new tiles, but keep the old ones, create a new folder at `front/src/mapbox-gl/` and change the path in `front/src/components/Map/styles.js`. At the end of the file, in `exports.global`, change the `sources.countries.tiles` url to your new path. (replace `tiles` with your folder name).

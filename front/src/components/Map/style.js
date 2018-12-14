@@ -247,7 +247,7 @@ exports.global = {
     "sources": {
         "countries": {
             "type": "raster",
-            "tiles": [location.origin + location.pathname + "mapbox-gl/cholet-tiles/{z}/{x}/{y}.png"],
+            "tiles": [location.origin + location.pathname + "mapbox-gl/tiles/{z}/{x}/{y}.png"],
             "maxzoom": 15
         }
     },
