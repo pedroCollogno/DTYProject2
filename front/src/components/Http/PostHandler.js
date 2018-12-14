@@ -193,10 +193,8 @@ class HttpRequestHandler extends Component {
                 let i = 0;
                 console.log("FILES", files)
                 for (let file of files) {
-                    if (file.name != ".DS_Store") {
-                        formData.append("File" + i, file, file.name); // standardized name for formData entry : "File{i}" (Django)
-                        i += 1;
-                    }
+                    formData.append("File" + i, file, file.name); // standardized name for formData entry : "File{i}" (Django)
+                    i += 1;
                 }
                 const config = {
                     headers: {
@@ -441,7 +439,7 @@ class HttpRequestHandler extends Component {
                                 <article className="tile is-child">
                                     <div className="file has-name is-boxed is-centered is-fullwidth" >
                                         <label className="file-label" >
-                                            <input type="file" className="file-input" multiple webkitdirectory="" mozdirectory="true" directory=""
+                                            <input type="file" className="file-input" multiple
                                                 onChange={this.onChange} value={this.state.inputFiles} />
                                             <span className="button is-grey" id="upload-button">
                                                 <span className="icon">
