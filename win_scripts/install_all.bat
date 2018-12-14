@@ -1,10 +1,10 @@
 cd ..
-xcopy config.json back_django/config.json
-xcopy config.json front/config.json
-xcopy config.json ml_tools/src/config.json
-
-cd ../back_django
+xcopy config.json back_django\config.json
+xcopy config.json front\config.json
+xcopy config.json ml_tools\src\config.json
 pip install Twisted-18.9.0-cp35-cp35m-win_amd64.whl
+
+cd back_django
 pip install -r requirements.txt
 
 cd ../ml_tools

@@ -24,6 +24,8 @@ This projects client side runs using `NodeJS` and `NPM`. If you haven't got thos
 The first thing you will have to do, even before installing the project, is decide where you will want to save the data you collect and the models you compile.
 It can be anywhere you choose, you just have to specify the path to these folders in the `config.json` file, at the very root of the project. If you have any trouble with that, refer to the [dedicated section](#writing-your-config-file) below.
 
+> *Windows* : You will need a wheel for the Twisted python package. If it does not come with the project, you can find it at https://www.lfd.uci.edu/~gohlke/pythonlibs/#twisted. Download the `Twisted-18.9.0-cp35-cp35m-win_amd64.whl` file (for 64 bits, for 32 bits it's the  `Twisted-18.9.0-cp35-cp35m-win_32.whl` file) and add it at the very root of the project.
+
 Once you've done that, execute the `ìnstall` script corresponding to your OS (located in unix_scripts for unix systems, or win_scripts for Windows).
 You just need to double-click the script file to do that. 
 
