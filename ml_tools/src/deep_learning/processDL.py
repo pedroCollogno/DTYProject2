@@ -36,30 +36,6 @@ logger = logging.getLogger('backend')
 time_step_ms = config['VARS']['time_step_ms']
 PKL_DIR = config['PATH']['pkl']
 
-
-def checkPkl(file_name):
-    file_path = os.path.join(PKL_DIR, file_name)
-    df = pd.read_pickle(file_path)
-    logger.info(df)
-    df = df.loc[df['Y'] == 1]
-    X = df['X'].values
-    Y = df['Y'].values
-    for k in range(len(X)):
-        comparaisons = X[k]
-        emitter1 = []
-        emitter2 = []
-        for i in range(len(comparaisons)):
-            emitter1.append(comparaisons[i][0])
-            emitter2.append(comparaisons[i][1])
-
-        plt.figure(1)
-        plt.plot(emitter1, color='green')
-
-        plt.plot(emitter2, color='blue')
-        logger.info(Y[k])
-        plt.show()
-
-
 def get_track_info_with_alternates(track):
     """ Takes essential information out of a given track
 
@@ -108,7 +84,7 @@ def get_last_track_by_id(track_streams, id):
 
 
 def get_start_and_end(track_streams):
-    """ Create a list of emission/nonemission at each time steps for an emitter
+    """ Get the start date, end date and sequence size given a time step
 
     :param track_streams: track stream to process
     :return start_date: start date of recording
@@ -120,8 +96,8 @@ def get_start_and_end(track_streams):
         for track in track_stream:
             raw_tracks.append(get_track_info_with_alternates(track))
     # raw_tracks : all the tracks with alternates info from a prp
-    start_date = raw_tracks[0][6][0][0]
-    end_date = raw_tracks[-1][6][0][1]
+    start_date = raw_tracks[0][6][0][0] # 0 : first track ever, 6 : list of alternates, 0: first alternate, 0: begin date
+    end_date = raw_tracks[-1][6][0][1] # -1 : last track ever, 6 : list of alternates, 0 : first alternate (alternates are added at the beginning of the list), 1 : end date
     sequence_size = (end_date-start_date)/time_step_ms
     return(start_date, end_date, sequence_size)
 
@@ -159,8 +135,6 @@ def process_data(track_streams, file_name):
         ts = [track_stream.tracks for track_stream in track_streams]
 
     preds = predict_all_ids(ts)
-    test_ids = set(preds[1])
-    #print("Number of emitters :", len(test_ids), len(preds[1]))
 
     temporal_data = get_start_and_end(ts)
     start_date_ms = temporal_data[0]
@@ -171,8 +145,14 @@ def process_data(track_streams, file_name):
     progress = 0
     pbar = ProgressBar(maxval=(len(preds[0])))
     pbar.start()
-    j = 0
 
+    # Create a dict :
+    # emitter_infos : {
+    #       emitterId: {
+    #           networkId : ...,
+    #           steps : [0,0,1,1,1,...,1,1,0,0,0] e.g.          
+    #   }
+    # }
     for i in range(len(preds[0])):
         emitter_infos[preds[1][i]] = {
             "network": preds[0][i],
@@ -193,6 +173,8 @@ def process_data(track_streams, file_name):
     create_new_folder(file_name, PKL_DIR)
     path_to_save = os.path.join(PKL_DIR, file_name)
 
+    # For each possible couple of emittors, transforms their steps lists (2 lists of size n) in one list of lists (of size (n, 2)) named 'X'
+    # Adds X, Y (the label, 1 if the emittors are in the same network, else 0), and id_Couple : (idEmitter1, idEmitter2)
     for couple in itertools.combinations(preds[1], 2):
         Y_value = int(emitter_infos[couple[0]]["network"]
                       == emitter_infos[couple[1]]["network"])
@@ -205,6 +187,7 @@ def process_data(track_streams, file_name):
         Y.append(Y_value)
         id_Couple.append([couple[0], couple[1]])
         progress += 1
+        # We save the data in seperated files every 2000 possible couples (to avoid too big dataframes) (the separated files will be loaded altogether in model.py)
         if progress % 2000 == 0:
             df = pd.DataFrame(
                 {

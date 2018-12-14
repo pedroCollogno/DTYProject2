@@ -447,7 +447,7 @@ class HttpRequestHandler extends Component {
                                                 <span className="icon">
                                                     <FontAwesomeIcon icon='download' />
                                                 </span>
-                                                <span>Upload your .PRP files…</span>
+                                                <span>Select your .PRP files…</span>
                                             </span>
                                             <span className="file-name has-text-white-ter" >
                                                 {this.state.files.toString()}

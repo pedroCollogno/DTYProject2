@@ -20,10 +20,12 @@ class Dashboard extends Component {
     this.toggleModal = this.toggleModal.bind(this);
     this.getEmitterList = this.getEmitterList.bind(this);
     this.rainbow = this.rainbow.bind(this);
-    this.handleChange = this.handleChange.bind(this);
     this.degToDms = this.degToDms.bind(this);
   }
 
+  /**
+   * This function is used to toggle the modal.
+   */
   toggleModal() {
     this.setState((prev, props) => {
       const newState = !prev.modalState;
@@ -32,6 +34,10 @@ class Dashboard extends Component {
     });
   }
 
+  /** 
+   * This function is used to convert geoloc to ... ° ... ' ... " 
+   * @param {*} deg 
+   */
   degToDms(deg) {
     let d = Math.floor(deg);
     let minfloat = (deg - d) * 60;
@@ -51,8 +57,12 @@ class Dashboard extends Component {
     return ("" + d + "°" + m + "'" + s + '"');
   }
 
+  /**
+   * This function generates vibrant, "evenly spaced" colours (i.e. no clustering). 
+   * @param {Number} numOfSteps 
+   * @param {Number} step 
+   */
   rainbow(numOfSteps, step) {
-    // This function generates vibrant, "evenly spaced" colors (i.e. no clustering).
     var r, g, b;
     var h = step / numOfSteps;
     var i = ~~(h * 6);
@@ -70,13 +80,11 @@ class Dashboard extends Component {
     return (c);
   }
 
-  handleChange(event) {
-    this.setState({
-      networkSelected: event.target.value
-    })
-  }
-
+  /**
+  * This function gets all the data (about networks and emitters) from the App component and renders the core of the dashboard.
+  */
   getEmitterList() {
+    // Some stats displayed in the dahsboard are stored in this object
     var stats = {
       networks: {
         numberEVF: 0,
@@ -95,37 +103,30 @@ class Dashboard extends Component {
         progressList: [],
         memoryUsageList: [],
         CPUUsageList: []
-      },
-      emitter: {
-        id: null,
-        lat: 0,
-        lng: 0,
-        network: 0
       }
     }
+    // We get the data from the props (from app component)
     var networks = this.props.emitters;
     var cycle_mem_info = this.props.cycle_mem_info;
     var global_mem_info = this.props.global_mem_info;
 
-    // The id of each network
+    // Array containing all the ids of the networks : [0, 1, 2 ..., n]
     var networksIndex = Object.keys(networks).map((network, i) => (
-      i
+      i + 1
     ))
 
+    // Number of networks
     stats.networks.numberNetworks = networksIndex.length
 
     var networksLengths = []
     var networksTypes = []
     var networksFrequenciesMHz = []
-    var networksDurations = []
 
     var emittersNetworksIds = []
     var emittersDurations = []
     var emittersIds = []
     var emitterLat = []
     var emitterLng = []
-
-    console.log(global_mem_info)
 
     // The total duration
     stats.cycle.progress = cycle_mem_info['progress']
@@ -170,26 +171,9 @@ class Dashboard extends Component {
       })
     });
 
-    // Set default index of emitter selected
-    var emitterIndex = emittersIds.indexOf(this.state.emitterSelected) || 0
-    stats.emitter.id = emittersIds[emitterIndex]
-    stats.emitter.lat = this.degToDms(emitterLat[emitterIndex])
-    stats.emitter.lng = this.degToDms(emitterLng[emitterIndex])
-    stats.emitter.network = emittersNetworksIds[emitterIndex]
-
-    // Gather the durations and ids of emitters, indexed by network id
-    // dataEmitters = {
-    //   '0' : {
-    //     'durations': [firstEmitterDuration, secondEmitterDuration, ...],
-    //     'ids': [firstEmitterId, secondEmitterId, ...]
-    //   },
-    //   '1' : {
-    //     ...
-    //   }
-    //   ...
-    // }
-
     // ---------------- LINE CHART DATA ----------------
+
+    // Data for the first line chart : CPU and Memory usages
 
     const lineData = {
       labels: stats.global.progressList || [],
@@ -251,6 +235,8 @@ class Dashboard extends Component {
 
     // ---------------- LINE CHART 2 DATA ----------------
 
+    // Data for the second line chart : Processing and Clustering times
+
     const lineData2 = {
       labels: stats.global.progressList || [],
       datasets: [{
@@ -308,6 +294,8 @@ class Dashboard extends Component {
 
 
     // ---------------- BAR CHART DATA ----------------
+
+    // Data for the bar chart
 
     var valuesEVF = []
     var valuesFF = []
@@ -393,22 +381,29 @@ class Dashboard extends Component {
 
     // ---------------- PIE CHART DATA ----------------
 
+    // Data for the pie chart
+
+    // Gather the durations and ids of emitters, indexed by network id
+    // dataEmitters = {
+    //   '0' : {
+    //     'durations': [firstEmitterDuration, secondEmitterDuration, ...],
+    //     'ids': [firstEmitterId, secondEmitterId, ...]
+    //     'totalDuration' : int
+    //   },
+    //   '1' : {
+    //     ...
+    //   }
+    //   ...
+    // }
+
     var dataEmitters = {}
 
     for (var i in emittersNetworksIds) {
       !(emittersNetworksIds[i] in dataEmitters) && (dataEmitters[emittersNetworksIds[i]] = {
-        //'pos': [],
         'ids': [],
         'durations': [],
         'totalDuration': 0
       });
-      // dataEmitters[emittersNetworksIds[i]]['pos'].push(
-      //   {
-      //     x: emitterLng[i],
-      //     y: emitterLat[i],
-      //     r: emittersDurations[i] / (progressDuration*10e3)
-      //   }
-      // );
       dataEmitters[emittersNetworksIds[i]]['ids'].push(emittersIds[i]);
       dataEmitters[emittersNetworksIds[i]]['durations'].push(emittersDurations[i])
       dataEmitters[emittersNetworksIds[i]]['totalDuration'] += emittersDurations[i]
@@ -423,7 +418,6 @@ class Dashboard extends Component {
       pieColors.push(this.rainbow(pieLabels['ids'].length, i));
     }
 
-
     const pieData = {
       labels: pieLabels['ids'],
       datasets: [{
@@ -436,7 +430,7 @@ class Dashboard extends Component {
     const pieOptions = {
       title: {
         display: true,
-        text: 'Speaking time of each emitter in Network ' + this.state.networkSelected + ' - Total spoken time : ' + Math.round((dataEmitters[this.state.networkSelected] || {'totalDuration': 0})['totalDuration']) + ' seconds'
+        text: 'Speaking time of each emitter in Network ' + this.state.networkSelected + ' - Total spoken time : ' + Math.round((dataEmitters[this.state.networkSelected] || { 'totalDuration': 0 })['totalDuration']) + ' seconds'
       },
       plugins: {
         labels: {
@@ -455,8 +449,6 @@ class Dashboard extends Component {
         }
       }
     }
-
-
 
     return (
       <div className="column">
