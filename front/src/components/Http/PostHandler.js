@@ -61,7 +61,7 @@ class HttpRequestHandler extends Component {
     }
 
     /**
-     * POSTs the files to the backend and sends the response data (hopefully, emittors) to the App.js component.
+     * POSTs the files to the backend and sends the response data (hopefully, emitters) to the App.js component.
      * @param {*} files 
      */
     postFiles(files) {
@@ -71,10 +71,10 @@ class HttpRequestHandler extends Component {
                 axios.get("http://localhost:8000/getstations") // GETs the locations of the reception stations...
                     .then((res2) => {
                         this.props.getStations(res2); // ...and update the App.js state !
-                        axios.get("http://localhost:8000/emittorspositions")
+                        axios.get("http://localhost:8000/emitterspositions")
                             .then((res3) => {
                                 if (res3.data) {
-                                    this.props.getEmittorsPositions(res3);
+                                    this.props.getEmittersPositions(res3);
                                     this.setState({ loaded: true }); // Allows the "Start simulation" button to be active 
                                 }
                             });
@@ -135,7 +135,7 @@ class HttpRequestHandler extends Component {
         axios.get("http://localhost:8000/startsimulationMix")
             .then((res) => {
                 console.log("Simulation started !");
-                this.props.changeSimulationMode("Clustering + Emittor-to-Cluster DL");
+                this.props.changeSimulationMode("Clustering + Emitter-to-Cluster DL");
             });
     }
 
@@ -175,7 +175,7 @@ class HttpRequestHandler extends Component {
         axios.get("http://localhost:8000/startsimulationDL")
             .then((res) => {
                 console.log("Simulation started using only Deep Learning for clustering !");
-                this.props.changeSimulationMode("Emittor-to-Emittor DL");
+                this.props.changeSimulationMode("Emitter-to-Emitter DL");
             });
     }
 
@@ -531,24 +531,24 @@ class HttpRequestHandler extends Component {
                         <Info simulationMode='1' title='Clustering'/>
                     </div>
                     <div className="buttons has-addons">
-                        <span className="button tooltip is-tooltip-bottom is-tooltip-multiline" id="start-sim-dl-button" data-tooltip="Runs the scenario and uses a Deep Learning method comparing emittor to emittor temproal data"
+                        <span className="button tooltip is-tooltip-bottom is-tooltip-multiline" id="start-sim-dl-button" data-tooltip="Runs the scenario and uses a Deep Learning method comparing emitter to emitter temproal data"
                             disabled={!this.state.loaded} onClick={this.onStartDL} style={this.isRunningColor("DL")}>
                             <span className="file-icon">
                                 <FontAwesomeIcon icon='magic' />
                             </span>
-                            Emittor-to-Emittor DL
+                            Emitter-to-Emitter DL
                         </span>
-                        <Info simulationMode='2' title='Emittor-to-Emittor DL'/>
+                        <Info simulationMode='2' title='Emitter-to-Emitter DL'/>
                     </div>
                     <div className="buttons has-addons">
-                        <span className="button tooltip is-tooltip-left is-tooltip-multiline" id="start-sim-mix-button" data-tooltip="Runs the scenario and uses the DBSCAN clustering method, suggesting adjustments with a Deep Learning method comparing emittor to previously established networks"
+                        <span className="button tooltip is-tooltip-left is-tooltip-multiline" id="start-sim-mix-button" data-tooltip="Runs the scenario and uses the DBSCAN clustering method, suggesting adjustments with a Deep Learning method comparing emitter to previously established networks"
                             disabled={!this.state.loaded} onClick={this.onStartMix} style={this.isRunningColor("both")}>
                             <span className="file-icon">
                                 <FontAwesomeIcon icon='magic' />
                             </span>
-                            Clustering + Emittor-to-Cluster DL
+                            Clustering + Emitter-to-Cluster DL
                         </span>
-                        <Info simulationMode='3' title='Clustering + Emittor-to-Cluster DL'/>
+                        <Info simulationMode='3' title='Clustering + Emitter-to-Cluster DL'/>
                     </div>
                 </section>
             </div>

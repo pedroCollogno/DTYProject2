@@ -31,9 +31,9 @@ class MapBox extends Component {
 
     constructor(props) {
         super(props);
-        let labels = Object.keys(props.emittors);
+        let labels = Object.keys(props.emitters);
         this.state = {
-            emittors: props.emittors,
+            emitters: props.emitters,
 
             networksLabels: labels, // the networks labels
             colors: colormap({ // a colormap to set a different color for each network
@@ -64,19 +64,19 @@ class MapBox extends Component {
     }
 
     /**
-     * Re-renders the map each time it received a new prop (emittor or network toggling)
+     * Re-renders the map each time it received a new prop (emitter or network toggling)
      * @param {*} nextProps 
      */
     componentWillReceiveProps(nextProps) {
         if (nextProps && nextProps !== this.props) { // little check, doesn't hurt
             let colorMin = colorMapMins[this.state.colorMapType]; // the minimum number of colors
             let highlights = {};
-            let labels = Object.keys(nextProps.emittors);
+            let labels = Object.keys(nextProps.emitters);
             for (let label of labels) { // eventual new network, along with all the other ones, is not highlighted
                 highlights[label] = 0;
             }
             this.setState({ // updates the state with the new props, thus re-rendering the component
-                emittors: nextProps.emittors,
+                emitters: nextProps.emitters,
                 networksLabels: labels,
                 colors: colormap({
                     colormap: colorMapNames[this.state.colorMapType],
@@ -91,15 +91,15 @@ class MapBox extends Component {
     }
 
     /**
-     * Centers the map on a "relevant" point (Paris by default, the first emittor if .PRP files have already been uploaded)
+     * Centers the map on a "relevant" point (Paris by default, the first emitter if .PRP files have already been uploaded)
      */
     center() {
         let keys = this.state.networksLabels;
         if (keys.length === 0) {
-            this.map.state.map.flyTo({ center: [2.33, 48.86] }); // centered on Paris if no emittor to display
+            this.map.state.map.flyTo({ center: [2.33, 48.86] }); // centered on Paris if no emitter to display
         }
-        let firstEmittor = Object.keys(this.props.emittors[keys[0]])[0]; // else, centered on the very first emittor received
-        this.map.state.map.flyTo({ center: [this.props.emittors[keys[0]][firstEmittor].coordinates.lng, this.props.emittors[keys[0]][firstEmittor].coordinates.lat] });
+        let firstEmitter = Object.keys(this.props.emitters[keys[0]])[0]; // else, centered on the very first emitter received
+        this.map.state.map.flyTo({ center: [this.props.emitters[keys[0]][firstEmitter].coordinates.lng, this.props.emitters[keys[0]][firstEmitter].coordinates.lat] });
     }
 
     switchColorMap() {
@@ -127,10 +127,10 @@ class MapBox extends Component {
     clusterCenter(network) {
         let x = 0;
         let y = 0;
-        let stationLabels = Object.keys(this.state.emittors[network]);
+        let stationLabels = Object.keys(this.state.emitters[network]);
         let N = stationLabels.length;
         for (let station_id of stationLabels) {
-            let station = this.state.emittors[network][station_id];
+            let station = this.state.emitters[network][station_id];
             x += station.coordinates.lng;
             y += station.coordinates.lat;
         }
@@ -175,7 +175,7 @@ class MapBox extends Component {
     }
 
     /**
-     * Toggles between the network names and their emittors numbers (triggered when clicking the "labels" button)
+     * Toggles between the network names and their emitters numbers (triggered when clicking the "labels" button)
      */
     nameNetworks() {
         this.setState({ nameNets: !this.state.nameNets });
@@ -244,7 +244,7 @@ class MapBox extends Component {
                                             <span className="legend-icon">
                                                 <FontAwesomeIcon icon="circle" />
                                             </span>
-                                            Emittor
+                                            Emitter
                                         </p>
                                     </div>
                                     <div className="legend-item">
@@ -252,14 +252,14 @@ class MapBox extends Component {
                                             <span className="legend-icon">
                                                 <FontAwesomeIcon icon="circle-notch" />
                                             </span>
-                                            Lone emittor
+                                            Lone emitter
                                         </p>
                                     </div>
                                 </div>
                                 <div className="legend-column is-next">
                                     <div className="legend-item is-first">
                                         <p><img src={lineImage} alt="Station symbol" />
-                                            Link emittor to network
+                                            Link emitter to network
                                         </p>
                                     </div>
                                     <div className="legend-item">
@@ -290,34 +290,34 @@ class MapBox extends Component {
                     {
                         this.state.networksLabels.map((network, k) => {
                             // Displays every network using 3 Layers : "center" which contains only the center of the
-                            // network, Stations which contains all the actual emittors of the network and Lines which
+                            // network, Stations which contains all the actual emitters of the network and Lines which
                             // contains the connections between each node of the network.
                             // Those last 2 are rendered uniquely when toggled or if showAll is active.
                             let clusterCenter = this.clusterCenter(network); // the center coordinates
                             let color = this.getColor(network); // the color of the network
-                            let emittors = this.state.emittors[network]; // al the emittors in this network
-                            let emittorsNumber = Object.keys(emittors).length;
+                            let emitters = this.state.emitters[network]; // al the emitters in this network
+                            let emittersNumber = Object.keys(emitters).length;
                             let toggled = this.state.networksToggled[network];
                             toggled = !(toggled == undefined || !toggled);
                             toggled = toggled || this.props.showAll;
-                            toggled = (emittorsNumber == 1) || toggled;
+                            toggled = (emittersNumber == 1) || toggled;
                             // toggled is True if it's defined, not manually de-toggled (= False)
-                            // or simply if showAll is active. Single emittors are always displayed.
+                            // or simply if showAll is active. Single emitters are always displayed.
 
                             let lines = toggled && (network != "-1000"); // We show the lines if the network is toggled.
-                            // At the beginning, no line should be shown (the emittors are shown as a cloud of unconnected points).
+                            // At the beginning, no line should be shown (the emitters are shown as a cloud of unconnected points).
 
                             let potentialLinks = []; // When using both ML and DL : list of all the corrected potential links given by the DL
-                            Object.keys(emittors).map((track_id, keyy) => {
-                                let potentialNetwork = emittors[track_id]["possible_network"];
+                            Object.keys(emitters).map((track_id, keyy) => {
+                                let potentialNetwork = emitters[track_id]["possible_network"];
                                 if (potentialNetwork != undefined && potentialNetwork != network) { // If there was a match with another network...
-                                    potentialLinks.push([[emittors[track_id]["coordinates"]["lng"], emittors[track_id]["coordinates"]["lat"]],
-                                    this.clusterCenter(potentialNetwork)]); // ...the link between the emittors coordinates and the other network's center's coordiantes is saved.
+                                    potentialLinks.push([[emitters[track_id]["coordinates"]["lng"], emitters[track_id]["coordinates"]["lat"]],
+                                    this.clusterCenter(potentialNetwork)]); // ...the link between the emitters coordinates and the other network's center's coordiantes is saved.
                                 }
                             });
 
                             let showPotential = (toggled && potentialLinks.length != 0); // We only
-                            let textCenter = "" + emittorsNumber;
+                            let textCenter = "" + emittersNumber;
                             if (this.state.nameNets) {
                                 textCenter = "" + (parseInt(network) + 1);
                             }
@@ -326,9 +326,9 @@ class MapBox extends Component {
                                     {lines &&// conditionnal rendering
                                         <Lines
                                             clusterCenter={clusterCenter} color={color}
-                                            network={network} stations={emittors} />
+                                            network={network} stations={emitters} />
                                     }
-                                    {network != "-1000" && emittorsNumber > 1 && !toggled && // always rendering when simulation has started
+                                    {network != "-1000" && emittersNumber > 1 && !toggled && // always rendering when simulation has started
                                         <Layer
                                             id={"center" + network}
                                             key={"center" + network}
@@ -357,7 +357,7 @@ class MapBox extends Component {
                                         </Layer>
                                     }
 
-                                    {network != "-1000" && emittorsNumber > 1 && toggled && // always rendering when simulation has started
+                                    {network != "-1000" && emittersNumber > 1 && toggled && // always rendering when simulation has started
                                         <Layer
                                             id={"centerToggled" + network}
                                             key={"centerToggled" + network}
@@ -380,8 +380,8 @@ class MapBox extends Component {
 
                                     {toggled && // conditionnal rendering
                                         <Stations
-                                            stations={emittors} network={network}
-                                            color={color} multiple={emittorsNumber > 1}
+                                            stations={emitters} network={network}
+                                            color={color} multiple={emittersNumber > 1}
                                             white={this.props.white} />
                                     }
                                     {showPotential &&
@@ -427,15 +427,15 @@ class MapBox extends Component {
 
 MapBox.propTypes = {
     /**
-     * the emittors received from App.js, in the form :
+     * the emitters received from App.js, in the form :
      *   {    network_id : {
-     *           emittor_id : {
+     *           emitter_id : {
      *               coordinates : {lat : float, lng : float}, ...
      *           }
      *       }
      *   }
      */
-    emittors: PropTypes.objectOf(PropTypes.objectOf(PropTypes.object)).isRequired,
+    emitters: PropTypes.objectOf(PropTypes.objectOf(PropTypes.object)).isRequired,
     /**
      * the list of the reception stations
      */

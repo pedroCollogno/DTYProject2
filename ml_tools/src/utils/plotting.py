@@ -1,12 +1,16 @@
 import matplotlib.pyplot as plt
+import os
+import sys
+import tkinter as tk
+from tkinter import filedialog
 from .loading import get_track_streams_from_prp
-
 
 def display_alternates(*args):
     """ Function that displays all the alternates detected by a station
 
     :args: the prp files from all the stations
     """
+    print(args)
     prps = [get_track_streams_from_prp(args[i]) for i in range(len(args))]
     all_alternates = {}
     for i in range(len(prps)):
@@ -42,3 +46,9 @@ def display_alternates(*args):
         ax[i].set_ylabel("Id")
         ax[i].set_xlabel("Seconds")
     plt.show()
+
+if __name__=="__main__":
+    root = tk.Tk()
+    root.withdraw()
+    file_path = filedialog.askopenfilename()
+    display_alternates(file_path)

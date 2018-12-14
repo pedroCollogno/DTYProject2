@@ -19,7 +19,7 @@ class SocketHandler extends Component {
 SocketHandler.propTypes = {
   /**
    * the function to call when receiving a message.
-   * Expects an emittor, in the form of a stringified JSON
+   * Expects an emitter, in the form of a stringified JSON
    */
   handleData: PropTypes.func.isRequired
 }

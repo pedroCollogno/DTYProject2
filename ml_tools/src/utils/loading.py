@@ -94,7 +94,7 @@ def get_track_streams_from_prp(filepath):
 
 
 def is_same_station_track(old_track, new_track):
-    """ Lets you know if two tracks, taken on the same station at a different time, are from the same emittor
+    """ Lets you know if two tracks, taken on the same station at a different time, are from the same emitter
 
     :param old_track: a track from cycle number i
     :param new_track: a track from cycle number i+1
