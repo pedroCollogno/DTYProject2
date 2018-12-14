@@ -35,6 +35,8 @@ You just need to double-click the script file to do that.
 
 > *Unix* : On unix systems, you will have to edit all scripts to add the path to the project folder on the third line. Just replace `cd /path/to/project` by the path of your project. For example it could be `cd /Users/username/Documents/Thales/thales-project`.
 
+Finally, add the model weights to your weights folder (path defined in `config.json`). You need to have both model files, `my_model_weights.h5` and `my_real_model_clusters_weights.h5`.
+
 ## Start the demonstrator
 
 Now that you've installed everything, you're ready to go !
