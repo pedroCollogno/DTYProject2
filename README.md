@@ -45,6 +45,10 @@ Then, to get to the app, just open a browser on [http://localhost:4200/](http://
 
 To know more about the possibilities with the demonstrator, and how to use it, check the [USER MANUAL](./USER_MANUAL.md) out !
 
+## Data input format
+
+Input format of data for demonstrator must be .PRP format. This format is quite specific, used quite often at Thales, and details to it can be found in the `Presentation_SIE` powerpoint presentation.
+
 ## Additional instructions
 
 ### Add Redis to PATH
