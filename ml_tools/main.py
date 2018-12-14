@@ -31,9 +31,3 @@ if __name__ == '__main__':
     root.withdraw()
     file_paths = filedialog.askopenfilenames()
     root.update()
-
-    track_streams = []
-    for path in file_paths:
-        if path is not None:
-            track_stream = load.get_track_streams_from_prp(path)
-            track_streams.append(track_stream)

@@ -185,13 +185,13 @@ class EWHandler:
 
     def stop(self):
         """
-        Stops the current instance of this object, ie. stops sending emittors and clustering them.
+        Stops the current instance of this object, ie. stops sending emitters and clustering them.
         """
         self.running=False
 
     def pause(self):
         """
-        Pauses the current instance of this object, ie. stops sending emittors and clustering them.
+        Pauses the current instance of this object, ie. stops sending emitters and clustering them.
         """
         self.paused=True
 
@@ -277,7 +277,7 @@ class EWHandler:
                     all_tracks_data[track_id]['duration']=latest_tracks_data[track_id]['duration']
 
             if not display_only:
-                self.make_emittor_clusters(global_track_streams,
+                self.make_emitter_clusters(global_track_streams,
                                            all_tracks_data, prev_tracks_data, debug=debug, use_deep=use_deep, mix=mix)
             
             if self.running:
@@ -333,11 +333,11 @@ class EWHandler:
         self.global_profiler.stop()
         self.global_profiler.reset_profiler()
 
-    def make_emittor_clusters(self, global_track_streams, all_tracks_data, prev_tracks_data, debug=False, use_deep=False, mix=False):
-        """ Makes the whole job of clustering emittors together from tracks
+    def make_emitter_clusters(self, global_track_streams, all_tracks_data, prev_tracks_data, debug=False, use_deep=False, mix=False):
+        """ Makes the whole job of clustering emitters together from tracks
 
-            Clusters emittors into networks using DBSCAN clustering algorithm. Updates the
-            cluster id info in the all_tracks_data parameter. Sends information for each emittor
+            Clusters emitters into networks using DBSCAN clustering algorithm. Updates the
+            cluster id info in the all_tracks_data parameter. Sends information for each emitter
             directly to the Django backend.
 
         :param global_track_streams: All track streams to study
@@ -360,9 +360,9 @@ class EWHandler:
         for tracks in global_track_streams:
             raw_tracks=get_track_list_info(tracks, raw_tracks)
         logger.debug("Done !")
-        logger.info("After merge of all station info, found a total of %s emittors." %
+        logger.info("After merge of all station info, found a total of %s emitters." %
                     len(raw_tracks))
-        logger.info("All_data_tracks has a total of %s emittors registered." %
+        logger.info("All_data_tracks has a total of %s emitters registered." %
                     len(all_tracks_data.keys()))
 
         if len(raw_tracks) > 1 and self.running:
@@ -378,19 +378,19 @@ class EWHandler:
                 clusters, ei=create_clusters(
                     global_track_streams, y_pred=y_pred, ids=ids)
 
-                for emittor_id in ei:
+                for emitter_id in ei:
                     possible_scores={}
                     for cluster_id in clusters:
-                        emittor_in_cluster=self.model_handler.are_in_same_cluster(
-                            emittor_id, cluster_id, ei, clusters)
-                        possible_scores[cluster_id]=emittor_in_cluster
+                        emitter_in_cluster=self.model_handler.are_in_same_cluster(
+                            emitter_id, cluster_id, ei, clusters)
+                        possible_scores[cluster_id]=emitter_in_cluster
 
                     min_score_cluster=min(
                         possible_scores, key=possible_scores.get)
-                    all_tracks_data[emittor_id]['possible_network']=int(
+                    all_tracks_data[emitter_id]['possible_network']=int(
                         min_score_cluster)
-                    logger.debug("Emittor %s seems pretty close to cluster %s !" % (
-                        emittor_id, min_score_cluster))
+                    logger.debug("Emitter %s seems pretty close to cluster %s !" % (
+                        emitter_id, min_score_cluster))
             else:
                 y_pred, ids, n_cluster=get_dbscan_prediction(
                     raw_tracks, all_tracks_data)
@@ -398,7 +398,7 @@ class EWHandler:
             i=0
 
             if len(y_pred) > len(all_tracks_data.keys()):
-                err="Too many labels : Got %s labels for %s emittors" % (
+                err="Too many labels : Got %s labels for %s emitters" % (
                     len(y_pred), len(all_tracks_data.keys()))
                 logger.error(err)
                 raise ValueError(err)

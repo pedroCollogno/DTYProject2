@@ -86,7 +86,7 @@ def get_track_id(track):
     return(track_id)
 
 
-def same_emittor(track_1, track_2):
+def same_emitter(track_1, track_2):
     """ This function lets you know if two given tracks come from the same emitter.
 
     :param track_1: The first track
@@ -182,7 +182,7 @@ def add_track_to_dict(track, track_dict, coords=None, prev_tracks_data={}):
 
     :param track: the track to add to the dict
     :param track_dict: the dictionnary of tracks, to which the track data should be added
-    :param coords: (optional) the gps coordinates of the emittor behind the track
+    :param coords: (optional) the gps coordinates of the emitter behind the track
     """
     track_id = get_track_id(track)
     freq = track.itr_measurement.central_freq_hz

@@ -39,10 +39,10 @@ function deg_to_dms(deg) {
 }
 
 /**
- * Gives you the emittor type as a string from an integer input
+ * Gives you the emitter type as a string from an integer input
  * @param {int} type 
  */
-function int_to_emittor_type(type) {
+function int_to_emitter_type(type) {
   if (type) {
     const new_type = parseInt(type)
 
@@ -69,15 +69,15 @@ function round_frequency(freq) {
 }
 
 /**
- * Displays an emittor's important characteristics in the table (returns an HTML "row");
- * @param {*} emittor 
+ * Displays an emitter's important characteristics in the table (returns an HTML "row");
+ * @param {*} emitter 
  */
-function show_network(emittor) {
-  let network = emittor.network_id
+function show_network(emitter) {
+  let network = emitter.network_id
   let icon = "check"
   let possible_network = -1000
-  if (Object.keys(emittor).includes('possible_network')) {
-    possible_network = emittor.possible_network
+  if (Object.keys(emitter).includes('possible_network')) {
+    possible_network = emitter.possible_network
     if (possible_network != network) { // Displays an exclamation triangle if the likeliest network is not the DBScan one
       icon = "exclamation-triangle"
     }
@@ -90,15 +90,15 @@ function show_network(emittor) {
 }
 
 /**
- * Returns an icon indicating the state of the emittor (emitting/silent).
- * @param {*} emittor 
+ * Returns an icon indicating the state of the emitter (emitting/silent).
+ * @param {*} emitter 
  */
-function show_talking(emittor) {
+function show_talking(emitter) {
   let icon = "circle";
   let clss = "not-talking";
   let talking = false
-  if (Object.keys(emittor).includes('talking')) {
-    talking = emittor.talking
+  if (Object.keys(emitter).includes('talking')) {
+    talking = emitter.talking
     if (talking) {
       clss = "talking"
     }
@@ -113,7 +113,7 @@ class App extends Component {
   constructor() {
     super();
     this.state = {
-      emittors: {}, // list of all the detected stations so far in the form :
+      emitters: {}, // list of all the detected stations so far in the form :
       // { network_id : 
       //        { track_id : {coordinates: { lat: int, lng: int }, ... }
       // }
@@ -135,12 +135,12 @@ class App extends Component {
       colorMapType: 0
     };
     // functions that are allowed to update the state of the component
-    this.newEmittors = this.newEmittors.bind(this);
+    this.newEmitters = this.newEmitters.bind(this);
     this.getStations = this.getStations.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.toggleNetwork = this.toggleNetwork.bind(this);
     this.switchAll = this.switchAll.bind(this);
-    this.getEmittorsPositions = this.getEmittorsPositions.bind(this);
+    this.getEmittersPositions = this.getEmittersPositions.bind(this);
     this.reset = this.reset.bind(this);
     this.changeShowVal = this.changeShowVal.bind(this);
     this.hoverIn = this.hoverIn.bind(this);
@@ -175,34 +175,34 @@ class App extends Component {
   }
 
   /**
-   * Gets all emittors positions after the prps upload. Displays them without prediction on their networks.
+   * Gets all emitters positions after the prps upload. Displays them without prediction on their networks.
    * @param {*} response 
    */
-  getEmittorsPositions(response) {
+  getEmittersPositions(response) {
     let dic = {};
     let data = response.data;
     let undefinedNetwork = data[Object.keys(data)[0]]["network_id"];
     for (let track_id of Object.keys(data)) {
-      let emittor = data[track_id];
-      if (emittor.coordinates != null) {
-        dic[track_id] = emittor;
+      let emitter = data[track_id];
+      if (emitter.coordinates != null) {
+        dic[track_id] = emitter;
       }
     }
-    let newEmittors = {};
-    newEmittors[undefinedNetwork] = dic;
-    this.setState({ emittors: newEmittors });
+    let newEmitters = {};
+    newEmitters[undefinedNetwork] = dic;
+    this.setState({ emitters: newEmitters });
   }
 
   /**
-   * Adds the emittors coming from the backend to the list of the emittors.
+   * Adds the emitters coming from the backend to the list of the emitters.
    * Stores them as {network_id : {track_id : {coordinates : {lat : int, lng : int}, ...}}}
    * @param {*} data 
    */
-  newEmittors(data) {
+  newEmitters(data) {
     if (data) {
       let colorMin = colorMapMins[this.state.colorMapType]; // the minimum number of colors
       let d = JSON.parse(data);
-      let dic = JSON.parse(JSON.stringify(this.state.emittors));
+      let dic = JSON.parse(JSON.stringify(this.state.emitters));
       if (dic["-1000"] != undefined) {
         delete dic["-1000"];
       }
@@ -235,7 +235,7 @@ class App extends Component {
               nshades: Math.max(Object.keys(dic).length, colorMin),
               alpha: 1
             });
-            this.setState({ emittors: dic, colors: colorMap });
+            this.setState({ emitters: dic, colors: colorMap });
 
           } else if (Object.keys(d)[0].includes("cycle_mem_info")) {
             this.setState({ cycle_mem_info: d[Object.keys(d)[0]] });
@@ -255,7 +255,7 @@ class App extends Component {
     }
     let colormapName = colorMapNames[index];
     let colorMin = colorMapMins[index]; // the minimum number of colors
-    let totalNetworksNumber = Object.keys(this.state.emittors).length;
+    let totalNetworksNumber = Object.keys(this.state.emitters).length;
     let colorMap = colormap({
       colormap: colormapName,
       nshades: Math.max(totalNetworksNumber, colorMin),
@@ -344,7 +344,7 @@ class App extends Component {
   reset() {
     console.log("Resetting App.js.");
     this.setState({
-      emittors: {},
+      emitters: {},
       stations: {},
       cycle_mem_info: {},
       global_mem_info: {},
@@ -380,22 +380,22 @@ class App extends Component {
   }
 
   /**
-   * Highlights (in white) the emittor corresponding to the row hovered over by the mouse if its network is toggled
+   * Highlights (in white) the emitter corresponding to the row hovered over by the mouse if its network is toggled
    * @param {String} network 
-   * @param {*} emittor 
+   * @param {*} emitter 
    */
-  hoverIn(network, emittor) {
+  hoverIn(network, emitter) {
     if (this.state.networksToggled[network] == true) {
-      this.setState({ white: emittor });
+      this.setState({ white: emitter });
     }
   }
 
   /**
    * Removes the highlighting (white) effect (if there was any) when the mouse leaves the row.
-   * @param {*} emittor 
+   * @param {*} emitter 
    */
-  hoverOut(emittor) {
-    if (this.state.white == emittor) {
+  hoverOut(emitter) {
+    if (this.state.white == emitter) {
       this.setState({ white: "" });
     }
   }
@@ -430,18 +430,18 @@ class App extends Component {
               <div className="field switch-container">
                 <input id="switchRoundedOutlinedInfo" type="checkbox" name="switchRoundedOutlinedInfo" className="switch is-rtl is-rounded is-outlined is-info" onChange={this.handleChange} />
                 <label htmlFor="switchRoundedOutlinedInfo"><strong>Switch to {this.getConnection()} map</strong></label>
-                <Dashboard emittors={this.state.emittors} cycle_mem_info={this.state.cycle_mem_info} global_mem_info={this.state.global_mem_info} simulationMode={this.state.simulationMode} />
+                <Dashboard emitters={this.state.emitters} cycle_mem_info={this.state.cycle_mem_info} global_mem_info={this.state.global_mem_info} simulationMode={this.state.simulationMode} />
               </div>
             </div>
           </div>
         </section>
 
         {/* Handles the HandShaking and sends a "begin" message to the backend Socket */}
-        < SocketHandler handleData={this.newEmittors} />
+        < SocketHandler handleData={this.newEmitters} />
 
         <div className="map-table-container">
           {/* Handles the displays on a canvas */}
-          <MapBox emittors={this.state.emittors} recStations={this.state.stations} connection={this.state.connection}
+          <MapBox emitters={this.state.emitters} recStations={this.state.stations} connection={this.state.connection}
             toggleNetwork={this.toggleNetwork} switchAll={this.switchAll}
             hideAll={this.state.hideAll} showAll={this.state.showAll} networksToggled={this.state.networksToggled}
             changeHideVal={this.changeHideVal} changeShowVal={this.changeShowVal} hideVal={this.state.hideVal} showVal={this.state.showVal}
@@ -460,9 +460,9 @@ class App extends Component {
                   </tr>
                 </thead>
                 {
-                  Object.keys(this.state.emittors).map((key) => {
+                  Object.keys(this.state.emitters).map((key) => {
                     if (this.state.networksToggled[key]) {
-                      let emittors = this.state.emittors[key];
+                      let emitters = this.state.emitters[key];
                       return (
                         <tbody key={key} style={{
                           borderStyle: this.getBorderStyle(key),
@@ -470,18 +470,18 @@ class App extends Component {
                           borderWidth: 5
                         }}>
                           {
-                            Object.keys(emittors).map((emittor_id) => {
-                              let emittor = emittors[emittor_id];
+                            Object.keys(emitters).map((emitter_id) => {
+                              let emitter = emitters[emitter_id];
                               return (
-                                <tr key={emittor.track_id} onClick={() => this.toggleNetwork(key)} onMouseEnter={() => this.hoverIn(key, emittor_id)}
-                                  onMouseLeave={() => this.hoverOut(emittor_id)}>
-                                  <td>{emittor.id}</td>
-                                  <td>{int_to_emittor_type(emittor.emission_type)}</td>
-                                  <td>{deg_to_dms(emittor.coordinates.lat)}</td>
-                                  <td>{deg_to_dms(emittor.coordinates.lng)}</td>
-                                  <td>{round_frequency(emittor.frequency)} MHz</td>
-                                  <td>{show_network(emittor)}</td>
-                                  <td>{show_talking(emittor)}</td>
+                                <tr key={emitter.track_id} onClick={() => this.toggleNetwork(key)} onMouseEnter={() => this.hoverIn(key, emitter_id)}
+                                  onMouseLeave={() => this.hoverOut(emitter_id)}>
+                                  <td>{emitter.id}</td>
+                                  <td>{int_to_emitter_type(emitter.emission_type)}</td>
+                                  <td>{deg_to_dms(emitter.coordinates.lat)}</td>
+                                  <td>{deg_to_dms(emitter.coordinates.lng)}</td>
+                                  <td>{round_frequency(emitter.frequency)} MHz</td>
+                                  <td>{show_network(emitter)}</td>
+                                  <td>{show_talking(emitter)}</td>
                                 </tr>
                               )
                             })
@@ -493,8 +493,8 @@ class App extends Component {
                   })
                 }
                 {
-                  Object.keys(this.state.emittors).map((key) => {
-                    let emittors = this.state.emittors[key];
+                  Object.keys(this.state.emitters).map((key) => {
+                    let emitters = this.state.emitters[key];
                     return (
                       <tbody key={key} style={{
                         borderStyle: this.getBorderStyle(key),
@@ -502,18 +502,18 @@ class App extends Component {
                         borderWidth: 5
                       }}>
                         {
-                          Object.keys(emittors).map((emittor_id) => {
-                            let emittor = emittors[emittor_id];
+                          Object.keys(emitters).map((emitter_id) => {
+                            let emitter = emitters[emitter_id];
                             return (
-                              <tr key={this.state.emittors[key][emittor_id].track_id} onClick={() => this.toggleNetwork(key)} onMouseEnter={() => this.hoverIn(key, emittor_id)}
-                                onMouseLeave={() => this.hoverOut(emittor_id)}>
-                                <td>{emittor.id}</td>
-                                <td>{int_to_emittor_type(emittor.emission_type)}</td>
-                                <td>{deg_to_dms(emittor.coordinates.lat)}</td>
-                                <td>{deg_to_dms(emittor.coordinates.lng)}</td>
-                                <td>{round_frequency(emittor.frequency)} MHz</td>
-                                <td>{show_network(emittor)}</td>
-                                <td>{show_talking(emittor)}</td>
+                              <tr key={this.state.emitters[key][emitter_id].track_id} onClick={() => this.toggleNetwork(key)} onMouseEnter={() => this.hoverIn(key, emitter_id)}
+                                onMouseLeave={() => this.hoverOut(emitter_id)}>
+                                <td>{emitter.id}</td>
+                                <td>{int_to_emitter_type(emitter.emission_type)}</td>
+                                <td>{deg_to_dms(emitter.coordinates.lat)}</td>
+                                <td>{deg_to_dms(emitter.coordinates.lng)}</td>
+                                <td>{round_frequency(emitter.frequency)} MHz</td>
+                                <td>{show_network(emitter)}</td>
+                                <td>{show_talking(emitter)}</td>
                               </tr>
                             )
                           })
@@ -530,7 +530,7 @@ class App extends Component {
 
         {/* Handles the HTTP requests and their responses from the backend */}
         <PostHandler getStations={this.getStations} reset={this.reset} changeSimulationMode={this.changeSimulationMode}
-          getEmittorsPositions={this.getEmittorsPositions} cycle_mem_info={this.state.cycle_mem_info} network_num={Object.keys(this.state.emittors).length} />
+          getEmittersPositions={this.getEmittersPositions} cycle_mem_info={this.state.cycle_mem_info} network_num={Object.keys(this.state.emitters).length} />
 
       </div >
     );

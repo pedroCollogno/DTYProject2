@@ -24,10 +24,10 @@ def user_list(request):
     return render(request, 'back/user_list.html')
 
 
-def send_emittor_to_front(json_obj):
+def send_emitter_to_front(json_obj):
     """
         To call when one cycle is over in the clustering algorithm
-        Sends a new emittor to the frontend in the form of a JSON
+        Sends a new emitter to the frontend in the form of a JSON
     """
     Group('users').send({
         'text': json.dumps(json_obj)
@@ -47,13 +47,13 @@ def send_stations_positions(request):
     return(HttpResponse(json.dumps(json_obj), content_type="application/json"))
 
 
-def initiate_emittors_positions(request):
+def initiate_emitters_positions(request):
     """
         To call to send station locations to frontend in the form of a JSON
     """
     track_streams = manager.get_track_streams()
 
-    json_obj = station_utils.initiate_emittors_positions(*track_streams)
+    json_obj = station_utils.initiate_emitters_positions(*track_streams)
     Group('users').send({
         'text': json.dumps(json_obj)
     })
@@ -64,7 +64,7 @@ def start_simulation(request):
     """
         Called when lauching the simulation
     """
-    send_emittor_to_front({'json': 'containing data'})
+    send_emitter_to_front({'json': 'containing data'})
     Group('users').send({
         'text': json.dumps({
             'simulation': 'starting simulation, no clustering'
@@ -77,7 +77,7 @@ def start_simulation(request):
     manager.set_mix(False)
     manager.set_display_only(True)
     manager.get_thread().set_track_streams(*track_streams)
-    manager.get_thread().set_sender_function(send_emittor_to_front)
+    manager.get_thread().set_sender_function(send_emitter_to_front)
     manager.get_thread().start()
     return render(request, 'back/user_list.html')
 
@@ -86,7 +86,7 @@ def start_simulation_mix(request):
     """
         Called when lauching the simulation using a mix of DB_Scan and Deep Learning
     """
-    send_emittor_to_front({'json': 'containing data'})
+    send_emitter_to_front({'json': 'containing data'})
     Group('users').send({
         'text': json.dumps({
             'simulation': 'start using DB_SCAN, corrected by Deep Learning for clustering'
@@ -99,7 +99,7 @@ def start_simulation_mix(request):
     manager.set_mix(True)
     manager.set_display_only(False)
     manager.get_thread().set_track_streams(*track_streams)
-    manager.get_thread().set_sender_function(send_emittor_to_front)
+    manager.get_thread().set_sender_function(send_emitter_to_front)
     manager.get_thread().start()
     return render(request, 'back/user_list.html')
 
@@ -108,7 +108,7 @@ def start_simulation_ml(request):
     """
         Called when lauching the simulation using only db_scan algorithm for clustering
     """
-    send_emittor_to_front({'json': 'containing data'})
+    send_emitter_to_front({'json': 'containing data'})
     Group('users').send({
         'text': json.dumps({
             'simulation': 'start using only DB_SCAN clustering'
@@ -121,7 +121,7 @@ def start_simulation_ml(request):
     manager.set_mix(False)
     manager.set_display_only(False)
     manager.get_thread().set_track_streams(*track_streams)
-    manager.get_thread().set_sender_function(send_emittor_to_front)
+    manager.get_thread().set_sender_function(send_emitter_to_front)
     manager.get_thread().start()
     return render(request, 'back/user_list.html')
 
@@ -131,7 +131,7 @@ def start_simulation_dl(request):
         Called when lauching the simulation using only deep learning for clustering
     """
 
-    send_emittor_to_front({'json': 'containing data'})
+    send_emitter_to_front({'json': 'containing data'})
     Group('users').send({
         'text': json.dumps({
             'simulation': 'start using only Deep Learning for clustering'
@@ -144,7 +144,7 @@ def start_simulation_dl(request):
     manager.set_mix(False)
     manager.set_display_only(False)
     manager.get_thread().set_track_streams(*track_streams)
-    manager.get_thread().set_sender_function(send_emittor_to_front)
+    manager.get_thread().set_sender_function(send_emitter_to_front)
     manager.get_thread().start()
     return render(request, 'back/user_list.html')
 

@@ -169,10 +169,10 @@ def get_station_coordinates(*args):
     return(station_coords)
 
 
-def initiate_emittors_positions(*args):
-    """ Returns the coordinates of all emittors at the very end of the simulation from the .prp files
+def initiate_emitters_positions(*args):
+    """ Returns the coordinates of all emitters at the very end of the simulation from the .prp files
 
-    :return: a dict containing all emittors from a simulation
+    :return: a dict containing all emitters from a simulation
     """
     n = len(args[0])
 
