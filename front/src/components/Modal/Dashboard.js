@@ -112,7 +112,7 @@ class Dashboard extends Component {
 
     // Array containing all the ids of the networks : [0, 1, 2 ..., n]
     var networksIndex = Object.keys(networks).map((network, i) => (
-      i
+      i+1
     ))
 
     // Number of networks
