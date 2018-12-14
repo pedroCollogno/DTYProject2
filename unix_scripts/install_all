@@ -1,19 +1,19 @@
 #!/bin/bash
 
-cd /Users/piaverous/Documents/DTY/Projet_Thales/thales-project
+cd /path/to/project
 
 cd ml_tools
-source py36_ml_env/bin/activate
+# If you use a virtual environment : source py36_ml_env/bin/activate
 pip install -r requirements.txt
-deactivate
+# deactivate
 
 cd ../back_django
-source py36_back_env/bin/activate
+# source py36_back_env/bin/activate
 pip install -r requirements.txt
 
 cd ../ml_tools
 python setup.py install
-deactivate
+# deactivate
 
 cd ../front
 npm install

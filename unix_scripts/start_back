@@ -1,9 +1,9 @@
 #!/bin/bash
 
-cd /Users/piaverous/Documents/DTY/Projet_Thales/thales-project
+cd /path/to/project
 
 cd back_django
-source py36_back_env/bin/activate
+# If you use a virtual environment : source py36_back_env/bin/activate
 cd ../ml_tools
 python setup.py install > /dev/null
 cd ../back_django

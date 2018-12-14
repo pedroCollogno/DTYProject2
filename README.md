@@ -26,6 +26,8 @@ It can be anywhere you choose, you just have to specify the path to these folder
 
 > *Windows* : You will need a wheel for the Twisted python package. If it does not come with the project, you can find it at https://www.lfd.uci.edu/~gohlke/pythonlibs/#twisted. Download the `Twisted-18.9.0-cp35-cp35m-win_amd64.whl` file (for 64 bits, for 32 bits it's the  `Twisted-18.9.0-cp35-cp35m-win_32.whl` file) and add it at the very root of the project.
 
+> *Unix* : Before moving on, you will have to change the path in all bash scripts to your project path. Just update the first line of each script from `unix_scripts` folder.
+
 Once you've done that, execute the `ìnstall` script corresponding to your OS (located in unix_scripts for unix systems, or win_scripts for Windows).
 You just need to double-click the script file to do that. 
 
@@ -50,6 +52,8 @@ To access it, press `WIN+R` and execute `sysdm.cpl`. Then, in Advanced System Pr
 ### Writing your config file
 
 Making this config file is easy. You just have to copy the `config.example.json`, rename it to `config.json`, and then fill out the paths from the `PATH` section with your preferred paths.
+
+When writing the path to a folder, note that the folder must exist. Create it if it doesn't exist !
 
 > *Windows* : On Windows, path will look like this : `"C:\\Program Files\\Thales\\Demo\\data"`
 
@@ -85,5 +89,6 @@ Here's an example of a filled out config file on OSX :
 ```
 
 If you later want to modify your config file, to change the `cycles_per_batch` parameter for example, don't forget to run the `install` script once again.
+
 
 > *Note* : This will copy the config file to the `back_django`, `front` and `ml_tools/src` folders, to make sure it is installed properly in every package. You do not need an internet connection to perform this.
